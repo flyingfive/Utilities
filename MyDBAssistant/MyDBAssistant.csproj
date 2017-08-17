@@ -1,0 +1,230 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{07C3AA20-E80E-4813-9294-DFB622D20A05}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MyDBAssistant</RootNamespace>
+    <AssemblyName>MyDBAssistant</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>main.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="NPOI">
+      <HintPath>..\dll\NPOI.dll</HintPath>
+    </Reference>
+    <Reference Include="NVelocity">
+      <HintPath>..\dll\NVelocity.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Caching\CacheExtensions.cs" />
+    <Compile Include="Caching\ICacheManager.cs" />
+    <Compile Include="Caching\MemoryCacheManager.cs" />
+    <Compile Include="Data\DataReaderConverter.cs" />
+    <Compile Include="Data\DbAccessException.cs" />
+    <Compile Include="Data\MsSqlHelper.cs" />
+    <Compile Include="Data\MsSqlHelper.Schema.cs" />
+    <Compile Include="Data\SqlCommandModel.cs" />
+    <Compile Include="ExcelExporter.cs" />
+    <Compile Include="FrmAbout.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmAbout.Designer.cs">
+      <DependentUpon>FrmAbout.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmBase.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmBase.Designer.cs">
+      <DependentUpon>FrmBase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmColumnEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmColumnEditor.designer.cs">
+      <DependentUpon>FrmColumnEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmDatabase.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmDatabase.designer.cs">
+      <DependentUpon>FrmDatabase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmDBObject.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmDBObject.Designer.cs">
+      <DependentUpon>FrmDBObject.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmDbSchema.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmDbSchema.designer.cs">
+      <DependentUpon>FrmDbSchema.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmMain.designer.cs">
+      <DependentUpon>FrmMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmMakeScript.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmMakeScript.designer.cs">
+      <DependentUpon>FrmMakeScript.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmModelCreator.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmModelCreator.designer.cs">
+      <DependentUpon>FrmModelCreator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmTableEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmTableEditor.designer.cs">
+      <DependentUpon>FrmTableEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Image.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Image.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Schema\Column.cs" />
+    <Compile Include="Schema\ConnectionString.cs" />
+    <Compile Include="Schema\CurrentRow.cs" />
+    <Compile Include="Schema\DatabaseObject.cs" />
+    <Compile Include="Schema\DatabaseSchemaHistory.cs" />
+    <Compile Include="Schema\MsSqlVersion.cs" />
+    <Compile Include="Schema\Table.cs" />
+    <Compile Include="Utils\Singleton.cs" />
+    <Compile Include="VelocityHelper.cs" />
+    <EmbeddedResource Include="FrmAbout.resx">
+      <DependentUpon>FrmAbout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmDatabase.resx">
+      <DependentUpon>FrmDatabase.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmDBObject.resx">
+      <DependentUpon>FrmDBObject.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmDbSchema.resx">
+      <DependentUpon>FrmDbSchema.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmMain.resx">
+      <DependentUpon>FrmMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmModelCreator.resx">
+      <DependentUpon>FrmModelCreator.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmTableEditor.resx">
+      <DependentUpon>FrmTableEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Image.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Image.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <None Include="templates\EFEntity.vt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="templates\nhbentity.vt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="templates\schema.xls">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="templates\SimpleEntity.vt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="templates\XenEntity.vt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="templates\XenSelfTrackingEntity.vt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="templates\star_cy_admin.vt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="DatabaseProject.ico" />
+    <Content Include="main.ico" />
+    <Content Include="setup.ico" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
