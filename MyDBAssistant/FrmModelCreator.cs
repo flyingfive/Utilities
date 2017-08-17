@@ -102,26 +102,11 @@ namespace MyDBAssistant
             string className = "";
             string templatDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "templates");
             VelocityHelper templateHelper = new VelocityHelper(templatDir);
-            var templateName = cboType.SelectedValue.ToString();//"";
-            //switch (cboType.Text)
-            //{
-            //    case "简单实体": templateName = "SimpleEntity.vt"; break;
-            //    case "Xen实体": templateName = "XenEntity.vt"; break;
-            //    case "Xen自跟踪实体": templateName = "XenSelfTrackingEntity.vt"; break;
-            //    case "EF实体": templateName = "EFEntity.vt"; break;
-            //    default: break;
-            //}
+            var templateName = cboType.SelectedValue.ToString();
             if (string.IsNullOrEmpty(templateName)) { MessageBox.Show(string.Format("没有类型:{0}对应的模板!", cboType.Text), "错误", MessageBoxButtons.OK, MessageBoxIcon.Stop); return; }
             foreach (var table in selectedTables)
             {
                 className = table.GetClassName(prefix);
-                //className = string.IsNullOrEmpty(prefix) ? table.TableName : table.TableName.Replace(prefix, "");
-                //if (className.IndexOf("_") > 0)
-                //{
-                //    var parts = className.Split(new char[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
-                //    className = parts[parts.Length - 1];
-                //    className = string.Concat(className.Substring(0, 1).ToUpper(), className.Substring(1));
-                //}
                 var ownerColumns = columns.Where(c => c.TableId == table.TableId).ToList();
                 var primaryKeys = ownerColumns.Where(c => c.IsPrimaryKey).ToList();
                 if (templateName.Equals("XenEntity.vt") || templateName.Equals("XenSelfTrackingEntity.vt")) { ownerColumns = ownerColumns.Where(c => !c.IsPrimaryKey).ToList(); }
@@ -200,27 +185,6 @@ namespace MyDBAssistant
                     MessageBox.Show("所有文件保存成功!", "消息", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
-        }
-
-        private void GenerateCode(string templateName)
-        {
-            //var lst = _columnDao.GetPropertyByTableName(_table.Name);
-            //if (lst != null && lst.Count > 0)
-            //{
-            //    var pk = lst.Where(p => p.IsPrimary).SingleOrDefault();
-            //    if (pk == null) { Program.Info(""); return; }
-            //    string[] tableName = pk.TableName.Split(new char[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
-            //    string moduleName = tableName[0].ToPascalWord();
-            //    _className = tableName[1].ToPascalWord();
-            //    lst.Remove(pk);
-            //    _templateHelper.Init(@"templates");
-            //    _templateHelper.PutSet("module", moduleName);
-            //    _templateHelper.PutSet("className", _className);
-            //    _templateHelper.PutSet("primary", pk);
-            //    _templateHelper.PutSet("properties", lst);
-            //    string result = _templateHelper.Display(templateName);
-            //    txtCode.Text = result;
-            //}
         }
     }
 }

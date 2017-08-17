@@ -96,9 +96,6 @@ namespace MyDBAssistant.Schema
                 var count = Convert.ToInt32(command.ExecuteScalar());
                 return count > 0;
             }
-            //string sql = "SELECT ISNULL(COUNT(0), 0) FROM sysdatabases WHERE name = @name";
-            //int count = Convert.ToInt32(helper.ExecuteQueryAsSingle(sql, System.Data.CommandType.Text, new DbParameter[] { new SqlParameter("@name", DataBase) }));
-            //return count > 0;
         }
 
         /// <summary>

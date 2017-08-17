@@ -45,17 +45,6 @@ namespace MyDBAssistant.Schema
         public string MakeExtendPropertiesSql()
         {
             StringBuilder sb = new StringBuilder();
-            //sb.AppendFormat("EXEC sp_addextendedproperty 'MS_Description', '{0}', 'user', dbo, 'table', [{1}]", TableDescription, TableName);
-            //sb.AppendLine();
-
-
-            //bool existsDescriptionSql = _mssqlHelper.ExecuteQueryAsSingle<int>(string.Format("SELECT ISNULL(COUNT(0), 0) FROM ::fn_listextendedproperty ('MS_Description', 'user', 'dbo', 'table', '{0}', 'column', '{1}')", _table.TableName, txtName.Text.Trim()), CommandType.Text) > 0;
-            //string sql = string.Format("EXEC sp_addextendedproperty 'MS_Description', '{0}', 'user', dbo, 'table', [{1}], 'column', [{2}]", txtDescription.Text.Trim(), _table.TableName, txtName.Text.Trim());
-            //if (existsDescriptionSql)
-            //{
-            //    sql = string.Format("EXEC sp_updateextendedproperty 'MS_Description', '{0}', 'user', dbo, 'table', [{1}], 'column', [{2}]", txtDescription.Text.Trim(), _table.TableName, txtName.Text.Trim());
-            //}
-
             sb.AppendLine(string.Format("IF ((SELECT COUNT(0) FROM ::fn_listextendedproperty ('MS_Description', 'user', 'dbo', 'table', '{0}', NULL, NULL)) = 0)", TableName));
             sb.AppendLine("BEGIN");
             sb.AppendLine(string.Format("EXEC sp_addextendedproperty 'MS_Description', '{0}', 'user', dbo, 'table', [{1}]", TableDescription, TableName));
@@ -67,8 +56,6 @@ namespace MyDBAssistant.Schema
             foreach (Column column in Columns)
             {
                 if (string.IsNullOrWhiteSpace(column.ColumnName) || string.IsNullOrWhiteSpace(column.ColumnDescription)) { continue; }
-                //sb.AppendLine(string.Format("EXEC sp_addextendedproperty 'MS_Description', '{0}', 'user', dbo, 'table', [{1}], 'column', [{2}]", column.ColumnDescription, TableName, column.ColumnName));
-
                 sb.AppendLine(string.Format("IF ((SELECT COUNT(0) FROM ::fn_listextendedproperty ('MS_Description', 'user', 'dbo', 'table', '{0}', 'column', '{1}')) = 0)", TableName, column.ColumnName));
                 sb.AppendLine("BEGIN");
                 sb.AppendLine(string.Format("EXEC sp_addextendedproperty 'MS_Description', '{0}', 'user', dbo, 'table', [{1}], 'column', '{2}'", column.ColumnDescription, TableName, column.ColumnName));
@@ -88,23 +75,18 @@ namespace MyDBAssistant.Schema
             if (string.IsNullOrWhiteSpace(TableName)) { return ""; }
             StringBuilder sb = new StringBuilder();
             string pkNames = "";
-            //sb.AppendFormat("CREATE TABLE [{0}]", TableName);
-            //sb.AppendLine();
             sb.AppendLine(string.Format("CREATE TABLE [{0}]", TableName));
             sb.AppendLine("(");
             foreach (Column column in Columns)
             {
-                //sb.AppendFormat("{0} ,", column.ToString());
-                //sb.AppendLine();
                 sb.AppendLine(string.Format("{0} ,", column.CreateColumnSql()));
                 if (column.IsPrimaryKey)
                 {
                     pkNames = string.Concat(pkNames, "[", column.ColumnName, "]", ",");
                 }
             }
-            //sb = sb.Remove(sb.ToString().LastIndexOf(","), 1);
             pkNames = pkNames.Substring(0, pkNames.Length - 1);
-            pkNames = string.Format("CONSTRAINT pk_{0} PRIMARY KEY CLUSTERED ({1}) ON [PRIMARY]", TableName, pkNames);//"PRIMARY KEY CLUSTERED ({0}) ON [PRIMARY]", pkNames);
+            pkNames = string.Format("CONSTRAINT PK_{0} PRIMARY KEY CLUSTERED ({1}) ON [PRIMARY]", TableName, pkNames);
             sb.AppendLine(pkNames);
             sb.AppendLine(")");
             return sb.ToString();
