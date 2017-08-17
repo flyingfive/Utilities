@@ -1,0 +1,57 @@
+using System;
+using System.Linq;
+using System.Text;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using Xen.Helper;
+using Xen.Helper.Data;
+
+namespace ${ns}
+{
+	/// <summary>
+	/// $table.TableDescription
+	/// </summary>
+	[Serializable]
+	[TableMap("$table.TableName")]
+	public class ${className} : XenEntity<${primaryKeyClass}>
+	{
+#foreach($column in $columns)
+
+		private $column.CSharpType _$column.ColumnName.Substring(0, 1).ToLower()$column.ColumnName.Substring(1);
+
+		/// <summary>
+		/// $column.ColumnDescription
+		/// </summary>
+		[ColumnMap(Name = "$column.ColumnName", SqlType = "$column.SqlType", Size = $column.Size#if($column.IsNullable), IsNullable = true#end#if($column.IsIdentity), IsIdentity = true#end#if($column.IsPrimaryKey), IsPrimaryKey = true#end)]
+		public virtual $column.CSharpType $column.ColumnName 
+		{ 
+			get { return _$column.ColumnName.Substring(0, 1).ToLower()$column.ColumnName.Substring(1); } 
+			set 
+			{ 
+				if(_$column.ColumnName.Substring(0, 1).ToLower()$column.ColumnName.Substring(1) == value){ return; }
+				base.XenEntityPropertyChanged(this, new EntityPropertyChangedRecord("$column.ColumnName", _$column.ColumnName.Substring(0, 1).ToLower()$column.ColumnName.Substring(1), value));
+				_$column.ColumnName.Substring(0, 1).ToLower()$column.ColumnName.Substring(1) = value; 
+			} 
+		}
+#end
+	}
+
+#if(${hasCustomPrimaryKey})
+	/// <summary>
+	/// $table.TableDescription Id
+	/// </summary>
+	[Serializable]
+	public class ${primaryKeyClass}
+	{
+#foreach($column in $primaryColumns)
+
+		/// <summary>
+		/// $column.ColumnDescription
+		/// </summary>
+		[ColumnMap(Name = "$column.ColumnName", SqlType = "$column.SqlType", Size = $column.Size#if($column.IsNullable), IsNullable = true#end#if($column.IsIdentity), IsIdentity = true#end#if($column.IsPrimaryKey), IsPrimaryKey = true#end)]
+		public virtual $column.CSharpType $column.ColumnName { get; set; }
+#end
+	}
+#end
+}

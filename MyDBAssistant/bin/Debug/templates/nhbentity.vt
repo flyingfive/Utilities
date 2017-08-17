@@ -1,0 +1,36 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.ComponentModel;
+using SR.Framework.Data;
+using FluentNHibernate.Mapping;
+
+namespace SAP.Libiraies.${module}.Entities
+{
+	[Serializable]
+	public class ${className} : BaseEntity<$primary.DataType>
+	{
+#foreach($prop in $properties)
+		public virtual $prop.DataType $prop.ColumnName { get; set; }
+#end
+	}
+
+
+	public class ${className}Map : ClassMap<${className}>
+	{
+		public ${className}()
+		{
+			Table("${module.ToLower()}_${className}");
+#if ($primary.DataType.Equals("int"))
+			Id(x => x.Id, "Id").GeneratedBy.Identity();
+#end
+#if ($primary.DataType.Equals("Guid"))
+			Id(x => x.Id, "Id").GeneratedBy.Assigned();
+#end
+#foreach($prop in $properties)
+			Map(x => x.$prop.ColumnName, "$prop.ColumnName");
+#end
+		}
+	}
+}
