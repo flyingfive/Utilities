@@ -42,6 +42,7 @@
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.ServiceModel.Web" />
     <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -53,12 +54,22 @@
     <Compile Include="Caching\CacheExtensions.cs" />
     <Compile Include="Caching\ICacheManager.cs" />
     <Compile Include="Caching\MemoryCacheManager.cs" />
+    <Compile Include="Data\Emit\DynamicClassGenerator.cs" />
+    <Compile Include="Data\Emit\EmitHelper.cs" />
+    <Compile Include="Data\Extensions.Reflection.cs" />
+    <Compile Include="Data\Fakes\FakeDataReader.cs" />
+    <Compile Include="Data\Mapper\IMemberMapper.cs" />
+    <Compile Include="Data\Mapper\IObjectActivator.cs" />
+    <Compile Include="Data\Mapper\MappingTypeConstructor.cs" />
+    <Compile Include="Data\Emit\DelegateGenerator.cs" />
     <Compile Include="Extensions.AppDomain.cs" />
     <Compile Include="Extensions.Char.cs" />
     <Compile Include="Extensions.Convert.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Data\Extensions.DataReader.cs" />
     <Compile Include="Extensions.DateTime.cs" />
     <Compile Include="Extensions.String.cs" />
+    <Compile Include="Extensions.Type.cs" />
     <Compile Include="Extensions.Uri.cs" />
     <Compile Include="IInitialization.cs" />
     <Compile Include="IStartupTask.cs" />
@@ -74,7 +85,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Singleton.cs" />
     <Compile Include="Utils\SerializationHelper.cs" />
+    <Compile Include="Win\Extensions.Control.cs" />
+    <Compile Include="Win\MsgBox.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

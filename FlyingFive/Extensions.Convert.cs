@@ -51,6 +51,27 @@ namespace FlyingFive
         }
 
         /// <summary>
+        /// 将任意值转换为指定类型(如果为null则转换为T类型的默认值)
+        /// </summary>
+        /// <typeparam name="T">转换的目标类型</typeparam>
+        /// <param name="srcValue">任意源值</param>
+        /// <param name="defaultVal">转换失败时的默认值</param>
+        /// <returns></returns>
+        public static T TryConvert<T>(this object srcValue, T defaultVal = default(T))
+        {
+            try
+            {
+                if (null == srcValue) { return defaultVal; }
+                T destVal = (T)Convert.ChangeType(srcValue, typeof(T));
+                return destVal;
+            }
+            catch
+            {
+                return defaultVal;
+            }
+        }
+
+        /// <summary>
         /// 类型转换
         /// </summary>
         /// <param name="srcValue">源值</param>
