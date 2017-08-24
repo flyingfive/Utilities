@@ -13,7 +13,7 @@ namespace FlyingFive.Tests
         public void TestMethod1()
         {
             var dt = new DataTable();
-            dt.Columns.AddRange(new DataColumn[] { new DataColumn("Id", typeof(Int32)), new DataColumn("Name", typeof(string)), new DataColumn("BirthDay", typeof(DateTime)) });
+            dt.Columns.AddRange(new DataColumn[] { new DataColumn("Id"), new DataColumn("Name", typeof(string)), new DataColumn("BirthDay", typeof(DateTime)) });
             for (int i = 0; i < 10; i++)
             {
                 var row = dt.NewRow();
@@ -29,12 +29,12 @@ namespace FlyingFive.Tests
 
                 throw;
             }
-            Type t = typeof(Int32);
-            var flag = t.IsNullable();
-            var code = Type.GetTypeCode(typeof(Guid));
-            var t2 = typeof(Int32?);
-            var methdod = Data.Extensions.DataReaderMethods.GetReaderMethod(typeof(Object));
-            flag = t2.IsNullable();
+            //Type t = typeof(Int32);
+            //var flag = t.IsNullable();
+            //var code = Type.GetTypeCode(typeof(Guid));
+            //var t2 = typeof(Int32?);
+            //var methdod = Data.Extensions.DataReaderMethods.GetReaderMethod(typeof(Object));
+            //flag = t2.IsNullable();
             var md5 = "123".MD5();
         }
     }

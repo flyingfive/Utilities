@@ -54,14 +54,32 @@
     <Compile Include="Caching\CacheExtensions.cs" />
     <Compile Include="Caching\ICacheManager.cs" />
     <Compile Include="Caching\MemoryCacheManager.cs" />
+    <Compile Include="Data\DataAccessException.cs" />
+    <Compile Include="Data\Fakes\FakeParameter.cs" />
+    <Compile Include="Data\DbContext.cs" />
     <Compile Include="Data\Emit\DynamicClassGenerator.cs" />
     <Compile Include="Data\Emit\EmitHelper.cs" />
     <Compile Include="Data\Extensions.Reflection.cs" />
     <Compile Include="Data\Fakes\FakeDataReader.cs" />
+    <Compile Include="Data\IDbContext.cs" />
+    <Compile Include="Data\IDbSession.cs" />
+    <Compile Include="Data\Infrastructure\DisplayQueryInfo.cs" />
+    <Compile Include="Data\Infrastructure\IDbConnectionFactory.cs" />
+    <Compile Include="Data\Infrastructure\IDbContextProvider.cs" />
+    <Compile Include="Data\Interception\DbCommandInterceptionContext.cs" />
+    <Compile Include="Data\Interception\GlobalDbInterception.cs" />
+    <Compile Include="Data\Interception\IDbCommandInterceptor.cs" />
+    <Compile Include="Data\Infrastructure\SupportedMappingType.cs" />
+    <Compile Include="Data\Kernel\CommonAdoSession.cs" />
+    <Compile Include="Data\Kernel\DbSession.cs" />
     <Compile Include="Data\Mapper\IMemberMapper.cs" />
     <Compile Include="Data\Mapper\IObjectActivator.cs" />
     <Compile Include="Data\Mapper\MappingTypeConstructor.cs" />
     <Compile Include="Data\Emit\DelegateGenerator.cs" />
+    <Compile Include="Data\SqlServer\MsSqlContext.cs" />
+    <Compile Include="Data\SqlServer\MsSqlContextProvider.cs" />
+    <Compile Include="Data\SqlServer\PagingMode.cs" />
+    <Compile Include="Data\SqlServer\SqlServerDbConnectionFactory.cs" />
     <Compile Include="Extensions.AppDomain.cs" />
     <Compile Include="Extensions.Char.cs" />
     <Compile Include="Extensions.Convert.cs" />
@@ -88,7 +106,9 @@
     <Compile Include="Win\Extensions.Control.cs" />
     <Compile Include="Win\MsgBox.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Data\Query\Internals\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

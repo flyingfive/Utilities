@@ -16,15 +16,13 @@ namespace FlyingFive.Data.Emit
     /// </summary>
     public static class DynamicClassGenerator
     {
-
-        static readonly Dictionary<Assembly, ModuleBuilder> _moduleBuilders = new Dictionary<Assembly, ModuleBuilder>();
-        static int _sequenceNumber = 0;
-
+        private static int _sequenceNumber = 0;
+        private static readonly Dictionary<Assembly, ModuleBuilder> _moduleBuilders = new Dictionary<Assembly, ModuleBuilder>();
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<MemberInfo, Type> _typeCache = new System.Collections.Concurrent.ConcurrentDictionary<MemberInfo, Type>();
 
 
         /// <summary>
-        /// 创建一个类型成员的映射器类型(IMRM接口的实现类型)
+        /// 创建一个类型成员的映射器类型(IMemberMapper接口的实现类型)
         /// </summary>
         /// <param name="member"></param>
         /// <returns></returns>
@@ -78,9 +76,9 @@ namespace FlyingFive.Data.Emit
             il.Emit(OpCodes.Ldarg_S, parameStartIndex + 2);    //加载参数 readOrdinal
             il.EmitCall(OpCodes.Call, readerMethod, null);     //调用对应的 DataReader方法 得到 value  此时栈顶为 从DataReader中取出的值
 
-            EmitHelper.SetValueIL(il, member); // object.XX = value; 此时栈顶为空
+            EmitHelper.SetValueIL(il, member);                 // 成员赋值; 此时栈顶为空
 
-            il.Emit(OpCodes.Ret);   // 即可 return
+            il.Emit(OpCodes.Ret);                              //方法返回
             mapperType = tb.CreateType();
             _typeCache.GetOrAdd(member, mapperType);
             return mapperType;

@@ -43,7 +43,7 @@ namespace FlyingFive.Data
         /// <summary>
         /// DataReader方法集合
         /// </summary>
-        public static class DataReaderMethods
+        internal static class DataReaderMethods
         {
             /// <summary>
             /// 根据数据类型获取DataReader的指定方法
@@ -121,6 +121,11 @@ namespace FlyingFive.Data
 
             public static int GetInt32(IDataReader reader, int ordinal)
             {
+                //if (reader.GetFieldType(ordinal) != typeof(Int32))
+                //{
+                //    var val = reader.GetValue(ordinal).TryConvert<Int32>();
+                //    return val;
+                //}
                 return reader.GetInt32(ordinal);
             }
 

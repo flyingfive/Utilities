@@ -25,20 +25,6 @@ namespace FlyingFive
         }
 
         /// <summary>
-        /// 指示当前类型是否自定义类型
-        /// </summary>
-        /// <param name="type">要判断的类型</param>
-        /// <returns></returns>
-        public static bool IsCustomType(this Type type)
-        {
-            if (type.IsPrimitive) { return false; }
-            if (type.IsArray && type.HasElementType && type.GetElementType().IsPrimitive) { return false; }
-            bool isCustomType = (type != typeof(object) && type != typeof(Guid) &&
-                Type.GetTypeCode(type) == TypeCode.Object && !type.IsGenericType);
-            return isCustomType;
-        }
-
-        /// <summary>
         /// 获取自定义特性
         /// </summary>
         /// <typeparam name="T">特性类型</typeparam>

@@ -11,6 +11,19 @@ namespace FlyingFive
     /// </summary>
     public static partial class Extensions
     {
+        /// <summary>
+        /// 指示当前类型是否自定义类型
+        /// </summary>
+        /// <param name="type">要判断的类型</param>
+        /// <returns></returns>
+        public static bool IsCustomType(this Type type)
+        {
+            if (type.IsPrimitive) { return false; }
+            if (type.IsArray && type.HasElementType && type.GetElementType().IsPrimitive) { return false; }
+            bool isCustomType = (type != typeof(object) && type != typeof(Guid) &&
+                Type.GetTypeCode(type) == TypeCode.Object && !type.IsGenericType);
+            return isCustomType;
+        }
 
         /// <summary>
         /// 转换为对应的数据库类型
@@ -91,6 +104,35 @@ namespace FlyingFive
         {
             underlyingType = Nullable.GetUnderlyingType(type);
             return underlyingType != null;
+        }
+
+
+        /// <summary>
+        /// 判断指定该类型是否为匿名类型
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsAnonymousType(this Type type)
+        {
+            const string csharpAnonPrefix = "<>f__AnonymousType";
+            const string vbAnonPrefix = "VB$Anonymous";
+            var typeName = type.Name;
+            return typeName.StartsWith(csharpAnonPrefix) || typeName.StartsWith(vbAnonPrefix);
+        }
+
+        /// <summary>
+        /// 获取类型的实际类型,如:int? => int
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static Type GetUnderlyingType(this Type type)
+        {
+            Type underlyingType;
+            if (!IsNullable(type, out underlyingType))
+            {
+                underlyingType = type;
+            }
+            return underlyingType;
         }
     }
 }
