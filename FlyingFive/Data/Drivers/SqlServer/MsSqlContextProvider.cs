@@ -5,7 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 
-namespace FlyingFive.Data.SqlServer
+namespace FlyingFive.Data.Drivers.SqlServer
 {
     public class MsSqlContextProvider : IDbContextProvider
     {

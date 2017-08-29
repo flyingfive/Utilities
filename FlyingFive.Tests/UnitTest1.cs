@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Linq;
 using FlyingFive;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data;
 using FlyingFive.Data;
+using FlyingFive.Data.Mapping;
+using FlyingFive.Data.Drivers.SqlServer;
+using FlyingFive.Tests.Entities;
 
 namespace FlyingFive.Tests
 {
@@ -12,6 +16,7 @@ namespace FlyingFive.Tests
         [TestMethod]
         public void TestMethod1()
         {
+            var rx = EntityMappingCollection.Mappings;
             var dt = new DataTable();
             dt.Columns.AddRange(new DataColumn[] { new DataColumn("Id"), new DataColumn("Name", typeof(string)), new DataColumn("BirthDay", typeof(DateTime)) });
             for (int i = 0; i < 10; i++)
@@ -36,6 +41,13 @@ namespace FlyingFive.Tests
             //var methdod = Data.Extensions.DataReaderMethods.GetReaderMethod(typeof(Object));
             //flag = t2.IsNullable();
             var md5 = "123".MD5();
+        }
+
+        [TestMethod]
+        public void TestMsSqlContext()
+        {
+            IDbContext context = new MsSqlContext("Data Source=173.31.15.53,2012;Initial Catalog=XSK1_TANGGP;User Id=sa;Password=sa;");
+            var list = context.SqlQuery<Dish>("select *  from cybr_bt_dish").ToList();
         }
     }
 

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace FlyingFive.Data.SqlServer
+namespace FlyingFive.Data.Drivers.SqlServer
 {
     /// <summary>
     /// MsSql数据库上下文
@@ -18,8 +18,15 @@ namespace FlyingFive.Data.SqlServer
 
         private IDbContextProvider _dbContextProvider = null;
 
+        /// <summary>
+        /// 上下文环境供应者(提供上下文所需要的DB连接以及表达式翻译等功能)
+        /// </summary>
         public override IDbContextProvider DbContextProvider { get { return _dbContextProvider; } }
 
+        public MsSqlContext(string connectionString)
+            : this(new DefaultDbConnectionFactory(connectionString))
+        {
+        }
 
         public MsSqlContext(IDbConnectionFactory dbConnectionFactory)
         {

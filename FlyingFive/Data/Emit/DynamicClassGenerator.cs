@@ -63,7 +63,7 @@ namespace FlyingFive.Data.Emit
             //实现IMemberMapper.Map方法
             var methodBuilder = tb.DefineMethod("Map", MethodAttributes.Public | MethodAttributes.Virtual, CallingConventions.HasThis, typeof(void), new Type[] { typeof(object), typeof(IDataReader), typeof(int) });
             ILGenerator il = methodBuilder.GetILGenerator();
-
+            
             int parameStartIndex = 1;
 
             il.Emit(OpCodes.Ldarg_S, parameStartIndex);//将第一个参数 object 对象加载到栈顶
@@ -81,7 +81,33 @@ namespace FlyingFive.Data.Emit
             il.Emit(OpCodes.Ret);                              //方法返回
             mapperType = tb.CreateType();
             _typeCache.GetOrAdd(member, mapperType);
+
             return mapperType;
+        }
+
+        /// <summary>
+        /// Throws a data exception, only used internally
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <param name="index"></param>
+        /// <param name="reader"></param>
+        private static void ThrowDataException(Exception ex, int index, IDataReader reader)
+        {
+            string name = "(n/a)", value = "(n/a)";
+            if (reader != null && index >= 0 && index < reader.FieldCount)
+            {
+                name = reader.GetName(index);
+                object val = reader.GetValue(index);
+                if (val == null || val is DBNull)
+                {
+                    value = "<null>";
+                }
+                else
+                {
+                    value = Convert.ToString(val) + " - " + Type.GetTypeCode(val.GetType());
+                }
+            }
+            throw new DataException(string.Format("Error parsing column {0} ({1}={2})", index, name, value), ex);
         }
     }
 }

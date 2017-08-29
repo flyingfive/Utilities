@@ -303,7 +303,7 @@ namespace FlyingFive.Data.Kernel
                 }
                 else
                 {
-                    DbType? dbType = SupportedMappingType.GetDbType(parameterType);
+                    DbType? dbType = SupportedMappingTypes.GetDbType(parameterType);
                     if (dbType.HasValue) { dbParameter.DbType = dbType.Value; }
                 }
 

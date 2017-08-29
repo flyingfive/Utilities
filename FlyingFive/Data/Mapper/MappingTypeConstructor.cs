@@ -26,15 +26,7 @@ namespace FlyingFive.Data.Mapper
         {
             this.MappingType = type;
             this.DataCreator = DelegateGenerator.CreateMappingTypeGenerator(MappingType);
-            //InitCreator();
         }
-
-        ///// <summary>
-        ///// 初始化映射数据生成器
-        ///// </summary>
-        //private void InitCreator()
-        //{
-        //}
 
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, MappingTypeConstructor> _constructorCache = new System.Collections.Concurrent.ConcurrentDictionary<Type, MappingTypeConstructor>();
 

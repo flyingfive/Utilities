@@ -1,5 +1,6 @@
 ﻿using FlyingFive.Data.Infrastructure;
 using FlyingFive.Data.Kernel;
+using FlyingFive.Data.Query.Internals;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -35,7 +36,7 @@ namespace FlyingFive.Data
         /// <summary>
         /// 上下文环境供应者(提供上下文所需要的DB连接以及表达式翻译等功能)
         /// </summary>
-        public abstract IDbContextProvider DbContextProvider { get;  }
+        public abstract IDbContextProvider DbContextProvider { get; }
 
         protected DbContext()
         {
@@ -49,7 +50,8 @@ namespace FlyingFive.Data
 
         public IEnumerable<T> SqlQuery<T>(string plainSql, CommandType cmdType = CommandType.Text, params FakeParameter[] parameters)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(plainSql)) { throw new ArgumentException("必需提供参数：plainSql"); }
+            return new InternalSqlQuery<T>(this, plainSql, cmdType, parameters);
         }
 
         public TEntity Insert<TEntity>(TEntity entity)

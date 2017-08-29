@@ -9,7 +9,7 @@ namespace FlyingFive.Data.Infrastructure
     /// <summary>
     /// 系统支持DB映射的数据类型
     /// </summary>
-    public static class SupportedMappingType
+    public static class SupportedMappingTypes
     {
         private static readonly object _lockObj = new object();
         /// <summary>
@@ -21,7 +21,7 @@ namespace FlyingFive.Data.Infrastructure
         /// </summary>
         private static readonly Dictionary<Type, DbType> _realTypeMappers = null;
 
-        static SupportedMappingType()
+        static SupportedMappingTypes()
         {
             _defaultTypeMappers = new Dictionary<Type, DbType>();
             _defaultTypeMappers[typeof(byte)] = DbType.Byte;

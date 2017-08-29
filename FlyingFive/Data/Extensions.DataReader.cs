@@ -3,6 +3,7 @@ using FlyingFive.Data.Mapper;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -43,7 +44,7 @@ namespace FlyingFive.Data
         /// <summary>
         /// DataReader方法集合
         /// </summary>
-        internal static class DataReaderMethods
+        public static class DataReaderMethods
         {
             /// <summary>
             /// 根据数据类型获取DataReader的指定方法
@@ -107,6 +108,10 @@ namespace FlyingFive.Data
             #region DataReader Methods
             public static short GetInt16(IDataReader reader, int ordinal)
             {
+                if (reader.IsDBNull(ordinal))
+                {
+                    throw WrapValueTypeNullReferenceException(reader, ordinal);
+                }
                 return reader.GetInt16(ordinal);
             }
 
@@ -121,11 +126,10 @@ namespace FlyingFive.Data
 
             public static int GetInt32(IDataReader reader, int ordinal)
             {
-                //if (reader.GetFieldType(ordinal) != typeof(Int32))
-                //{
-                //    var val = reader.GetValue(ordinal).TryConvert<Int32>();
-                //    return val;
-                //}
+                if (reader.IsDBNull(ordinal))
+                {
+                    throw WrapValueTypeNullReferenceException(reader, ordinal);
+                }
                 return reader.GetInt32(ordinal);
             }
 
@@ -140,6 +144,10 @@ namespace FlyingFive.Data
 
             public static long GetInt64(IDataReader reader, int ordinal)
             {
+                if (reader.IsDBNull(ordinal))
+                {
+                    throw WrapValueTypeNullReferenceException(reader, ordinal);
+                }
                 return reader.GetInt64(ordinal);
             }
 
@@ -154,6 +162,10 @@ namespace FlyingFive.Data
 
             public static decimal GetDecimal(IDataReader reader, int ordinal)
             {
+                if (reader.IsDBNull(ordinal))
+                {
+                    throw WrapValueTypeNullReferenceException(reader, ordinal);
+                }
                 return reader.GetDecimal(ordinal);
             }
 
@@ -168,6 +180,10 @@ namespace FlyingFive.Data
 
             public static double GetDouble(IDataReader reader, int ordinal)
             {
+                if (reader.IsDBNull(ordinal))
+                {
+                    throw WrapValueTypeNullReferenceException(reader, ordinal);
+                }
                 return reader.GetDouble(ordinal);
             }
 
@@ -182,6 +198,10 @@ namespace FlyingFive.Data
 
             public static float GetSingle(IDataReader reader, int ordinal)
             {
+                if (reader.IsDBNull(ordinal))
+                {
+                    throw WrapValueTypeNullReferenceException(reader, ordinal);
+                }
                 return reader.GetFloat(ordinal);
             }
 
@@ -196,6 +216,10 @@ namespace FlyingFive.Data
 
             public static bool GetBoolean(IDataReader reader, int ordinal)
             {
+                if (reader.IsDBNull(ordinal))
+                {
+                    throw WrapValueTypeNullReferenceException(reader, ordinal);
+                }
                 return reader.GetBoolean(ordinal);
             }
 
@@ -210,6 +234,10 @@ namespace FlyingFive.Data
 
             public static DateTime GetDateTime(IDataReader reader, int ordinal)
             {
+                if (reader.IsDBNull(ordinal))
+                {
+                    throw WrapValueTypeNullReferenceException(reader, ordinal);
+                }
                 return reader.GetDateTime(ordinal);
             }
 
@@ -224,6 +252,10 @@ namespace FlyingFive.Data
 
             public static Guid GetGuid(IDataReader reader, int ordinal)
             {
+                if (reader.IsDBNull(ordinal))
+                {
+                    throw WrapValueTypeNullReferenceException(reader, ordinal);
+                }
                 return reader.GetGuid(ordinal);
             }
 
@@ -238,6 +270,10 @@ namespace FlyingFive.Data
 
             public static byte GetByte(IDataReader reader, int ordinal)
             {
+                if (reader.IsDBNull(ordinal))
+                {
+                    throw WrapValueTypeNullReferenceException(reader, ordinal);
+                }
                 return reader.GetByte(ordinal);
             }
 
@@ -252,6 +288,10 @@ namespace FlyingFive.Data
 
             public static char GetChar(IDataReader reader, int ordinal)
             {
+                if (reader.IsDBNull(ordinal))
+                {
+                    throw WrapValueTypeNullReferenceException(reader, ordinal);
+                }
                 return reader.GetChar(ordinal);
             }
 
@@ -292,6 +332,10 @@ namespace FlyingFive.Data
             /// <returns></returns>
             public static TEnum GetEnum<TEnum>(IDataReader reader, int ordinal) where TEnum : struct
             {
+                if (reader.IsDBNull(ordinal))
+                {
+                    throw WrapValueTypeNullReferenceException(reader, ordinal);
+                }
                 Type fieldType = reader.GetFieldType(ordinal);
 
                 object value;
@@ -334,6 +378,20 @@ namespace FlyingFive.Data
                 return new Nullable<T>((T)val);
             }
             #endregion
+
+
+            /// <summary>
+            /// 包装值类型空引用异常
+            /// </summary>
+            /// <param name="reader"></param>
+            /// <param name="ordinal"></param>
+            /// <returns></returns>
+            private static Exception WrapValueTypeNullReferenceException(IDataReader reader, int ordinal)
+            {
+                var callMethod = new StackTrace().GetFrame(1).GetMethod();
+                var returnType = callMethod.DeclaringType.GetMethod(callMethod.Name).ReturnType;
+                return new DataAccessException(string.Format("对于值类型{0}在索引位置: {1}(字段: {2})处返回了NULL值", returnType.FullName, ordinal, reader.GetName(ordinal)));
+            }
         }
     }
 }

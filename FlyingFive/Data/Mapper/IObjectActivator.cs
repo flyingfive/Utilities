@@ -53,10 +53,41 @@ namespace FlyingFive.Data.Mapper
     /// </summary>
     public class ObjectActivator : IObjectActivator
     {
+        private int? _checkNullOrdinal = null;
+        private Func<IDataReader, DataReaderOrdinalEnumerator, ObjectActivatorEnumerator, object> _instanceCreator = null;
+        private List<int> _readerOrdinals = null;
+        private List<IObjectActivator> _objectActivators = null;
+        private List<IValueSetter> _memberSetters = null;
+
+        private DataReaderOrdinalEnumerator _readerOrdinalEnumerator = null;
+        private ObjectActivatorEnumerator _objectActivatorEnumerator = null;
+
+        public ObjectActivator(Func<IDataReader, DataReaderOrdinalEnumerator, ObjectActivatorEnumerator, object> instanceCreator, List<int> readerOrdinals
+            , List<IObjectActivator> objectActivators, List<IValueSetter> memberSetters, int? checkNullOrdinal)
+        {
+            this._instanceCreator = instanceCreator;
+            this._readerOrdinals = readerOrdinals;
+            this._objectActivators = objectActivators;
+            this._memberSetters = memberSetters;
+            this._checkNullOrdinal = checkNullOrdinal;
+            this._readerOrdinalEnumerator = new DataReaderOrdinalEnumerator(this._readerOrdinals);
+            this._objectActivatorEnumerator = new ObjectActivatorEnumerator(this._objectActivators);
+        }
 
         public object CreateInstance(IDataReader reader)
         {
-            throw new NotImplementedException();
+            if (this._checkNullOrdinal.HasValue)
+            {
+                if (reader.IsDBNull(this._checkNullOrdinal.Value)) { return null; }
+            }
+            this._objectActivatorEnumerator.Reset();
+            this._readerOrdinalEnumerator.Reset();
+            object instance = this._instanceCreator(reader, this._readerOrdinalEnumerator, this._objectActivatorEnumerator);
+            foreach (var setter in this._memberSetters)
+            {
+                setter.SetValue(instance, reader);
+            }
+            return instance;
         }
     }
 }

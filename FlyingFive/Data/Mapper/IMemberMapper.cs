@@ -29,7 +29,7 @@ namespace FlyingFive.Data.Mapper
         /// </summary>
         /// <param name="member">成员对象</param>
         /// <returns></returns>
-        public static IMemberMapper CreateMRM(MemberInfo member)
+        public static IMemberMapper CreateMemberMapper(MemberInfo member)
         {
             Type type = DynamicClassGenerator.CreateMemberMapperClass(member);
             //IMRM obj = (IMRM)type.GetConstructor(Type.EmptyTypes).Invoke(null);

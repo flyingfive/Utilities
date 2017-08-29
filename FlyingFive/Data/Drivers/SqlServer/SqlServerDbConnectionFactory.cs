@@ -7,7 +7,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 
-namespace FlyingFive.Data.SqlServer
+namespace FlyingFive.Data.Drivers.SqlServer
 {
     /// <summary>
     /// SqlServer数据库连接工厂

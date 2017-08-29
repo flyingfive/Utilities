@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace FlyingFive.Data.SqlServer
+namespace FlyingFive.Data.Drivers.SqlServer
 {
     /// <summary>
     /// 分页模式
