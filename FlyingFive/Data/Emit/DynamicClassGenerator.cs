@@ -85,29 +85,5 @@ namespace FlyingFive.Data.Emit
             return mapperType;
         }
 
-        /// <summary>
-        /// Throws a data exception, only used internally
-        /// </summary>
-        /// <param name="ex"></param>
-        /// <param name="index"></param>
-        /// <param name="reader"></param>
-        private static void ThrowDataException(Exception ex, int index, IDataReader reader)
-        {
-            string name = "(n/a)", value = "(n/a)";
-            if (reader != null && index >= 0 && index < reader.FieldCount)
-            {
-                name = reader.GetName(index);
-                object val = reader.GetValue(index);
-                if (val == null || val is DBNull)
-                {
-                    value = "<null>";
-                }
-                else
-                {
-                    value = Convert.ToString(val) + " - " + Type.GetTypeCode(val.GetType());
-                }
-            }
-            throw new DataException(string.Format("Error parsing column {0} ({1}={2})", index, name, value), ex);
-        }
     }
 }

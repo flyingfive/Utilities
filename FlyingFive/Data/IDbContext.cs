@@ -21,7 +21,7 @@ namespace FlyingFive.Data
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <returns></returns>
-        //IQuery<TEntity> Query<TEntity>();
+        IQuery<TEntity> Query<TEntity>();
         /// <summary>
         /// 根据主键查询实体
         /// </summary>

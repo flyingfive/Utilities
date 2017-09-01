@@ -131,16 +131,16 @@ namespace FlyingFive.Data.Mapping
             return this;
         }
 
-        public void AddToEntityMapping()
-        {
-            var exists = this.EntityMapping.PropertyMappings.Where(p => p.PropertyName.Equals(this.PropertyName)).SingleOrDefault();
-            if (exists != null)
-            {
-                this.EntityMapping.PropertyMappings.Remove(exists);
-            }
-            this.EntityMapping.PropertyMappings.Add(this);
-            this.EntityMapping.PropertyMappings.TrimExcess();
-        }
+        //public void AddToEntityMapping()
+        //{
+        //    var exists = this.EntityMapping.PropertyMappings.Where(p => p.PropertyName.Equals(this.PropertyName)).SingleOrDefault();
+        //    if (exists != null)
+        //    {
+        //        this.EntityMapping.PropertyMappings.Remove(exists);
+        //    }
+        //    this.EntityMapping.PropertyMappings.Add(this);
+        //    this.EntityMapping.PropertyMappings.TrimExcess();
+        //}
 
         internal void FinalPass()
         {

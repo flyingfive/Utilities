@@ -19,9 +19,21 @@ namespace FlyingFive.Data.Query.Internals
     /// </summary>
     internal class InternalSqlQuery<T> : IEnumerable<T>, IEnumerable
     {
+        /// <summary>
+        /// 执行查询的SQL语句
+        /// </summary>
         private string _sql = null;
+        /// <summary>
+        /// 当前查询所在的DB上下文
+        /// </summary>
         private DbContext _dbContext = null;
+        /// <summary>
+        /// 查询的命令类型
+        /// </summary>
         private CommandType _cmdType = CommandType.Text;
+        /// <summary>
+        /// 查询的伪装参数
+        /// </summary>
         private FakeParameter[] _parameters = null;
 
         public InternalSqlQuery(DbContext dbContext, string sql, CommandType cmdType, FakeParameter[] parameters)
@@ -43,15 +55,17 @@ namespace FlyingFive.Data.Query.Internals
             return this.GetEnumerator();
         }
 
-
-        struct QueryEnumerator : IEnumerator<T>
+        /// <summary>
+        /// 查询枚举器
+        /// </summary>
+        internal struct QueryEnumerator : IEnumerator<T>
         {
+            private T _current;
+            private bool _disposed;
+            private bool _hasFinished;
             private IDataReader _reader;
             private InternalSqlQuery<T> _internalSqlQuery;
             private IObjectActivator _objectActivator;
-            private T _current;
-            private bool _hasFinished;
-            private bool _disposed;
 
             public QueryEnumerator(InternalSqlQuery<T> internalSqlQuery)
             {
@@ -75,7 +89,7 @@ namespace FlyingFive.Data.Query.Internals
 
                 if (this._reader == null)
                 {
-                    this.Prepare();
+                    this.PrepareReader();
                 }
 
                 if (this._reader.Read())
@@ -116,10 +130,13 @@ namespace FlyingFive.Data.Query.Internals
 
             public void Reset()
             {
-                throw new NotSupportedException();
+                throw new NotSupportedException("不支持的操作");
             }
 
-            void Prepare()
+            /// <summary>
+            /// 准备读取器
+            /// </summary>
+            private void PrepareReader()
             {
                 Type type = typeof(T);
                 if (SupportedMappingTypes.IsMappingType(type))
@@ -140,10 +157,16 @@ namespace FlyingFive.Data.Query.Internals
                 return reader;
             }
 
+            /// <summary>
+            /// 获取指定类型的对象激活器
+            /// </summary>
+            /// <param name="type"></param>
+            /// <param name="reader"></param>
+            /// <returns></returns>
             private static ObjectActivator GetObjectActivator(Type type, IDataReader reader)
             {
                 List<CacheInfo> caches;
-                if (!ObjectActivatorCache.TryGetValue(type, out caches))
+                if (!ObjectActivatorsCache.TryGetValue(type, out caches))
                 {
                     if (!Monitor.TryEnter(type))
                     {
@@ -152,7 +175,7 @@ namespace FlyingFive.Data.Query.Internals
 
                     try
                     {
-                        caches = ObjectActivatorCache.GetOrAdd(type, new List<CacheInfo>(1));
+                        caches = ObjectActivatorsCache.GetOrAdd(type, new List<CacheInfo>(1));
                     }
                     finally
                     {
@@ -179,20 +202,34 @@ namespace FlyingFive.Data.Query.Internals
                 return cache.ObjectActivator;
             }
 
-            static ObjectActivator CreateObjectActivator(Type type, IDataReader reader)
+            /// <summary>
+            /// 创建对象激活器
+            /// </summary>
+            /// <param name="type"></param>
+            /// <param name="reader"></param>
+            /// <returns></returns>
+            private static ObjectActivator CreateObjectActivator(Type type, IDataReader reader)
             {
                 ConstructorInfo constructor = type.GetConstructor(Type.EmptyTypes);
                 if (constructor == null)
-                    throw new ArgumentException(string.Format("The type of '{0}' does't define a none parameter constructor.", type.FullName));
-
-                EntityConstructorDescriptor constructorDescriptor = EntityConstructorDescriptor.GetConstructorDescriptor(constructor);
-                EntityMemberMapper mapper = constructorDescriptor.GetEntityMemberMapper();
-                Func<IDataReader, DataReaderOrdinalEnumerator, ObjectActivatorEnumerator, object> instanceCreator = constructorDescriptor.GetInstanceCreator();
-                List<IValueSetter> memberSetters = PrepareValueSetters(type, reader, mapper);
+                {
+                    throw new ArgumentException(string.Format("类型 '{0}' 没有定义无参构造函数", type.FullName));
+                }
+                var constructorDescriptor = EntityConstructorDescriptor.GetConstructorDescriptor(constructor);
+                var mapper = constructorDescriptor.GetEntityMemberMapper();
+                var instanceCreator = constructorDescriptor.GetInstanceCreator();
+                var memberSetters = PrepareValueSetters(type, reader, mapper);
                 return new ObjectActivator(instanceCreator, null, null, memberSetters, null);
             }
 
-            static List<IValueSetter> PrepareValueSetters(Type type, IDataReader reader, EntityMemberMapper mapper)
+            /// <summary>
+            /// 从DataReader中准备实体类型的属性/字段的setter访问值
+            /// </summary>
+            /// <param name="type"></param>
+            /// <param name="reader"></param>
+            /// <param name="mapper"></param>
+            /// <returns></returns>
+            private static List<IValueSetter> PrepareValueSetters(Type type, IDataReader reader, EntityMemberMapper mapper)
             {
                 List<IValueSetter> memberSetters = new List<IValueSetter>(reader.FieldCount);
 
@@ -236,7 +273,8 @@ namespace FlyingFive.Data.Query.Internals
 
                 return memberSetters;
             }
-            static CacheInfo TryGetCacheInfoFromList(List<CacheInfo> caches, IDataReader reader)
+
+            private static CacheInfo TryGetCacheInfoFromList(List<CacheInfo> caches, IDataReader reader)
             {
                 CacheInfo cache = null;
                 for (int i = 0; i < caches.Count; i++)
@@ -252,7 +290,10 @@ namespace FlyingFive.Data.Query.Internals
                 return cache;
             }
 
-            static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, List<CacheInfo>> ObjectActivatorCache = new System.Collections.Concurrent.ConcurrentDictionary<Type, List<CacheInfo>>();
+            /// <summary>
+            /// 创建好了的指定激活器缓存
+            /// </summary>
+            private static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, List<CacheInfo>> ObjectActivatorsCache = new System.Collections.Concurrent.ConcurrentDictionary<Type, List<CacheInfo>>();
         }
 
         public class CacheInfo

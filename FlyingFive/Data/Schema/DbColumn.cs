@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FlyingFive.Data.DbExpressions;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -75,6 +76,18 @@ namespace FlyingFive.Data.Schema
             this.Type = csharpType;
             this.DbType = dbType;
             this.Size = size;
+        }
+
+        public static DbColumn MakeColumn(DbExpression exp, string alias)
+        {
+            DbColumn column;
+            DbColumnAccessExpression e = exp as DbColumnAccessExpression;
+            if (e != null)
+                column = new DbColumn(alias, e.Column.Type, e.Column.DbType, e.Column.Size);
+            else
+                column = new DbColumn(alias, exp.Type);
+
+            return column;
         }
     }
 }

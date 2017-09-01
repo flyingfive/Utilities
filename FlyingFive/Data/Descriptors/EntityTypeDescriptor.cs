@@ -2,6 +2,7 @@
 using FlyingFive.Data.Infrastructure;
 using FlyingFive.Data.Mapping;
 using FlyingFive.Data.Schema;
+using FlyingFive.Data.Visitors;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,22 +17,39 @@ namespace FlyingFive.Data.Descriptors
     /// </summary>
     public class EntityTypeDescriptor
     {
-        private IDictionary<MemberInfo, MappingMemberDescriptor> _mappingMemberDescriptors;
-        private IDictionary<MemberInfo, DbColumnAccessExpression> _memberColumnMap;
-        //private ReadOnlyCollection<MappingMemberDescriptor> _primaryKeys;
-        private MappingMemberDescriptor _autoIncrement = null;
+        private IDictionary<MemberInfo, DbColumnAccessExpression> _memberColumnMap = null;
+        /// <summary>
+        /// 所有映射的成员描述
+        /// </summary>
+        public IDictionary<MemberInfo, MappingMemberDescriptor> MappingMemberDescriptors { get; private set; }
+        /// <summary>
+        /// 映射为标识列的成员描述
+        /// </summary>
+        public MappingMemberDescriptor AutoIncrement { get; private set; }
+        /// <summary>
+        /// 实体类型
+        /// </summary>
         public Type EntityType { get; private set; }
+        /// <summary>
+        /// 实体映射到的数据库表
+        /// </summary>
         public DbTable Table { get; private set; }
         /// <summary>
-        /// 实体的主键列表
+        /// 实体的主键列表描述
         /// </summary>
         public ReadOnlyCollection<MappingMemberDescriptor> PrimaryKeys { get; private set; }
+        /// <summary>
+        /// 实体类型是否存在主键描述
+        /// </summary>
+        public bool HasPrimaryKeys { get { return PrimaryKeys != null && PrimaryKeys.Count > 0; } }
 
         public EntityTypeDescriptor(Type entityType)
         {
             this.EntityType = entityType;
+            //this.PrimaryKeys = new ReadOnlyCollection<MappingMemberDescriptor>()
             InitTable();
             InitMemberInfo();
+            InitMemberColumnMap();
         }
 
         private void InitTable()
@@ -76,13 +94,16 @@ namespace FlyingFive.Data.Descriptors
             }
             else //(autoIncrementMemberDescriptors.Count == 1)
             {
-                var autoIncrementMemberDescriptor = identityColumns.First();
-                if (!(autoIncrementMemberDescriptor.MemberInfoType == typeof(Int32) || autoIncrementMemberDescriptor.MemberInfoType == typeof(Int32)))
+                var autoIncrementMemberDescriptor = identityColumns.FirstOrDefault();
+                if (autoIncrementMemberDescriptor != null)
                 {
-                    throw new DataAccessException("映射为自增列的成员类型只能为：Int32或Int64.");
+                    if (!(autoIncrementMemberDescriptor.MemberInfoType == typeof(Int32) || autoIncrementMemberDescriptor.MemberInfoType == typeof(Int32)))
+                    {
+                        throw new DataAccessException("映射为自增列的成员类型只能为：Int32或Int64.");
+                    }
                 }
                 //autoIncrementMemberDescriptor.IsAutoIncrement = true;
-                this._autoIncrement = autoIncrementMemberDescriptor;
+                this.AutoIncrement = autoIncrementMemberDescriptor;
             }
             //if (primaryKeys.Count == 1)
             //{
@@ -95,11 +116,21 @@ namespace FlyingFive.Data.Descriptors
             //    }
             //}
 
-            this._mappingMemberDescriptors = new Dictionary<MemberInfo, MappingMemberDescriptor>(mappingMemberDescriptors.Count);
+            this.MappingMemberDescriptors = new Dictionary<MemberInfo, MappingMemberDescriptor>(mappingMemberDescriptors.Count);
             foreach (MappingMemberDescriptor mappingMemberDescriptor in mappingMemberDescriptors)
             {
-                this._mappingMemberDescriptors.Add(mappingMemberDescriptor.MemberInfo, mappingMemberDescriptor);
+                this.MappingMemberDescriptors.Add(mappingMemberDescriptor.MemberInfo, mappingMemberDescriptor);
             }
+        }
+
+        private void InitMemberColumnMap()
+        {
+            Dictionary<MemberInfo, DbColumnAccessExpression> memberColumnMap = new Dictionary<MemberInfo, DbColumnAccessExpression>(this.MappingMemberDescriptors.Count);
+            foreach (var kv in this.MappingMemberDescriptors)
+            {
+                memberColumnMap.Add(kv.Key, new DbColumnAccessExpression(this.Table, kv.Value.Column));
+            }
+            this._memberColumnMap = memberColumnMap;
         }
 
         /// <summary>
@@ -140,6 +171,58 @@ namespace FlyingFive.Data.Descriptors
             {
                 return false;//只支持公共属性和字段
             }
+        }
+
+        private DefaultExpressionParser _expressionParser = null;
+        public DefaultExpressionParser GetExpressionParser(DbTable explicitDbTable)
+        {
+            if (explicitDbTable == null)
+            {
+                if (this._expressionParser == null)
+                    this._expressionParser = new DefaultExpressionParser(this, null);
+                return this._expressionParser;
+            }
+            else
+                return new DefaultExpressionParser(this, explicitDbTable);
+        }
+        public MappingMemberDescriptor TryGetMappingMemberDescriptor(MemberInfo memberInfo)
+        {
+            memberInfo = memberInfo.AsReflectedMemberOf(this.EntityType);
+            MappingMemberDescriptor memberDescriptor;
+            this.MappingMemberDescriptors.TryGetValue(memberInfo, out memberDescriptor);
+            return memberDescriptor;
+        }
+        public DbColumnAccessExpression TryGetColumnAccessExpression(MemberInfo memberInfo)
+        {
+            memberInfo = memberInfo.AsReflectedMemberOf(this.EntityType);
+            DbColumnAccessExpression dbColumnAccessExpression;
+            this._memberColumnMap.TryGetValue(memberInfo, out dbColumnAccessExpression);
+            return dbColumnAccessExpression;
+        }
+
+
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, EntityTypeDescriptor> InstanceCache = new System.Collections.Concurrent.ConcurrentDictionary<Type, EntityTypeDescriptor>();
+
+        /// <summary>
+        /// 获取实体类型描述
+        /// </summary>
+        /// <param name="type">实体类型</param>
+        /// <returns></returns>
+        public static EntityTypeDescriptor GetEntityTypeDescriptor(Type type)
+        {
+            EntityTypeDescriptor instance = null;
+            if (!InstanceCache.TryGetValue(type, out instance))
+            {
+                lock (type)
+                {
+                    if (!InstanceCache.TryGetValue(type, out instance))
+                    {
+                        instance = new EntityTypeDescriptor(type);
+                        InstanceCache.GetOrAdd(type, instance);
+                    }
+                }
+            }
+            return instance;
         }
     }
 }

@@ -8,6 +8,10 @@ using System.Text;
 
 namespace FlyingFive.Data.Mapping
 {
+    /// <summary>
+    /// 表示一个实体的映射配置
+    /// </summary>
+    /// <typeparam name="TEntity">配置的实体类型</typeparam>
     public abstract class EntityMappingConfiguration<TEntity> where TEntity : class, new()
     {
         private string _entityName = null;
@@ -54,6 +58,7 @@ namespace FlyingFive.Data.Mapping
             else
             {
                 propMapping = new PropertyMapping() { PropertyName = propName, EntityMapping = _entityMapping };
+                _entityMapping.PropertyMappings.Add(propMapping);
             }
             return propMapping;
         }
