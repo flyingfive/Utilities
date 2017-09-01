@@ -12,7 +12,7 @@ namespace FlyingFive.Data.Query.QueryState
 {
     internal sealed class RootQueryState : QueryStateBase
     {
-        Type _elementType;
+        private Type _elementType = null;
         public RootQueryState(Type elementType, string explicitTableName)
             : base(CreateResultElement(elementType, explicitTableName))
         {
@@ -32,10 +32,10 @@ namespace FlyingFive.Data.Query.QueryState
             return base.ToFromQueryResult();
         }
 
-        static ResultElement CreateResultElement(Type type, string explicitTableName)
+        private static ResultElement CreateResultElement(Type type, string explicitTableName)
         {
             if (type.IsAbstract || type.IsInterface)
-                throw new ArgumentException("The type of input can not be abstract class or interface.");
+                throw new ArgumentException("请求的类型不能为抽象类或接口.");
 
             //TODO init _resultElement
             ResultElement resultElement = new ResultElement();
@@ -50,7 +50,7 @@ namespace FlyingFive.Data.Query.QueryState
 
             ConstructorInfo constructor = typeDescriptor.EntityType.GetConstructor(Type.EmptyTypes);
             if (constructor == null)
-                throw new ArgumentException(string.Format("The type of '{0}' does't define a none parameter constructor.", type.FullName));
+                throw new ArgumentException(string.Format("没有为类型 '{0}' 定义一个空参构造函数.", type.FullName));
 
             MappingObjectExpression moe = new MappingObjectExpression(constructor);
 

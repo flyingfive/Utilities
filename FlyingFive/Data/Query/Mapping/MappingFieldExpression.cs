@@ -11,17 +11,16 @@ namespace FlyingFive.Data.Query.Mapping
 {
     public class MappingFieldExpression : IMappingObjectExpression
     {
-        Type _type;
-        DbExpression _exp;
+        private Type _type;
+        public DbExpression Expression { get; private set; }
+        public DbExpression NullChecking { get; set; }
         public MappingFieldExpression(Type type, DbExpression exp)
         {
             this._type = type;
-            this._exp = exp;
+            this.Expression = exp;
         }
 
-        public DbExpression Expression { get { return this._exp; } }
 
-        public DbExpression NullChecking { get; set; }
 
         public void AddMappingConstructorParameter(ParameterInfo p, DbExpression exp)
         {
@@ -51,10 +50,9 @@ namespace FlyingFive.Data.Query.Mapping
         {
             Stack<MemberExpression> memberExpressions = memberExpressionDeriveParameter.Reverse();
 
-            if (memberExpressions.Count == 0)
-                throw new Exception();
+            if (memberExpressions.Count == 0) { throw new InvalidOperationException("没有找到访问成员."); }
 
-            DbExpression ret = this._exp;
+            DbExpression ret = this.Expression;
 
             foreach (MemberExpression memberExpression in memberExpressions)
             {
@@ -63,7 +61,7 @@ namespace FlyingFive.Data.Query.Mapping
             }
 
             if (ret == null)
-                throw new Exception(memberExpressionDeriveParameter.ToString());
+                throw new InvalidOperationException(memberExpressionDeriveParameter.ToString());
 
             return ret;
         }
@@ -75,7 +73,7 @@ namespace FlyingFive.Data.Query.Mapping
         public IObjectActivatorCreator GenarateObjectActivatorCreator(DbSqlQueryExpression sqlQuery)
         {
             int ordinal;
-            ordinal = MappingObjectExpressionHelper.TryGetOrAddColumn(sqlQuery, this._exp).Value;
+            ordinal = MappingObjectExpressionHelper.TryGetOrAddColumn(sqlQuery, this.Expression).Value;
 
             MappingField mf = new MappingField(this._type, ordinal);
 
@@ -88,7 +86,7 @@ namespace FlyingFive.Data.Query.Mapping
         public IMappingObjectExpression ToNewObjectExpression(DbSqlQueryExpression sqlQuery, DbTable table)
         {
             DbColumnAccessExpression cae = null;
-            cae = MappingObjectExpressionHelper.ParseColumnAccessExpression(sqlQuery, table, this._exp);
+            cae = MappingObjectExpressionHelper.ParseColumnAccessExpression(sqlQuery, table, this.Expression);
 
             MappingFieldExpression mf = new MappingFieldExpression(this._type, cae);
 

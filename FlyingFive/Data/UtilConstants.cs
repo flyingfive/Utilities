@@ -2,6 +2,7 @@
 using FlyingFive.Data.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -99,7 +100,14 @@ namespace FlyingFive.Data
         public static readonly MethodInfo MethodInfo_DbFunctions_DiffMicroseconds = typeof(DbFunctions).GetMethod("DiffMicroseconds");
         #endregion
 
-
+        /// <summary>
+        /// 字典复制
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="comparer"></param>
+        /// <returns></returns>
         public static Dictionary<TKey, TValue> Clone<TKey, TValue>(Dictionary<TKey, TValue> source, IEqualityComparer<TKey> comparer = null)
         {
             Dictionary<TKey, TValue> ret;
@@ -116,6 +124,11 @@ namespace FlyingFive.Data
             return ret;
         }
 
+        /// <summary>
+        /// 根据参数得到委托类型
+        /// </summary>
+        /// <param name="typeArguments"></param>
+        /// <returns></returns>
         public static Type GetFuncDelegateType(Type[] typeArguments)
         {
             int parameters = typeArguments.Length;
@@ -135,22 +148,25 @@ namespace FlyingFive.Data
                     funcType = typeof(Func<,,,,,>);
                     break;
                 default:
-                    throw new NotSupportedException();
+                    throw new NotSupportedException("不支持的参数个数!");
             }
-
             return funcType.MakeGenericType(typeArguments);
         }
 
-        public static string AppendDbCommandInfo(string cmdText, FakeParameter[] parameters)
+        /// <summary>
+        /// 得到DB命令的SQL语句及参数信息
+        /// </summary>
+        /// <param name="cmdText"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        public static string GetDbCommandInfo(string cmdText, FakeParameter[] parameters)
         {
             StringBuilder sb = new StringBuilder();
             if (parameters != null)
             {
                 foreach (var param in parameters)
                 {
-                    if (param == null)
-                        continue;
-
+                    if (param == null) { continue; }
                     string typeName = null;
                     object value = null;
                     Type parameterType;
@@ -163,23 +179,21 @@ namespace FlyingFive.Data
                     {
                         value = param.Value;
                         parameterType = param.Value.GetType();
-
-                        if (parameterType == typeof(string) || parameterType == typeof(DateTime))
-                            value = "'" + value + "'";
+                        if (parameterType == typeof(string) || parameterType == typeof(DateTime)) { value = "'" + value + "'"; }
                     }
 
                     if (parameterType != null)
+                    {
                         typeName = GetTypeName(parameterType);
-
+                    }
                     sb.AppendFormat("{0} {1} = {2};", typeName, param.Name, value);
                     sb.AppendLine();
                 }
             }
-
             sb.AppendLine(cmdText);
-
             return sb.ToString();
         }
+
         private static string GetTypeName(Type type)
         {
             Type underlyingType;
@@ -187,10 +201,14 @@ namespace FlyingFive.Data
             {
                 return string.Format("Nullable<{0}>", GetTypeName(underlyingType));
             }
-
             return type.Name;
         }
-
+        /// <summary>
+        /// 生成查询中唯一的列别名
+        /// </summary>
+        /// <param name="sqlQuery">一个DB查询</param>
+        /// <param name="defaultAlias">默认别名</param>
+        /// <returns></returns>
         public static string GenerateUniqueColumnAlias(DbSqlQueryExpression sqlQuery, string defaultAlias = UtilConstants.DefaultColumnAlias)
         {
             string alias = defaultAlias;
@@ -200,10 +218,15 @@ namespace FlyingFive.Data
                 alias = defaultAlias + i.ToString();
                 i++;
             }
-
             return alias;
         }
 
+        /// <summary>
+        /// 两个对象判等
+        /// </summary>
+        /// <param name="obj1">对象1</param>
+        /// <param name="obj2">对象2</param>
+        /// <returns></returns>
         public static bool AreEqual(object obj1, object obj2)
         {
             if (obj1 == null && obj2 == null)
@@ -221,22 +244,36 @@ namespace FlyingFive.Data
 
             return object.Equals(obj1, obj2);
         }
+
     }
 
+    /// <summary>
+    /// 异常辅助工具
+    /// </summary>
     public static class UtilExceptions
     {
+        /// <summary>
+        /// NULL检查
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="paramName"></param>
         public static void CheckNull(object obj, string paramName = null)
         {
             if (obj == null)
                 throw new ArgumentNullException(paramName);
         }
 
+        /// <summary>
+        /// 不支持的方法
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns></returns>
         public static NotSupportedException NotSupportedMethod(MethodInfo method)
         {
-            return new NotSupportedException(string.Format("Does not support method '{0}'.", ToMethodString(method)));
+            return new NotSupportedException(string.Format("不支持的方法 '{0}'.", ToMethodString(method)));
         }
 
-        public static string ToMethodString(MethodInfo method)
+        private static string ToMethodString(MethodInfo method)
         {
             StringBuilder sb = new StringBuilder();
             ParameterInfo[] parameters = method.GetParameters();
@@ -256,6 +293,29 @@ namespace FlyingFive.Data
             }
 
             return string.Format("{0}.{1}({2})", method.DeclaringType.Name, method.Name, sb.ToString());
+        }
+
+        /// <summary>
+        /// 追加错误信息
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="ordinal"></param>
+        /// <param name="ex"></param>
+        /// <returns></returns>
+        public static string AppendErrorMsg(IDataReader reader, int ordinal, Exception ex)
+        {
+            string msg = null;
+            if (reader.IsDBNull(ordinal))
+            {
+                msg = string.Format("Please make sure that the member of the column '{0}'({1},{2},{3}) map is nullable.", reader.GetName(ordinal), ordinal.ToString(), reader.GetDataTypeName(ordinal), reader.GetFieldType(ordinal).FullName);
+            }
+            else if (ex is InvalidCastException)
+            {
+                msg = string.Format("Please make sure that the member of the column '{0}'({1},{2},{3}) map is the correct type.", reader.GetName(ordinal), ordinal.ToString(), reader.GetDataTypeName(ordinal), reader.GetFieldType(ordinal).FullName);
+            }
+            else
+                msg = string.Format("An error occurred while mapping the column '{0}'({1},{2},{3}). For details please see the inner exception.", reader.GetName(ordinal), ordinal.ToString(), reader.GetDataTypeName(ordinal), reader.GetFieldType(ordinal).FullName);
+            return msg;
         }
     }
 }

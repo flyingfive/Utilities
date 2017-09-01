@@ -78,7 +78,7 @@ namespace FlyingFive.Data
 
         public TEntity Insert<TEntity>(TEntity entity)
         {
-            //Utils.CheckNull(entity);
+            UtilExceptions.CheckNull(entity);
 
             var typeDescriptor = EntityTypeDescriptor.GetEntityTypeDescriptor(entity.GetType());
 
@@ -91,8 +91,6 @@ namespace FlyingFive.Data
                 MappingMemberDescriptor memberDescriptor = kv.Value;
 
                 if (memberDescriptor.Column.IsIdentity) { continue; }
-                //if (memberDescriptor == autoIncrementMemberDescriptor)
-                //    continue;
 
                 object val = memberDescriptor.GetValue(entity);
 
@@ -110,7 +108,7 @@ namespace FlyingFive.Data
                 throw new DataAccessException(string.Format("主键 '{0}' 不能为NULL.", nullValueKey.MemberInfo.Name));
             }
 
-            DbTable dbTable = typeDescriptor.Table;//table == null ? typeDescriptor.Table : new DbTable(table, typeDescriptor.Table.Schema);
+            DbTable dbTable = typeDescriptor.Table;
             DbInsertExpression e = new DbInsertExpression(dbTable);
 
             foreach (var kv in insertColumns)
@@ -177,7 +175,7 @@ namespace FlyingFive.Data
             if (updateColumns.Count == 0)
                 return 0;
 
-            DbTable dbTable = typeDescriptor.Table;//table == null ? typeDescriptor.Table : new DbTable(table, typeDescriptor.Table.Schema);
+            DbTable dbTable = typeDescriptor.Table;
             DbExpression conditionExp = MakeCondition(keyValueMap, dbTable);
             DbUpdateExpression e = new DbUpdateExpression(dbTable, conditionExp);
 
@@ -234,19 +232,16 @@ namespace FlyingFive.Data
         public int Delete<TEntity>(TEntity entity)
         {
             UtilExceptions.CheckNull(entity);
-
             var typeDescriptor = EntityTypeDescriptor.GetEntityTypeDescriptor(entity.GetType());
             EnsureEntityHasPrimaryKey(typeDescriptor);
-
-            Dictionary<MappingMemberDescriptor, object> keyValueMap = new Dictionary<MappingMemberDescriptor, object>();
-
+            var keyValueMap = new Dictionary<MappingMemberDescriptor, object>();
             foreach (MappingMemberDescriptor keyMemberDescriptor in typeDescriptor.PrimaryKeys)
             {
                 object keyVal = keyMemberDescriptor.GetValue(entity);
                 keyValueMap.Add(keyMemberDescriptor, keyVal);
             }
 
-            DbTable dbTable = typeDescriptor.Table;//table == null ? typeDescriptor.Table : new DbTable(table, typeDescriptor.Table.Schema);
+            DbTable dbTable = typeDescriptor.Table;
             DbExpression conditionExp = MakeCondition(keyValueMap, dbTable);
             DbDeleteExpression e = new DbDeleteExpression(dbTable, conditionExp);
             return this.ExecuteSqlCommand(e);
@@ -268,7 +263,7 @@ namespace FlyingFive.Data
 
         public int DeleteByKey<TEntity>(object key)
         {
-            Expression<Func<TEntity, bool>> predicate = BuildPredicate<TEntity>(key);
+            var predicate = BuildPredicate<TEntity>(key);
             return this.Delete<TEntity>(predicate);
         }
 

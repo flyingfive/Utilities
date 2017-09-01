@@ -43,7 +43,7 @@ namespace FlyingFive.Data
                     return stripedExp;
 
                 DbParameterExpression val;
-                if (dbMemberExp.TryConvertToParameterExpression( out val))
+                if (dbMemberExp.TryConvertToParameterExpression(out val))
                 {
                     if (cList != null)
                     {
@@ -258,13 +258,13 @@ namespace FlyingFive.Data
                     if (declaringType.IsClass || declaringType.IsInterface)
                     {
                         if (instance == null)
-                            throw new NullReferenceException(string.Format("There is an object reference not set to an instance of an object in expression tree.The type of null object is '{0}'.", declaringType.FullName));
+                            throw new NullReferenceException(string.Format("在表达式树中未将对象引用到对象实例.空引用对象类型为: '{0}'.", declaringType.FullName));
                     }
                 }
                 return m.Evaluate(instance);
             }
 
-            throw new NotSupportedException();
+            throw new NotSupportedException("不支持的操作!");
         }
 
         /// <summary>

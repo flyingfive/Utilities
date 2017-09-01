@@ -51,16 +51,29 @@ namespace FlyingFive.Tests
         public void TestMsSqlContext()
         {
             IDbContext context = new MsSqlContext("Data Source=173.31.15.53,2012;Initial Catalog=XSK1_TANGGP;User Id=sa;Password=sa;");
+            context.Session.CommandTimeout = 60;
             FlyingFive.Data.Interception.GlobalDbInterception.Add(new DbCommandInterceptor());
             //var list = context.SqlQuery<Dish>("select *  from cybr_bt_dish").ToList();
             var dish = new Dish() { DishNo = "test01", Build = DateTime.Now, CurFlag = "N", DeductType = "1", DishName = "test01", Electscale = "N", HalfFlag = "N", ItemFlag = "N", OutPrice = 12, Price1 = 10, Discount = "Y", SeriesNo = "01", TypeNo = "01", Spec = "大", Spell = "", UnitNo = "02", SuitFlag = "N", StopFlag = "N", DownFlag = "Y", DcbCode = "test", DeductAmount = 1, Explain = "just a test", SubNo = "t01", DishFlag = "Y" };
-            //context.Insert(dish);
+            var rows1 = context.Insert(dish);
             //var d2 = context.QueryByKey<Dish>("test01");
-            var q = context.Query<Dish>().Where(u => u.DishNo.Equals("test01"));
-            var s = q.Select(d => new { Name = d.DishName, No = d.DishNo }).ToList();
-            var x = q.Select(a => new { Count = AggregateFunctions.Count(), Max = AggregateFunctions.Max(a.Build) }).FirstOrDefault();
-            //s.DishName = "aaaa";
-            //var flag = context.Update(s);
+            var dish2 = context.Query<Dish>().Where(u => u.DishNo.Equals("test01")).FirstOrDefault();
+            if (dish2 != null)
+            {
+                dish2.DishName = "aaaabbb";
+                var rows = context.Update(dish2);
+                var count = context.Delete(dish2);
+            }
+            var s = context.Query<Dish>().Select(d => new { Name = d.DishName, No = d.DishNo }).ToList();
+            try
+            {
+                var x = context.Query<Dish>().Where(d => d.DishNo.Contains("01")).Select(a => new { Count = AggregateFunctions.Count(), Max = AggregateFunctions.Max(a.Build) }).FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+
+            }
+
         }
     }
 

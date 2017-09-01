@@ -65,8 +65,8 @@ namespace FlyingFive.Data.Mapper
     /// </summary>
     public class ComplexMemberBinder : IValueSetter
     {
-        Action<object, object> _setter;
-        IObjectActivator _activtor;
+        private Action<object, object> _setter;
+        private IObjectActivator _activtor;
         public ComplexMemberBinder(Action<object, object> setter, IObjectActivator activtor)
         {
             this._setter = setter;

@@ -42,8 +42,7 @@ namespace FlyingFive.Data.Mapper
             }
             catch (Exception ex)
             {
-                return ex;
-                //throw new SISSException(ObjectActivator.AppendErrorMsg(reader, this._readOrdinal, ex), ex);
+                throw new DataAccessException(UtilExceptions.AppendErrorMsg(reader, this._readOrdinal, ex), ex);
             }
         }
     }

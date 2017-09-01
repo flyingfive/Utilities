@@ -54,7 +54,7 @@ namespace FlyingFive.Data.Query.Internals
         public override string ToString()
         {
             DbCommandFactor commandFactor = this.GenerateCommandFactor();
-            return UtilConstants.AppendDbCommandInfo(commandFactor.CommandText, commandFactor.Parameters);
+            return UtilConstants.GetDbCommandInfo(commandFactor.CommandText, commandFactor.Parameters);
         }
     }
 }

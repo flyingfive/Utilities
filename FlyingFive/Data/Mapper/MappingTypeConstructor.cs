@@ -1,5 +1,6 @@
 ﻿using FlyingFive.Data.Emit;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -28,7 +29,7 @@ namespace FlyingFive.Data.Mapper
             this.DataCreator = DelegateGenerator.CreateMappingTypeGenerator(MappingType);
         }
 
-        private static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, MappingTypeConstructor> _constructorCache = new System.Collections.Concurrent.ConcurrentDictionary<Type, MappingTypeConstructor>();
+        private static readonly ConcurrentDictionary<Type, MappingTypeConstructor> _constructorCache = new ConcurrentDictionary<Type, MappingTypeConstructor>();
 
         /// <summary>
         /// 获取指定映射类型的构造器实例

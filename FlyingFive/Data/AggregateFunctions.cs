@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace FlyingFive.Data.Infrastructure
+namespace FlyingFive.Data
 {
     /// <summary>
     /// 受支持的聚合操作函数

@@ -12,6 +12,11 @@ namespace FlyingFive.Data.Query.Mapping
 {
     public interface IMappingObjectExpression
     {
+        /// <summary>
+        /// 为SQL查询操作生成对象激活工具生成器
+        /// </summary>
+        /// <param name="sqlQuery"></param>
+        /// <returns></returns>
         IObjectActivatorCreator GenarateObjectActivatorCreator(DbSqlQueryExpression sqlQuery);
         IMappingObjectExpression ToNewObjectExpression(DbSqlQueryExpression sqlQuery, DbTable table);
         void AddMappingConstructorParameter(ParameterInfo p, DbExpression exp);

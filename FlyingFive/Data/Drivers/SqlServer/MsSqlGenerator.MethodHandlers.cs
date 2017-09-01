@@ -12,9 +12,6 @@ namespace FlyingFive.Data.Drivers.SqlServer
 {
     public partial class MsSqlGenerator
     {
-
-
-
         private static readonly Dictionary<string, Action<DbMethodCallExpression, MsSqlGenerator>> MethodHandlers = InitMethodHandlers();
         private static readonly Dictionary<string, Action<DbAggregateExpression, MsSqlGenerator>> AggregateHandlers = InitAggregateHandlers();
         private static readonly Dictionary<MethodInfo, Action<DbBinaryExpression, MsSqlGenerator>> BinaryWithMethodHandlers = InitBinaryWithMethodHandlers();
@@ -24,6 +21,10 @@ namespace FlyingFive.Data.Drivers.SqlServer
 
         public static readonly ReadOnlyCollection<DbExpressionType> SafeDbExpressionTypes;
 
+        /// <summary>
+        /// 支持的方法调用
+        /// </summary>
+        /// <returns></returns>
         private static Dictionary<string, Action<DbMethodCallExpression, MsSqlGenerator>> InitMethodHandlers()
         {
             var methodHandlers = new Dictionary<string, Action<DbMethodCallExpression, MsSqlGenerator>>();

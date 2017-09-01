@@ -29,7 +29,7 @@ namespace FlyingFive.Data.Query.Mapping
         public DbExpression NullChecking { get; set; }
 
         /// <summary>
-        /// 返回类型
+        /// 实体构造描述
         /// </summary>
         public EntityConstructorDescriptor ConstructorDescriptor { get; private set; }
         public Dictionary<ParameterInfo, DbExpression> MappingConstructorParameters { get; private set; }
@@ -101,6 +101,12 @@ namespace FlyingFive.Data.Query.Mapping
 
             return ret;
         }
+
+        /// <summary>
+        /// 从Linq表达式翻译为DB表现
+        /// </summary>
+        /// <param name="memberExpressionDeriveFromParameter"></param>
+        /// <returns></returns>
         public DbExpression GetDbExpression(MemberExpression memberExpressionDeriveFromParameter)
         {
             Stack<MemberExpression> memberExpressions = memberExpressionDeriveFromParameter.Reverse();

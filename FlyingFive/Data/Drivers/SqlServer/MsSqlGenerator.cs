@@ -578,7 +578,7 @@ namespace FlyingFive.Data.Drivers.SqlServer
             return exp;
         }
 
-        private void QuoteName(string name)
+        protected void QuoteName(string name)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -587,18 +587,18 @@ namespace FlyingFive.Data.Drivers.SqlServer
             this.SqlBuilder.Append("[", name, "]");
         }
 
-        private void BuildCastState(DbExpression castExp, string targetDbTypeString)
+        protected void BuildCastState(DbExpression castExp, string targetDbTypeString)
         {
             this.SqlBuilder.Append("CAST(");
             castExp.Accept(this);
             this.SqlBuilder.Append(" AS ", targetDbTypeString, ")");
         }
-        private void BuildCastState(object castObject, string targetDbTypeString)
+        protected void BuildCastState(object castObject, string targetDbTypeString)
         {
             this.SqlBuilder.Append("CAST(", castObject, " AS ", targetDbTypeString, ")");
         }
 
-        private bool IsDatePart(DbMemberExpression exp)
+        protected bool IsDatePart(DbMemberExpression exp)
         {
             MemberInfo member = exp.Member;
             if (member == UtilConstants.PropertyInfo_DateTime_Year)
@@ -766,7 +766,7 @@ namespace FlyingFive.Data.Drivers.SqlServer
         }
 
 
-        private void BuildWhereState(DbExpression whereExpression)
+        protected void BuildWhereState(DbExpression whereExpression)
         {
             if (whereExpression != null)
             {
@@ -774,7 +774,7 @@ namespace FlyingFive.Data.Drivers.SqlServer
                 whereExpression.Accept(this);
             }
         }
-        private void BuildOrderState(List<DbOrdering> orderings)
+        protected void BuildOrderState(List<DbOrdering> orderings)
         {
             if (orderings.Count > 0)
             {
@@ -782,7 +782,7 @@ namespace FlyingFive.Data.Drivers.SqlServer
                 this.ConcatOrderings(orderings);
             }
         }
-        private void ConcatOrderings(List<DbOrdering> orderings)
+        protected void ConcatOrderings(List<DbOrdering> orderings)
         {
             for (int i = 0; i < orderings.Count; i++)
             {
@@ -794,7 +794,7 @@ namespace FlyingFive.Data.Drivers.SqlServer
                 this.AppendOrdering(orderings[i]);
             }
         }
-        private void BuildGroupState(DbSqlQueryExpression exp)
+        protected void BuildGroupState(DbSqlQueryExpression exp)
         {
             var groupSegments = exp.GroupSegments;
             if (groupSegments.Count == 0)
@@ -816,13 +816,13 @@ namespace FlyingFive.Data.Drivers.SqlServer
             }
         }
 
-        private void AppendTableSegment(DbTableSegment seg)
+        protected void AppendTableSegment(DbTableSegment seg)
         {
             seg.Body.Accept(this);
             this.SqlBuilder.Append(" AS ");
             this.QuoteName(seg.Alias);
         }
-        private void AppendColumnSegment(DbColumnSegment seg)
+        protected void AppendColumnSegment(DbColumnSegment seg)
         {
             seg.Body.Accept(this.ValueExpressionVisitor);
             this.SqlBuilder.Append(" AS ");

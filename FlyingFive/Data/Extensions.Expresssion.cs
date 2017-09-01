@@ -7,6 +7,9 @@ using System.Text;
 
 namespace FlyingFive.Data
 {
+    /// <summary>
+    /// Linq表达式扩展
+    /// </summary>
     public static partial class Extensions
     {
         public static Stack<MemberExpression> Reverse(this MemberExpression exp)

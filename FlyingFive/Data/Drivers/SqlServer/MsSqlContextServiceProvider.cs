@@ -32,11 +32,11 @@ namespace FlyingFive.Data.Drivers.SqlServer
         {
             if (this._msSqlContext.PagingMode == PagingMode.ROW_NUMBER)
             {
-                return DbExpressionTranslator.Instance;
+                return MsSqlExpressionTranslator.Instance;
             }
             else if (this._msSqlContext.PagingMode == PagingMode.OFFSET_FETCH)
             {
-                //return DbExpressionTranslator_OffsetFetch.Instance;
+                return MsSqlExpressionTranslator_OffsetFetch.Instance;
             }
             return null;
 

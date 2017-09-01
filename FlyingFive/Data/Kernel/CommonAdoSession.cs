@@ -206,14 +206,13 @@ namespace FlyingFive.Data.Kernel
         public void BeginTransaction(IsolationLevel? il = null)
         {
             this.Activate();
-
-            if (il == null)
+            if (il.HasValue)
             {
-                this._dbTransaction = this._dbConnection.BeginTransaction();
+                this._dbTransaction = this._dbConnection.BeginTransaction(il.Value);
             }
             else
             {
-                this._dbTransaction = this._dbConnection.BeginTransaction(il.Value);
+                this._dbTransaction = this._dbConnection.BeginTransaction();
             }
             this.IsInTransaction = true;
         }

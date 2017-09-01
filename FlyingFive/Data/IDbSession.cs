@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FlyingFive.Data.Interception;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace FlyingFive.Data
         /// <summary>
         /// 该会话上的DB上下文
         /// </summary>
-        IDbContext DbContext { get; }
+        DbContext DbContext { get; }
         /// <summary>
         /// 会话是否在事务处理中
         /// </summary>
@@ -68,11 +69,11 @@ namespace FlyingFive.Data
         /// 为该会话添加一个命令拦截器
         /// </summary>
         /// <param name="interceptor"></param>
-        //void AddInterceptor(IDbCommandInterceptor interceptor);
+        void AddInterceptor(IDbCommandInterceptor interceptor);
         /// <summary>
         /// 从本会话移除一个拦截器
         /// </summary>
         /// <param name="interceptor"></param>
-        //void RemoveInterceptor(IDbCommandInterceptor interceptor);
+        void RemoveInterceptor(IDbCommandInterceptor interceptor);
     }
 }
