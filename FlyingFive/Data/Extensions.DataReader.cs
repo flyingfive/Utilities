@@ -105,7 +105,7 @@ namespace FlyingFive.Data
                 return method;
             }
 
-            #region 从DataReader 取值方法
+            #region DataReader 取值方法
             public static short GetInt16(IDataReader reader, int ordinal)
             {
                 if (reader.IsDBNull(ordinal))
@@ -378,8 +378,7 @@ namespace FlyingFive.Data
                 return new Nullable<T>((T)val);
             }
             #endregion
-
-
+            
             /// <summary>
             /// 包装值类型空引用异常
             /// </summary>

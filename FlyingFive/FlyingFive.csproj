@@ -59,10 +59,16 @@
     <Compile Include="Data\Extensions.Reflection.cs" />
     <Compile Include="Data\Fakes\FakeParameter.cs" />
     <Compile Include="Data\Fakes\OutputParameter.cs" />
+    <Compile Include="Data\IDbContext.cs" />
+    <Compile Include="Data\IDbSession.cs" />
     <Compile Include="Data\Interception\DbCommandInterceptionContext.cs" />
     <Compile Include="Data\Interception\IDbCommandInterceptor.cs" />
     <Compile Include="Data\Kernel\CommonAdoSession.cs" />
     <Compile Include="Data\Mappers\IMemberMapper.cs" />
+    <Compile Include="Data\Mapping\EntityMapping.cs" />
+    <Compile Include="Data\Mapping\EntityMappingConfiguration.cs" />
+    <Compile Include="Data\Mapping\MemberMapping.cs" />
+    <Compile Include="Data\Utils.cs" />
     <Compile Include="Extensions.AppDomain.cs" />
     <Compile Include="Extensions.Char.cs" />
     <Compile Include="Extensions.Convert.cs" />

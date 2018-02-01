@@ -16,7 +16,7 @@ namespace FlyingFive.Tests
         [TestMethod]
         public void TestMapping()
         {
-            var list = new List<Employees>();
+            var list = new List<Employee>();
             try
             {
                 var result = CodeTimer.Time("test", 10, (() =>
@@ -28,7 +28,7 @@ namespace FlyingFive.Tests
                         connection.Open();
                         using (var reader = command.ExecuteReader())
                         {
-                            list = reader.ToList<Employees>();
+                            list = reader.ToList<Employee>();
                         }
                     }
                 }));
