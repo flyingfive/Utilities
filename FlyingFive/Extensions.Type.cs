@@ -32,7 +32,7 @@ namespace FlyingFive
         /// <returns></returns>
         public static SqlDbType ToSqlDbType(this Type csharpType)
         {
-            if (csharpType.IsNullable())
+            if (csharpType.IsNullableType())
             {
                 var type = csharpType.GetGenericArguments().FirstOrDefault();
                 return type.ToSqlDbType();
@@ -61,7 +61,7 @@ namespace FlyingFive
         /// <returns></returns>
         public static DbType ToDbType(this Type csharpType)
         {
-            if (csharpType.IsNullable())
+            if (csharpType.IsNullableType())
             {
                 var type = csharpType.GetGenericArguments().FirstOrDefault();
                 return type.ToDbType();
@@ -88,10 +88,10 @@ namespace FlyingFive
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static bool IsNullable(this Type type)
+        public static bool IsNullableType(this Type type)
         {
             Type underlyingType = null;
-            return IsNullable(type, out underlyingType);
+            return IsNullableType(type, out underlyingType);
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace FlyingFive
         /// <param name="type"></param>
         /// <param name="underlyingType">可空类型</param>
         /// <returns></returns>
-        public static bool IsNullable(this Type type, out Type underlyingType)
+        public static bool IsNullableType(this Type type, out Type underlyingType)
         {
             underlyingType = Nullable.GetUnderlyingType(type);
             return underlyingType != null;
@@ -128,7 +128,7 @@ namespace FlyingFive
         public static Type GetUnderlyingType(this Type type)
         {
             Type underlyingType;
-            if (!IsNullable(type, out underlyingType))
+            if (!IsNullableType(type, out underlyingType))
             {
                 underlyingType = type;
             }

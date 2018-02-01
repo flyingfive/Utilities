@@ -1,4 +1,4 @@
-﻿using FlyingFive.Data.Mapping;
+﻿//using FlyingFive.Data.Mapping;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -130,40 +130,40 @@ namespace FlyingFive.Tests.Entities
         //public virtual string Ch_serviceflag { get; set; }
     }
 
-    public class DishMap : EntityMappingConfiguration<Dish>
-    {
-        public DishMap()
-        {
-            this.Table("cybr_bt_dish");
+    //public class DishMap : EntityMappingConfiguration<Dish>
+    //{
+    //    public DishMap()
+    //    {
+    //        this.Table("cybr_bt_dish");
 
-            this.Property(entity => entity.DishNo).HasColumnName("ch_dishno").HasMaxSize(7).HasPrimaryKey();
-            this.Property(entity => entity.SubNo).HasColumnName("vch_subno").HasRequired(false).HasMaxSize(20);
-            this.Property(entity => entity.DishName).HasColumnName("vch_dishname").HasRequired(false).HasMaxSize(30);
-            this.Property(entity => entity.Spell).HasColumnName("vch_spell").HasRequired(false).HasMaxSize(15);
-            this.Property(entity => entity.English).HasColumnName("vch_english").HasRequired(false).HasMaxSize(40);
-            this.Property(entity => entity.SeriesNo).HasColumnName("ch_seriesno").HasRequired(false).HasMaxSize(2);
-            this.Property(entity => entity.TypeNo).HasColumnName("ch_typeno").HasRequired(false).HasMaxSize(4);
-            this.Property(entity => entity.UnitNo).HasColumnName("ch_unitno").HasRequired(false).HasMaxSize(3);
-            this.Property(entity => entity.Spec).HasColumnName("vch_spec").HasRequired(false).HasMaxSize(20);
-            this.Property(entity => entity.Price1).HasColumnName("num_price1").HasRequired(false).HasMaxSize(9);
-            this.Property(entity => entity.StopFlag).HasColumnName("ch_stopflag").HasRequired(false).HasMaxSize(1);
-            this.Property(entity => entity.SuitFlag).HasColumnName("ch_suitflag").HasRequired(false).HasMaxSize(1);
-            this.Property(entity => entity.CurFlag).HasColumnName("ch_curflag").HasRequired(false).HasMaxSize(1);
-            this.Property(entity => entity.Discount).HasColumnName("ch_discount").HasRequired(false).HasMaxSize(1);
-            this.Property(entity => entity.DownFlag).HasColumnName("ch_downflag").HasRequired(false).HasMaxSize(1);
-            this.Property(entity => entity.Explain).HasColumnName("vch_explain").HasRequired(false).HasMaxSize(254);
-            this.Property(entity => entity.DishFlag).HasColumnName("ch_dishflag").HasRequired(false).HasMaxSize(1);
-            this.Property(entity => entity.DeductType).HasColumnName("ch_dishtype").HasRequired(false).HasMaxSize(1);
-            this.Property(entity => entity.DeductAmount).HasColumnName("num_dish_deduct").HasRequired(false).HasMaxSize(9);
-            this.Property(entity => entity.DeductRate).HasColumnName("int_dish_deduct").HasRequired(false).HasMaxSize(9);
-            this.Property(entity => entity.Build).HasColumnName("dt_build").HasRequired(false).HasMaxSize(5);
-            this.Property(entity => entity.DcbCode).HasColumnName("vch_dcb_code").HasRequired(false).HasMaxSize(5);
-            this.Property(entity => entity.ItemFlag).HasColumnName("ch_itemflag").HasRequired(false).HasMaxSize(1);
-            this.Property(entity => entity.MaterialNo).HasColumnName("ch_materialno").HasRequired(false).HasMaxSize(7);
-            this.Property(entity => entity.HalfFlag).HasColumnName("ch_halfflag").HasRequired(true).HasMaxSize(1);
-            this.Property(entity => entity.OutPrice).HasColumnName("num_outprice").HasRequired(false).HasMaxSize(9);
-            this.Property(entity => entity.Electscale).HasColumnName("ch_electscale").HasRequired(true).HasMaxSize(1);
-            this.AddToEntityMapping();
-        }
-    }
+    //        this.Property(entity => entity.DishNo).HasColumnName("ch_dishno").HasMaxSize(7).HasPrimaryKey();
+    //        this.Property(entity => entity.SubNo).HasColumnName("vch_subno").HasRequired(false).HasMaxSize(20);
+    //        this.Property(entity => entity.DishName).HasColumnName("vch_dishname").HasRequired(false).HasMaxSize(30);
+    //        this.Property(entity => entity.Spell).HasColumnName("vch_spell").HasRequired(false).HasMaxSize(15);
+    //        this.Property(entity => entity.English).HasColumnName("vch_english").HasRequired(false).HasMaxSize(40);
+    //        this.Property(entity => entity.SeriesNo).HasColumnName("ch_seriesno").HasRequired(false).HasMaxSize(2);
+    //        this.Property(entity => entity.TypeNo).HasColumnName("ch_typeno").HasRequired(false).HasMaxSize(4);
+    //        this.Property(entity => entity.UnitNo).HasColumnName("ch_unitno").HasRequired(false).HasMaxSize(3);
+    //        this.Property(entity => entity.Spec).HasColumnName("vch_spec").HasRequired(false).HasMaxSize(20);
+    //        this.Property(entity => entity.Price1).HasColumnName("num_price1").HasRequired(false).HasMaxSize(9);
+    //        this.Property(entity => entity.StopFlag).HasColumnName("ch_stopflag").HasRequired(false).HasMaxSize(1);
+    //        this.Property(entity => entity.SuitFlag).HasColumnName("ch_suitflag").HasRequired(false).HasMaxSize(1);
+    //        this.Property(entity => entity.CurFlag).HasColumnName("ch_curflag").HasRequired(false).HasMaxSize(1);
+    //        this.Property(entity => entity.Discount).HasColumnName("ch_discount").HasRequired(false).HasMaxSize(1);
+    //        this.Property(entity => entity.DownFlag).HasColumnName("ch_downflag").HasRequired(false).HasMaxSize(1);
+    //        this.Property(entity => entity.Explain).HasColumnName("vch_explain").HasRequired(false).HasMaxSize(254);
+    //        this.Property(entity => entity.DishFlag).HasColumnName("ch_dishflag").HasRequired(false).HasMaxSize(1);
+    //        this.Property(entity => entity.DeductType).HasColumnName("ch_dishtype").HasRequired(false).HasMaxSize(1);
+    //        this.Property(entity => entity.DeductAmount).HasColumnName("num_dish_deduct").HasRequired(false).HasMaxSize(9);
+    //        this.Property(entity => entity.DeductRate).HasColumnName("int_dish_deduct").HasRequired(false).HasMaxSize(9);
+    //        this.Property(entity => entity.Build).HasColumnName("dt_build").HasRequired(false).HasMaxSize(5);
+    //        this.Property(entity => entity.DcbCode).HasColumnName("vch_dcb_code").HasRequired(false).HasMaxSize(5);
+    //        this.Property(entity => entity.ItemFlag).HasColumnName("ch_itemflag").HasRequired(false).HasMaxSize(1);
+    //        this.Property(entity => entity.MaterialNo).HasColumnName("ch_materialno").HasRequired(false).HasMaxSize(7);
+    //        this.Property(entity => entity.HalfFlag).HasColumnName("ch_halfflag").HasRequired(true).HasMaxSize(1);
+    //        this.Property(entity => entity.OutPrice).HasColumnName("num_outprice").HasRequired(false).HasMaxSize(9);
+    //        this.Property(entity => entity.Electscale).HasColumnName("ch_electscale").HasRequired(true).HasMaxSize(1);
+    //        this.AddToEntityMapping();
+    //    }
+    //}
 }

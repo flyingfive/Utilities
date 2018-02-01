@@ -54,6 +54,15 @@
     <Compile Include="Caching\CacheExtensions.cs" />
     <Compile Include="Caching\ICacheManager.cs" />
     <Compile Include="Caching\MemoryCacheManager.cs" />
+    <Compile Include="Data\DataAccessException.cs" />
+    <Compile Include="Data\Extensions.DataReader.cs" />
+    <Compile Include="Data\Extensions.Reflection.cs" />
+    <Compile Include="Data\Fakes\FakeParameter.cs" />
+    <Compile Include="Data\Fakes\OutputParameter.cs" />
+    <Compile Include="Data\Interception\DbCommandInterceptionContext.cs" />
+    <Compile Include="Data\Interception\IDbCommandInterceptor.cs" />
+    <Compile Include="Data\Kernel\CommonAdoSession.cs" />
+    <Compile Include="Data\Mappers\IMemberMapper.cs" />
     <Compile Include="Extensions.AppDomain.cs" />
     <Compile Include="Extensions.Char.cs" />
     <Compile Include="Extensions.Convert.cs" />
@@ -81,7 +90,7 @@
     <Compile Include="Win\Win32Utility.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Data\" />
+    <Folder Include="Data\Emit\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
