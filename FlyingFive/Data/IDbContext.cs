@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -16,6 +17,12 @@ namespace FlyingFive.Data
         /// </summary>
         IDbSession Session { get; }
         /// <summary>
+        /// 查询实体对象
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <returns></returns>
+        IQuery<TEntity> Query<TEntity>();
+        /// <summary>
         /// 根据主键查询实体
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
@@ -24,12 +31,28 @@ namespace FlyingFive.Data
         /// <returns></returns>
         TEntity QueryByKey<TEntity>(object key, bool tracking = false);
         /// <summary>
+        /// 原生sql语句查询
+        /// </summary>
+        /// <typeparam name="T">返回数据类型</typeparam>
+        /// <param name="plainSql">原生sql语句</param>
+        /// <param name="cmdType"></param>
+        /// <param name="parameters">参数集合</param>
+        /// <returns></returns>
+        IEnumerable<T> SqlQuery<T>(string plainSql, CommandType cmdType = CommandType.Text, params FakeParameter[] parameters);
+        /// <summary>
         /// 插入实体
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="entity"></param>
         /// <returns></returns>
         TEntity Insert<TEntity>(TEntity entity);
+        /// <summary>
+        /// 插入实体,返回主键
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="body"></param>
+        /// <returns>PrimaryKey</returns>
+        //object Insert<TEntity>(Expression<Func<TEntity>> body);
         /// <summary>
         /// 更新实体
         /// </summary>
@@ -66,5 +89,10 @@ namespace FlyingFive.Data
         /// <param name="key"></param>
         /// <returns></returns>
         int DeleteByKey<TEntity>(object key);
+        /// <summary>
+        /// 跟踪实体
+        /// </summary>
+        /// <param name="entity"></param>
+        void TrackEntity(object entity);
     }
 }

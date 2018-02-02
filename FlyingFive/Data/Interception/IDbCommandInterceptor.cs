@@ -16,18 +16,6 @@ namespace FlyingFive.Data.Interception
         /// </summary>
         /// <param name="command">执行命令的System.Data.IDbCommand对象</param>
         /// <param name="interceptionContext">拦截器信息</param>
-        void DataAdapterExecuting(IDbCommand command, DbCommandInterceptionContext<object> interceptionContext);
-        /// <summary>
-        /// 执行command对象的DataReader方法后
-        /// </summary>
-        /// <param name="command">执行命令的System.Data.IDbCommand对象</param>
-        /// <param name="interceptionContext">拦截器信息</param>
-        void DataAdapterExecuted(IDbCommand command, DbCommandInterceptionContext<object> interceptionContext);
-        /// <summary>
-        /// 执行command对象的DataReader方法前
-        /// </summary>
-        /// <param name="command">执行命令的System.Data.IDbCommand对象</param>
-        /// <param name="interceptionContext">拦截器信息</param>
         void ReaderExecuting(IDbCommand command, DbCommandInterceptionContext<IDataReader> interceptionContext);
         /// <summary>
         /// 执行command对象的DataReader方法后

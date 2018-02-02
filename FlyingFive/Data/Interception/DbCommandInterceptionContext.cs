@@ -19,13 +19,8 @@ namespace FlyingFive.Data.Interception
         /// 当前会话处理的DB操作中发生的异常
         /// </summary>
         public Exception Exception { get; set; }
-        /// <summary>
-        /// 数据包
-        /// </summary>
         public Dictionary<string, object> DataBag { get; private set; }
-        /// <summary>
-        /// 初始化一个System.Data.IDbCommand对象拦截器当前拦截的上下文信息实例
-        /// </summary>
+
         public DbCommandInterceptionContext() { this.DataBag = new Dictionary<string, object>(); }
     }
 }

@@ -4,10 +4,10 @@ using System.Data;
 using System.Linq;
 using System.Text;
 
-namespace FlyingFive.Data.Fakes
+namespace FlyingFive.Data
 {
     /// <summary>
-    /// 操作数据库的参数伪装
+    /// 表示数据库的伪装参数
     /// </summary>
     public class FakeParameter
     {
@@ -68,6 +68,98 @@ namespace FlyingFive.Data.Fakes
             this.Name = name;
             this.Value = value;
             this.DataType = type;
+        }
+
+        /// <summary>
+        /// 创建参数
+        /// </summary>
+        /// <param name="name">参数名称</param>
+        /// <param name="value">参数值</param>
+        /// <returns></returns>
+        public static FakeParameter Create(string name, object value)
+        {
+            return new FakeParameter(name, value);
+        }
+
+        /// <summary>
+        /// 创建参数
+        /// </summary>
+        /// <param name="name">参数名称</param>
+        /// <param name="value">参数值</param>
+        /// <param name="type">参数类型</param>
+        public static FakeParameter Create(string name, object value, Type type)
+        {
+            return new FakeParameter(name, value, type);
+        }
+    }
+
+    /// <summary>
+    /// 表示输出参数
+    /// </summary>
+    public class OutputParameter
+    {
+        private FakeParameter _fakeParameter = null;
+        private IDbDataParameter _dbParameter = null;
+
+        public OutputParameter(FakeParameter param, IDbDataParameter parameter)
+        {
+            this._fakeParameter = param;
+            this._dbParameter = parameter;
+        }
+
+        /// <summary>
+        /// 执行完DB操作后从实际的DB参数中将值映射到伪装参数
+        /// </summary>
+        public void MapValue()
+        {
+            object val = this._dbParameter.Value;
+            if (val == DBNull.Value)
+                this._fakeParameter.Value = null;
+            else
+                this._fakeParameter.Value = val;
+        }
+
+        /// <summary>
+        /// DB操作完成后批量映射输出参数的实际值到伪装参数上
+        /// </summary>
+        /// <param name="outputParameters">输出参数列表</param>
+        public static void CallMapValue(IList<OutputParameter> outputParameters)
+        {
+            if (outputParameters != null)
+            {
+                for (int i = 0; i < outputParameters.Count; i++)
+                {
+                    outputParameters[i].MapValue();
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// MsSql数据库的伪装参数
+    /// </summary>
+    public class FakeMsSqlParameter : FakeParameter
+    {
+        public SqlDbType SqlDbType { get; set; }
+
+        public override object Value
+        {
+            get
+            {
+                return base.Value;
+            }
+            set
+            {
+                base.Value = value;
+                if (base.Value != null) { this.DataType.ToSqlDbType(); }
+            }
+        }
+
+        public FakeMsSqlParameter(string name, object value) : base(name, value) { }
+        public FakeMsSqlParameter(string name, object value, Type type)
+            : base(name, value, type)
+        {
+            this.SqlDbType = type.ToSqlDbType();
         }
     }
 }

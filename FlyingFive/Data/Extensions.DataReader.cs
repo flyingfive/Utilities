@@ -1,15 +1,18 @@
-﻿using System;
+﻿using FlyingFive.Data.Emit;
+using FlyingFive.Data.Mapper;
+using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using FlyingFive;
-using System.Data;
-using System.Diagnostics;
-using FlyingFive.Data.Mappers;
 
 namespace FlyingFive.Data
 {
+    /// <summary>
+    /// DataReader扩展
+    /// </summary>
     public static partial class Extensions
     {
         /// <summary>
@@ -18,28 +21,25 @@ namespace FlyingFive.Data
         /// <typeparam name="T"></typeparam>
         /// <param name="reader"></param>
         /// <returns></returns>
-        public static IEnumerable<T> ToEnumerable<T>(this IDataReader reader) where T : class, new()
+        public static IList<T> ToList<T>(this IDataReader reader) where T : class,new()
         {
+            var list = new List<T>();
             var properties = typeof(T).GetProperties().Where(p => p.CanWrite);
             while (reader.Read())
             {
-                var instance = new T();
+                var obj = Activator.CreateInstance<T>();
                 foreach (var prop in properties)
                 {
                     var ordinal = reader.GetOrdinal(prop.Name);
-                    var mapper = MemberMapperHelper.CreateMemberMapper(prop);
+                    var type = DynamicClassGenerator.CreateMemberMapperClass(prop);
+                    var mapper = Activator.CreateInstance(type) as IMemberMapper;
                     if (mapper == null) { continue; }
-                    mapper.Map(instance, reader, ordinal);
+                    mapper.Map(obj, reader, ordinal);
                 }
-                yield return instance;
+                list.Add(obj);
             }
+            return list;
         }
-
-        public static List<T> ToList<T>(this IDataReader reader) where T : class, new()
-        {
-            return reader.ToEnumerable<T>().ToList();
-        }
-
 
         /// <summary>
         /// DataReader方法集合
@@ -56,7 +56,7 @@ namespace FlyingFive.Data
                 MethodInfo method = null;
                 var isNullable = false;
                 Type underlyingType = null;
-                isNullable = dataType.IsNullableType(out underlyingType);
+                isNullable = dataType.IsNullable(out underlyingType);
                 if (isNullable) { dataType = underlyingType; }
                 var name = string.Empty;
                 if (dataType.IsEnum)
@@ -105,7 +105,7 @@ namespace FlyingFive.Data
                 return method;
             }
 
-            #region DataReader 取值方法
+            #region DataReader Methods
             public static short GetInt16(IDataReader reader, int ordinal)
             {
                 if (reader.IsDBNull(ordinal))
@@ -378,7 +378,8 @@ namespace FlyingFive.Data
                 return new Nullable<T>((T)val);
             }
             #endregion
-            
+
+
             /// <summary>
             /// 包装值类型空引用异常
             /// </summary>
