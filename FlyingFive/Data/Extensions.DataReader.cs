@@ -21,7 +21,7 @@ namespace FlyingFive.Data
         /// <typeparam name="T"></typeparam>
         /// <param name="reader"></param>
         /// <returns></returns>
-        public static IList<T> ToList<T>(this IDataReader reader) where T : class,new()
+        public static List<T> ToList<T>(this IDataReader reader) where T : class,new()
         {
             var list = new List<T>();
             var properties = typeof(T).GetProperties().Where(p => p.CanWrite);
@@ -31,8 +31,7 @@ namespace FlyingFive.Data
                 foreach (var prop in properties)
                 {
                     var ordinal = reader.GetOrdinal(prop.Name);
-                    var type = DynamicClassGenerator.CreateMemberMapperClass(prop);
-                    var mapper = Activator.CreateInstance(type) as IMemberMapper;
+                    var mapper = MemberMapperHelper.CreateMemberMapper(prop);
                     if (mapper == null) { continue; }
                     mapper.Map(obj, reader, ordinal);
                 }
@@ -56,7 +55,7 @@ namespace FlyingFive.Data
                 MethodInfo method = null;
                 var isNullable = false;
                 Type underlyingType = null;
-                isNullable = dataType.IsNullable(out underlyingType);
+                isNullable = dataType.IsNullableType(out underlyingType);
                 if (isNullable) { dataType = underlyingType; }
                 var name = string.Empty;
                 if (dataType.IsEnum)

@@ -110,24 +110,24 @@ namespace FlyingFive.Tests.Entities
         public EmployeeMap()
         {
             this.Table("Employees");
-            this.Property(e => e.EmployeeID).HasColumnName("EmployeeID").HasMaxLength(4).HasIdentity().HasRequired(true).HasPrimaryKey();
-            this.Property(e => e.LastName).HasMaxLength(20).HasRequired(true);
-            this.Property(e => e.FirstName).HasMaxLength(10).HasRequired(true);
-            this.Property(e => e.Title).HasMaxLength(30);
-            this.Property(e => e.TitleOfCourtesy).HasMaxLength(25);
-            this.Property(e => e.BirthDate).HasMaxLength(8);
-            this.Property(e => e.HireDate).HasMaxLength(8);
-            this.Property(e => e.Address).HasMaxLength(60);
-            this.Property(e => e.City).HasMaxLength(15);
-            this.Property(e => e.Region).HasMaxLength(15);
-            this.Property(e => e.PostalCode).HasMaxLength(10);
-            this.Property(e => e.Country).HasMaxLength(15);
-            this.Property(e => e.HomePhone).HasMaxLength(24);
-            this.Property(e => e.Extension).HasMaxLength(4);
-            this.Property(e => e.Photo).HasMaxLength(int.MaxValue);
-            this.Property(e => e.Notes).HasMaxLength(int.MaxValue);
-            this.Property(e => e.ReportsTo).HasMaxLength(4);
-            this.Property(e => e.PhotoPath).HasMaxLength(255);
+            this.Property(e => e.EmployeeID).HasColumnName("EmployeeID").HasMaxSize(4).HasIdentity().HasRequired(true).HasPrimaryKey();
+            this.Property(e => e.LastName).HasMaxSize(20).HasRequired(true);
+            this.Property(e => e.FirstName).HasMaxSize(10).HasRequired(true);
+            this.Property(e => e.Title).HasMaxSize(30);
+            this.Property(e => e.TitleOfCourtesy).HasMaxSize(25);
+            this.Property(e => e.BirthDate).HasMaxSize(8);
+            this.Property(e => e.HireDate).HasMaxSize(8);
+            this.Property(e => e.Address).HasMaxSize(60);
+            this.Property(e => e.City).HasMaxSize(15);
+            this.Property(e => e.Region).HasMaxSize(15);
+            this.Property(e => e.PostalCode).HasMaxSize(10);
+            this.Property(e => e.Country).HasMaxSize(15);
+            this.Property(e => e.HomePhone).HasMaxSize(24);
+            this.Property(e => e.Extension).HasMaxSize(4);
+            this.Property(e => e.Photo).HasMaxSize(int.MaxValue);
+            this.Property(e => e.Notes).HasMaxSize(int.MaxValue);
+            this.Property(e => e.ReportsTo).HasMaxSize(4);
+            this.Property(e => e.PhotoPath).HasMaxSize(255);
         }
     }
 }

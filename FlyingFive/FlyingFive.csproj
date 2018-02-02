@@ -112,7 +112,6 @@
     <Compile Include="Data\Extensions.Expresssion.cs" />
     <Compile Include="Data\Fakes\FakeParameter.cs" />
     <Compile Include="Data\DbContext.cs" />
-    <Compile Include="Data\Emit\DynamicClassGenerator.cs" />
     <Compile Include="Data\Emit\EmitHelper.cs" />
     <Compile Include="Data\Extensions.Reflection.cs" />
     <Compile Include="Data\Fakes\FakeDataReader.cs" />

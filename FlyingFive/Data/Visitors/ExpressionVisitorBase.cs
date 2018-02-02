@@ -444,7 +444,7 @@ namespace FlyingFive.Data.Visitors
                 if (exp.NodeType == ExpressionType.MemberAccess)
                 {
                     MemberExpression memberExpression = (MemberExpression)exp;
-                    if (memberExpression.Member.Name == "HasValue" && memberExpression.Member.DeclaringType.IsNullable())
+                    if (memberExpression.Member.Name == "HasValue" && memberExpression.Member.DeclaringType.IsNullableType())
                     {
                         var nullRight = Expression.Constant(null, memberExpression.Expression.Type);
                         if (trueOrFalse)

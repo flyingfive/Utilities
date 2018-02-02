@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FlyingFive.Data.Emit;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
@@ -9,25 +10,22 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading;
 
-namespace FlyingFive.Data.Mappers
+namespace FlyingFive.Data.Mapper
 {
     /// <summary>
-    /// 表示类型的成员映射器
+    /// 表示成员映射器
     /// </summary>
     public interface IMemberMapper
     {
         /// <summary>
-        /// 将dataReader指定索引位置的值映射到实例成员上
+        /// 根据映射从DataReader赋值给实体对象的属性
         /// </summary>
-        /// <param name="instance">实例对象</param>
-        /// <param name="dataReader">dataRader对象</param>
-        /// <param name="ordinal">索引位置</param>
-        void Map(object instance, IDataReader dataReader, int ordinal);
+        /// <param name="instance"></param>
+        /// <param name="reader"></param>
+        /// <param name="ordinal"></param>
+        void Map(object instance, IDataReader reader, int ordinal);
     }
 
-    /// <summary>
-    /// 成员映射器助手
-    /// </summary>
     public static class MemberMapperHelper
     {
         private static int _sequenceNumber = 0;
@@ -35,9 +33,9 @@ namespace FlyingFive.Data.Mappers
         private static readonly ConcurrentDictionary<MemberInfo, Type> _typeCache = new System.Collections.Concurrent.ConcurrentDictionary<MemberInfo, Type>();
 
         /// <summary>
-        /// 创建实例成员的映射器
+        /// 创建成员映射器对象
         /// </summary>
-        /// <param name="member"></param>
+        /// <param name="member">成员对象</param>
         /// <returns></returns>
         public static IMemberMapper CreateMemberMapper(MemberInfo member)
         {
@@ -45,6 +43,7 @@ namespace FlyingFive.Data.Mappers
             var mapper = Activator.CreateInstance(type) as IMemberMapper;
             return mapper;
         }
+
 
         /// <summary>
         /// 创建成员映射器的具体类型
@@ -76,7 +75,7 @@ namespace FlyingFive.Data.Mappers
                     }
                 }
             }
-            var typeName = string.Format("DynamicMemberMappers.{0}_{1}_{2}{3}", instanceType.FullName, member.Name, Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper(), Interlocked.Increment(ref _sequenceNumber).ToString());
+            var typeName = string.Format("DynamicMemberMappers.{0}_{1}_{2}{3}", instanceType.FullName, member.Name, Guid.NewGuid().ToString("N").Substring(0, 5).ToUpper(), Interlocked.Increment(ref _sequenceNumber).ToString());
             TypeAttributes typeAttributes = TypeAttributes.Class | TypeAttributes.NotPublic | TypeAttributes.Sealed;
             var typeBuilder = dynamicModuleBuilder.DefineType(typeName, typeAttributes, null, new Type[] { typeof(IMemberMapper) });
             //实现IMemberMapper.Map方法

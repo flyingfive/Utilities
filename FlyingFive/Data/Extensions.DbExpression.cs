@@ -136,7 +136,7 @@ namespace FlyingFive.Data
 
             //(int?)123
 
-            if (convertExpression.Type.IsNullable(out underlyingType))  //可空类型转换
+            if (convertExpression.Type.IsNullableType(out underlyingType))  //可空类型转换
             {
                 if (underlyingType == convertExpression.Operand.Type)
                     return StripInvalidConvert(convertExpression.Operand);
@@ -153,7 +153,7 @@ namespace FlyingFive.Data
                     return StripInvalidConvert(convertExpression.Operand);
 
                 //(int)NullableEnumTypeValue
-                if (convertExpression.Operand.Type.IsNullable(out underlyingType) && underlyingType.IsEnum)
+                if (convertExpression.Operand.Type.IsNullableType(out underlyingType) && underlyingType.IsEnum)
                     return StripInvalidConvert(convertExpression.Operand);
             }
 
@@ -161,7 +161,7 @@ namespace FlyingFive.Data
             if (exp.Type.IsValueType)
             {
                 //(long)NullableValue
-                if (convertExpression.Operand.Type.IsNullable(out underlyingType) && underlyingType == exp.Type)
+                if (convertExpression.Operand.Type.IsNullableType(out underlyingType) && underlyingType == exp.Type)
                     return StripInvalidConvert(convertExpression.Operand);
             }
 

@@ -62,7 +62,7 @@ namespace FlyingFive.Data.Infrastructure
         public static string GetTypeDisplayName(Type type)
         {
             Type underlyingType = null;
-            if (type.IsNullable(out underlyingType))
+            if (type.IsNullableType(out underlyingType))
             {
                 return string.Format("Nullable<{0}>", GetTypeDisplayName(underlyingType));
             }

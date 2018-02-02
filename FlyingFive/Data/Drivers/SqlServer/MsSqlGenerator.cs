@@ -214,7 +214,7 @@ namespace FlyingFive.Data.Drivers.SqlServer
                 this.SqlBuilder.Append(")");
                 return exp;
             }
-            else if (member.Name == "Value" && exp.Expression.Type.IsNullable())
+            else if (member.Name == "Value" && exp.Expression.Type.IsNullableType())
             {
                 exp.Expression.Accept(this);
                 return exp;

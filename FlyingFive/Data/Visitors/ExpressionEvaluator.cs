@@ -50,7 +50,7 @@ namespace FlyingFive.Data.Visitors
             if (operandValue == null)
             {
                 //(int)null
-                if (exp.Type.IsValueType && !exp.Type.IsNullable())
+                if (exp.Type.IsValueType && !exp.Type.IsNullableType())
                     throw new NullReferenceException();
 
                 return null;
@@ -65,7 +65,7 @@ namespace FlyingFive.Data.Visitors
 
             Type underlyingType;
 
-            if (exp.Type.IsNullable(out underlyingType))
+            if (exp.Type.IsNullableType(out underlyingType))
             {
                 //(int?)int
                 if (underlyingType == operandValueType)
@@ -84,7 +84,7 @@ namespace FlyingFive.Data.Visitors
             }
 
             //(int)int?
-            if (operandValueType.IsNullable(out underlyingType))
+            if (operandValueType.IsNullableType(out underlyingType))
             {
                 if (underlyingType == exp.Type)
                 {

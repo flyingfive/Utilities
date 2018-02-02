@@ -70,7 +70,7 @@ namespace FlyingFive.Data.Drivers.SqlServer
         }
         private static void Aggregate_Sum(MsSqlGenerator generator, DbExpression exp, Type retType)
         {
-            if (retType.IsNullable())
+            if (retType.IsNullableType())
             {
                 AppendAggregateFunction(generator, exp, retType, "SUM", true);
             }

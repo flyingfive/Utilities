@@ -255,7 +255,7 @@ namespace FlyingFive.Data.Drivers.SqlServer
             if (memberExp == null)
                 return exp;
 
-            if (memberExp.Member.Name == "Value" && memberExp.Expression.Type.IsNullable())
+            if (memberExp.Member.Name == "Value" && memberExp.Expression.Type.IsNullableType())
                 return memberExp.Expression;
 
             return exp;

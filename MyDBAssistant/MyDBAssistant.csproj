@@ -170,12 +170,6 @@
     <Compile Include="FrmTableEditor.designer.cs">
       <DependentUpon>FrmTableEditor.cs</DependentUpon>
     </Compile>
-    <Compile Include="FrmTest.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FrmTest.Designer.cs">
-      <DependentUpon>FrmTest.cs</DependentUpon>
-    </Compile>
     <Compile Include="Image.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -190,9 +184,6 @@
     <Compile Include="Schema\DatabaseSchemaHistory.cs" />
     <Compile Include="Schema\MsSqlVersion.cs" />
     <Compile Include="Schema\Table.cs" />
-    <Compile Include="TransparentPanel.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Utils\Singleton.cs" />
     <Compile Include="VelocityHelper.cs" />
     <EmbeddedResource Include="FrmAbout.resx">
@@ -215,9 +206,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FrmTableEditor.resx">
       <DependentUpon>FrmTableEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FrmTest.resx">
-      <DependentUpon>FrmTest.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Image.resx">
       <Generator>ResXFileCodeGenerator</Generator>
