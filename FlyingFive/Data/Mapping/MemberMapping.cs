@@ -93,6 +93,7 @@ namespace FlyingFive.Data.Mapping
         public MemberMapping HasColumnName(string columnName)
         {
             this.ColumnName = columnName;
+            this.IsNullable = true;
             return this;
         }
 
