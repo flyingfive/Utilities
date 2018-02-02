@@ -93,7 +93,6 @@
     <Compile Include="Utils\SerializationHelper.cs" />
     <Compile Include="Win\Extensions.Control.cs" />
     <Compile Include="Win\MsgBox.cs" />
-    <Compile Include="Win\Win32Utility.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\Emit\" />

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
@@ -61,54 +60,5 @@ namespace FlyingFive.Win
             return ret;
         }
 
-        /// <summary>
-        /// 设置控件的水印提示文字
-        /// </summary>
-        /// <param name="control"></param>
-        /// <param name="text"></param>
-        public static void SetCueText(this Control control, string text)
-        {
-            if (string.IsNullOrWhiteSpace(text)) { return; }
-            if (control == null) { throw new ArgumentNullException("参数：control不能为null."); }
-            if (control.IsDisposed)
-            {
-                throw new ObjectDisposedException("无法在已释放的控件上设置水印提示！");
-            }
-            if (control.InvokeRequired)
-            {
-                control.Invoke(new Action<Control, string>((ctl, txt) =>
-                {
-                    Win32Utility.SetCueText(ctl, text);
-                }), new object[] { control, text });
-            }
-            else
-            {
-                Win32Utility.SetCueText(control, text);
-            }
-        }
-
-        ///// <summary>
-        ///// 获取控件的水印提示文字
-        ///// </summary>
-        ///// <param name="control"></param>
-        ///// <returns></returns>
-        //public static string GetCueText(this Control control)
-        //{
-        //    if (control == null) { throw new ArgumentNullException("参数：control不能为null."); }
-        //    if (control.IsDisposed)
-        //    {
-        //        throw new ObjectDisposedException("无法在已释放的控件上获取控件的水印提示！");
-        //    }
-        //    if (control.InvokeRequired)
-        //    {
-        //        var obj = control.Invoke(new Func<Control, string>((ctl) => { var text = Win32Utility.GetCueText(ctl); return text; }), new object[] { control });
-        //        return obj == null ? string.Empty : obj.ToString();
-        //    }
-        //    else
-        //    {
-        //        var text = Win32Utility.GetCueText(control);
-        //        return text;
-        //    }
-        //}
     }
 }
