@@ -46,7 +46,7 @@ namespace FlyingFive.Data
                 var properties = instance.GetType().GetProperties().Where(p => p.CanRead);
                 foreach (var pName in paramNames)
                 {
-                    var prop = properties.Where(p => p.Name.Equals(pName)).SingleOrDefault();
+                    var prop = properties.Where(p => p.Name.Equals(pName.Substring(1))).SingleOrDefault();
                     if (prop == null) { throw new FormatException(string.Format("没有为sql查询提供必需的参数:{0}", pName)); }
                     var pValue = prop.GetValue(instance, null);
                     var param = new FakeParameter(pName, pValue);

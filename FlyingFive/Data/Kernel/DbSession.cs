@@ -23,7 +23,7 @@ namespace FlyingFive.Data.Kernel
 
         public int ExecuteNonQuery(string cmdText, CommandType cmdType, params FakeParameter[] parameters)
         {
-            return this.ExecuteNonQuery(cmdText, CommandType.Text, parameters);
+            return this.DbContext.CommonSession.ExecuteNonQuery(cmdText, CommandType.Text, parameters);
         }
 
         public object ExecuteScalar(string cmdText, CommandType cmdType, params FakeParameter[] parameters)

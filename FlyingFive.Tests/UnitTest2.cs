@@ -7,6 +7,7 @@ using FlyingFive.Tests.Entities;
 using System.Collections.Generic;
 using FlyingFive.Data;
 using FlyingFive.Utils;
+using FlyingFive.Data.Drivers.SqlServer;
 
 namespace FlyingFive.Tests
 {
@@ -37,6 +38,17 @@ namespace FlyingFive.Tests
             catch (Exception ex)
             {
             }
+        }
+
+        [TestMethod]
+        public void TestFlying()
+        {
+            using (var context = new MsSqlContext("Data Source=173.31.15.53,2012;Initial Catalog=Northwind;User Id=sa;Password=sa;"))
+            {
+                //var cnt = context.SqlQuery("INSERT INTO Employees([LastName],[FirstName]) VALUES(@LastName, @FirstName)", new { FirstName = "LIU", LastName = "BIQING" });
+                var list = context.SqlQuery<Employee>("select * from employees where [EmployeeID] = @EmployeeID", new { EmployeeID = 1 }).ToList();
+            }
+
         }
     }
 }
