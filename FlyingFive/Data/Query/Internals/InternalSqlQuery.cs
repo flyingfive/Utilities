@@ -248,7 +248,7 @@ namespace FlyingFive.Data.Query.Internals
                         member = members.Where(a => string.Equals(a.Name, name, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
                         if (member == null)
                         {
-                            var entityMapping = EntityMappingCollection.Mappings[type.FullName];
+                            var entityMapping = EntityMappingTable.AllMappings[type.FullName];
                             var propMapping = entityMapping.PropertyMappings.Where(p => p.ColumnName.Equals(name, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault();
                             if (propMapping != null)
                             {

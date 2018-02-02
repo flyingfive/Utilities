@@ -26,24 +26,31 @@ namespace FlyingFive.Data.Mapping
         /// <summary>
         /// 属性映射集合
         /// </summary>
-        public List<PropertyMapping> PropertyMappings { get; set; }
+        public List<MemberMapping> PropertyMappings { get; set; }
 
         public EntityMapping()
         {
-            this.PropertyMappings = new List<PropertyMapping>();
+            Schema = "dbo";
+            this.PropertyMappings = new List<MemberMapping>();
         }
 
         internal void FinalPass()
         {
-
+            if (string.IsNullOrWhiteSpace(TableName)) { throw new InvalidOperationException("实体映射配置无效:不存在表名称!"); }
+            if (PropertyMappings.Count <= 0) { throw new InvalidOperationException("实体映射配置无效: 不存在任何属性映射!"); }
+            if (!PropertyMappings.Any(p => p.IsPrimaryKey)) { throw new InvalidOperationException("实体映射配置无效: 实体属性映射中不存在任何主键信息!"); }
+            foreach (var property in PropertyMappings)
+            {
+                property.FinalPass();
+            }
         }
     }
 
     /// <summary>
-    /// 实体属性映射
+    /// 实体成员映射
     /// </summary>
     [Serializable]
-    public class PropertyMapping
+    public class MemberMapping
     {
         public EntityMapping EntityMapping { get; set; }
         /// <summary>
@@ -53,7 +60,7 @@ namespace FlyingFive.Data.Mapping
         /// <summary>
         /// 对应的数据库列名称
         /// </summary>
-        public string ColumnName { get; private set; }
+        public string ColumnName { get; internal set; }
         /// <summary>
         /// 是否主键
         /// </summary>
@@ -83,49 +90,65 @@ namespace FlyingFive.Data.Mapping
         /// </summary>
         public DbType DbType { get; private set; }
 
-        public PropertyMapping HasColumnName(string columnName)
+        public MemberMapping HasColumnName(string columnName)
         {
             this.ColumnName = columnName;
             return this;
         }
 
-        public PropertyMapping HasPrimaryKey()
+        /// <summary>
+        /// 将映射属性设置为主键
+        /// </summary>
+        /// <returns></returns>
+        public MemberMapping HasPrimaryKey()
         {
             this.IsPrimaryKey = true;
             return this;
         }
 
-        public PropertyMapping HasIdentity()
+        /// <summary>
+        /// 将映射属性设置为标识列
+        /// </summary>
+        /// <returns></returns>
+        public MemberMapping HasIdentity()
         {
             this.IsIdentity = true;
             return this;
         }
-
-        public PropertyMapping HasRequired(bool required)
+        /// <summary>
+        /// 将映射属性设置为必填字段
+        /// </summary>
+        /// <param name="required">是否必填</param>
+        /// <returns></returns>
+        public MemberMapping HasRequired(bool required)
         {
             this.IsNullable = !required;
             return this;
         }
-
-        public PropertyMapping HasMaxSize(int maxSize)
+        /// <summary>
+        /// 为映射属性设置为最大存储字节数
+        /// </summary>
+        /// <param name="maxSize"></param>
+        /// <returns></returns>
+        public MemberMapping HasMaxSize(int maxSize)
         {
             this.Size = maxSize;
             return this;
         }
-
-        public PropertyMapping HasPrecision(int precision)
+        /// <summary>
+        /// 为映射属性设置数字精度与长度
+        /// </summary>
+        /// <param name="precision"></param>
+        /// <param name="scale"></param>
+        /// <returns></returns>
+        public MemberMapping HasPrecision(int precision, int scale)
         {
             this.Precision = precision;
-            return this;
-        }
-
-        public PropertyMapping HasScale(int scale)
-        {
             this.Scale = scale;
             return this;
         }
 
-        public PropertyMapping HasDbType(DbType type)
+        public MemberMapping HasDbType(DbType type)
         {
             this.DbType = type;
             return this;
@@ -133,7 +156,8 @@ namespace FlyingFive.Data.Mapping
 
         internal void FinalPass()
         {
-
+            if (string.IsNullOrWhiteSpace(PropertyName)) { throw new InvalidOperationException("配置无效:找不到实体属性名称!"); }
+            if (string.IsNullOrWhiteSpace(ColumnName)) { throw new InvalidOperationException("配置无效:实体属性没有映射对应列名!"); }
         }
     }
 }

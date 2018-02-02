@@ -110,9 +110,9 @@
     <Compile Include="Data\Extensions.DbCommand.cs" />
     <Compile Include="Data\Extensions.DbExpression.cs" />
     <Compile Include="Data\Extensions.Expresssion.cs" />
+    <Compile Include="Data\Extensions.IDbContext.cs" />
     <Compile Include="Data\Fakes\FakeParameter.cs" />
     <Compile Include="Data\DbContext.cs" />
-    <Compile Include="Data\Emit\EmitHelper.cs" />
     <Compile Include="Data\Extensions.Reflection.cs" />
     <Compile Include="Data\Fakes\FakeDataReader.cs" />
     <Compile Include="Data\IDbContext.cs" />
@@ -146,7 +146,7 @@
     <Compile Include="Data\Emit\DelegateGenerator.cs" />
     <Compile Include="Data\Mapping\ColumnAttribute.cs" />
     <Compile Include="Data\Mapping\EntityMappingConfiguration.cs" />
-    <Compile Include="Data\Mapping\PropertyMapping.cs" />
+    <Compile Include="Data\Mapping\MemberMapping.cs" />
     <Compile Include="Data\Query\DbExpressionEqualityComparer.cs" />
     <Compile Include="Data\Query\FromQueryResult.cs" />
     <Compile Include="Data\Query\GroupingQuery.cs" />

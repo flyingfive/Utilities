@@ -43,7 +43,7 @@ namespace FlyingFive.Data.Mapping
         /// <typeparam name="TProperty">属性类型</typeparam>
         /// <param name="propertyExpression">要映射的属性表达式</param>
         /// <returns></returns>
-        protected PropertyMapping Property<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression)
+        protected MemberMapping Property<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression)
         {
             var expression = propertyExpression.Body as System.Linq.Expressions.MemberExpression;
             if (propertyExpression == null || expression == null) { throw new ArgumentException("参数:propertyExpression不是有效的值!"); }
@@ -52,14 +52,10 @@ namespace FlyingFive.Data.Mapping
             var propMapping = _entityMapping.PropertyMappings.Where(m => m.PropertyName.Equals(propName)).SingleOrDefault();
             if (propMapping != null)
             {
-                //propMapping.MappingType = dbType;
-                propMapping.PropertyName = propName;
+                throw new InvalidOperationException(string.Format("已经存在实体成员:{0}.{1}的映射,不能重复映射.", typeof(TEntity).FullName, propName));
             }
-            else
-            {
-                propMapping = new PropertyMapping() { PropertyName = propName, EntityMapping = _entityMapping };
-                _entityMapping.PropertyMappings.Add(propMapping);
-            }
+            propMapping = new MemberMapping() { PropertyName = propName, ColumnName = propName, EntityMapping = _entityMapping };
+            _entityMapping.PropertyMappings.Add(propMapping);
             return propMapping;
         }
 
@@ -70,48 +66,59 @@ namespace FlyingFive.Data.Mapping
         {
             if (_entityMapping == null) { throw new InvalidOperationException(string.Format("还没有初始化:{0}的实体映射", _entityName)); }
             _entityMapping.FinalPass();
-            if (EntityMappingCollection.Mappings.ContainsKey(_entityName))
+            EntityMapping currentMapping = null;
+            if (EntityMappingTable.AllMappings.TryGetValue(_entityName, out currentMapping))
             {
-                EntityMapping mapping = null;
-                var flag = EntityMappingCollection.Mappings.TryRemove(_entityName, out mapping);
+                var flag = EntityMappingTable.AllMappings.TryRemove(_entityName, out currentMapping);
             }
-            var added = EntityMappingCollection.Mappings.TryAdd(_entityName, _entityMapping);
-            if (!added) { throw new InvalidOperationException("映射配置失败"); }
+            var added = EntityMappingTable.AllMappings.TryAdd(_entityName, _entityMapping);
+            if (!added) { throw new InvalidOperationException("映射配置添加失败"); }
         }
-
     }
 
     /// <summary>
-    /// 所有实体映射集合
+    /// 实体映射配置表
     /// </summary>
-    public static class EntityMappingCollection
+    public static class EntityMappingTable
     {
         private static object _locker = new object();
 
         private static readonly ConcurrentDictionary<string, EntityMapping> _allMappings = null;
 
         private static long _configFlag = 0;
-        public static bool HasConfigured { get { return System.Threading.Interlocked.Read(ref _configFlag) > 0; } }
+        /// <summary>
+        /// 是否有完成实体配置工作
+        /// </summary>
+        public static bool HasEntityConfigured { get { return System.Threading.Interlocked.Read(ref _configFlag) > 0; } }
 
-        static EntityMappingCollection()
+        static EntityMappingTable()
         {
             _allMappings = new ConcurrentDictionary<string, EntityMapping>();
-            if (!HasConfigured)
+            if (!HasEntityConfigured)
             {
-                var typeFinder = new AppDomainTypeFinder();
-                var mappingTypes = typeFinder.FindClassesOfType(typeof(EntityMappingConfiguration<>));
-                foreach (var type in mappingTypes)
-                {
-                    var instance = Activator.CreateInstance(type);
-                }
-                System.Threading.Interlocked.Increment(ref _configFlag);
+                ConfigureEntityMapping();
             }
+        }
+
+        /// <summary>
+        /// 配置实体映射
+        /// </summary>
+        public static void ConfigureEntityMapping()
+        {
+            if (HasEntityConfigured) { return; }
+            var typeFinder = new AppDomainTypeFinder();
+            var mappingTypes = typeFinder.FindClassesOfType(typeof(EntityMappingConfiguration<>));
+            foreach (var type in mappingTypes)
+            {
+                var instance = Activator.CreateInstance(type);
+            }
+            System.Threading.Interlocked.Increment(ref _configFlag);
         }
 
         /// <summary>
         /// 所有实体映射(通过类型完全限定名访问)
         /// </summary>
-        public static new ConcurrentDictionary<string, EntityMapping> Mappings
+        public static new ConcurrentDictionary<string, EntityMapping> AllMappings
         {
             get
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace FlyingFive.Data
 {
@@ -160,6 +161,19 @@ namespace FlyingFive.Data
             : base(name, value, type)
         {
             this.SqlDbType = type.ToSqlDbType();
+        }
+
+        public static IList<string> FindQueryParmeters(string sql)
+        {
+            IList<string> lst = new List<string>();
+            //修正正则表达式匹配参数时，Sql中包括@@rowcount之类的变量的情况，不应该算作参数
+            Regex paramReg = new Regex(@"[^@@](?<p>@\w+)");
+            MatchCollection matches = paramReg.Matches(String.Concat(sql, " "));
+            foreach (Match m in matches)
+            {
+                lst.Add(m.Groups["p"].Value.Trim());
+            }
+            return lst;
         }
     }
 }

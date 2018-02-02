@@ -25,7 +25,7 @@ namespace FlyingFive.Data.Descriptors
         /// <summary>
         /// 该成员的映射信息
         /// </summary>
-        public PropertyMapping Mapping { get; private set; }
+        public MemberMapping Mapping { get; private set; }
 
         public MappingMemberDescriptor(MemberInfo memberInfo, EntityTypeDescriptor entityTypeDescriptor)
             : base(memberInfo, entityTypeDescriptor)
@@ -41,7 +41,7 @@ namespace FlyingFive.Data.Descriptors
             {
                 var key = MemberInfo.DeclaringType.FullName;
                 EntityMapping entityMapping = null;
-                var flag = EntityMappingCollection.Mappings.TryGetValue(key, out entityMapping);
+                var flag = EntityMappingTable.AllMappings.TryGetValue(key, out entityMapping);
                 if (!flag || entityMapping == null) { throw new InvalidOperationException("实体没有映射"); }
                 var propMapping = entityMapping.PropertyMappings.Where(p => p.PropertyName.Equals(memberInfo.Name)).SingleOrDefault();
                 if (propMapping == null) { throw new InvalidOperationException("实体没有映射"); }

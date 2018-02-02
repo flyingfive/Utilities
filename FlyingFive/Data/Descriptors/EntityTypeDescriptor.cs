@@ -66,7 +66,7 @@ namespace FlyingFive.Data.Descriptors
             {
                 var key = entityType.FullName;
                 EntityMapping entityMapping = null;
-                var flag = EntityMappingCollection.Mappings.TryGetValue(key, out entityMapping);
+                var flag = EntityMappingTable.AllMappings.TryGetValue(key, out entityMapping);
                 if (!flag || entityMapping == null) { throw new InvalidOperationException("实体没有映射"); }
                 this.Table = new DbTable(entityMapping.TableName, entityMapping.Schema);
             }
