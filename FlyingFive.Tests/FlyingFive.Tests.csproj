@@ -55,6 +55,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Class1.cs" />
     <Compile Include="Entities\Dish.cs" />
     <Compile Include="Entities\Employees.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
