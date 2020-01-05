@@ -1,4 +1,6 @@
-﻿using FlyingFive.Data.Interception;
+﻿using FlyingFive.Data.Fakes;
+using FlyingFive.Data.Infrastructure;
+using FlyingFive.Data.Interception;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -7,70 +9,99 @@ using System.Text;
 
 namespace FlyingFive.Data.Kernel
 {
-    public class DbSession : IDbSession
+    public abstract class DbSession : IDbSession, IDisposable
     {
-        public DbContext DbContext { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public IDbConnectionFactory DbConnectionFactory { get; private set; }
 
-        public bool IsInTransaction { get { return this.DbContext.CommonSession.IsInTransaction; } }
-
-        public int CommandTimeout { get { return this.DbContext.CommonSession.CommandTimeout; } set { this.DbContext.CommonSession.CommandTimeout = value; } }
-
-        public DbSession(DbContext dbContext)
+        private CommonAdoSession _commonSession = null;
+        /// <summary>
+        /// 通用会话
+        /// </summary>
+        public CommonAdoSession CommonSession
         {
-            UtilExceptions.CheckNull(dbContext);
-            this.DbContext = dbContext;
+            get
+            {
+                this.CheckDisposed();
+                if (this._commonSession == null)
+                    this._commonSession = new CommonAdoSession(this.DbConnectionFactory.CreateConnection());
+                return this._commonSession;
+            }
         }
 
-        public int ExecuteNonQuery(string cmdText, CommandType cmdType, params FakeParameter[] parameters)
+        public bool IsInTransaction { get { return this.CommonSession.IsInTransaction; } }
+
+        public int CommandTimeout { get { return this.CommonSession.CommandTimeout; } set { this.CommonSession.CommandTimeout = value; } }
+
+        public DbSession(IDbConnectionFactory connectionFactory)
         {
-            return this.DbContext.CommonSession.ExecuteNonQuery(cmdText, CommandType.Text, parameters);
+            UtilExceptions.CheckNull(connectionFactory);
+            this.DbConnectionFactory = connectionFactory;
         }
 
-        public object ExecuteScalar(string cmdText, CommandType cmdType, params FakeParameter[] parameters)
+        public int ExecuteNonQuery(string cmdText, CommandType cmdType = CommandType.Text, params FakeParameter[] parameters)
         {
-            return this.DbContext.CommonSession.ExecuteScalar(cmdText, cmdType, parameters);
+            return this.CommonSession.ExecuteNonQuery(cmdText, CommandType.Text, parameters);
         }
 
-        public IDataReader ExecuteReader(string cmdText, CommandType cmdType, params FakeParameter[] parameters)
+        public object ExecuteScalar(string cmdText, CommandType cmdType = CommandType.Text, params FakeParameter[] parameters)
         {
-            return this.DbContext.CommonSession.ExecuteReader(cmdText, cmdType, parameters);
+            return this.CommonSession.ExecuteScalar(cmdText, cmdType, parameters);
+        }
+
+        public IDataReader ExecuteReader(string cmdText, CommandType cmdType = CommandType.Text, params FakeParameter[] parameters)
+        {
+            return this.CommonSession.ExecuteReader(cmdText, cmdType, parameters);
         }
 
         public void BeginTransaction()
         {
-            this.DbContext.CommonSession.BeginTransaction(null);
+            this.CommonSession.BeginTransaction(null);
         }
 
         public void BeginTransaction(IsolationLevel il)
         {
-            this.DbContext.CommonSession.BeginTransaction(il);
+            this.CommonSession.BeginTransaction(il);
         }
 
         public void CommitTransaction()
         {
-            this.DbContext.CommonSession.CommitTransaction();
+            this.CommonSession.CommitTransaction();
         }
 
         public void RollbackTransaction()
         {
-            this.DbContext.CommonSession.RollbackTransaction();
+            this.CommonSession.RollbackTransaction();
         }
 
         public void AddInterceptor(IDbCommandInterceptor interceptor)
         {
             UtilExceptions.CheckNull(interceptor, "interceptor");
-            this.DbContext.CommonSession.DbCommandInterceptors.Add(interceptor);
+            this.CommonSession.DbCommandInterceptors.Add(interceptor);
         }
 
         public void RemoveInterceptor(IDbCommandInterceptor interceptor)
         {
             UtilExceptions.CheckNull(interceptor, "interceptor");
-            this.DbContext.CommonSession.DbCommandInterceptors.Remove(interceptor);
+            this.CommonSession.DbCommandInterceptors.Remove(interceptor);
+        }
+
+        private bool _disposed = false;
+        protected void CheckDisposed()
+        {
+            if (this._disposed)
+            {
+                throw new ObjectDisposedException(string.Format("无法访问已释放的对象:{0}", this.GetType().FullName));
+            }
         }
 
         public void Dispose()
         {
-            this.DbContext.Dispose();
+            if (this._disposed) { return; }
+            this.CommonSession.Dispose();
+            this._disposed = true;
         }
     }
 }

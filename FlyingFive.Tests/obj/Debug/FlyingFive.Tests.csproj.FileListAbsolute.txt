@@ -1,0 +1,9 @@
+D:\work\src\github\Utilities\FlyingFive.Tests\obj\Debug\FlyingFive.Tests.csprojAssemblyReference.cache
+D:\work\src\github\Utilities\FlyingFive.Tests\bin\Debug\FlyingFive.Tests.dll
+D:\work\src\github\Utilities\FlyingFive.Tests\bin\Debug\FlyingFive.Tests.pdb
+D:\work\src\github\Utilities\FlyingFive.Tests\bin\Debug\FlyingFive.dll
+D:\work\src\github\Utilities\FlyingFive.Tests\bin\Debug\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll
+D:\work\src\github\Utilities\FlyingFive.Tests\bin\Debug\FlyingFive.pdb
+D:\work\src\github\Utilities\FlyingFive.Tests\obj\Debug\FlyingFive.Tests.csproj.CopyComplete
+D:\work\src\github\Utilities\FlyingFive.Tests\obj\Debug\FlyingFive.Tests.dll
+D:\work\src\github\Utilities\FlyingFive.Tests\obj\Debug\FlyingFive.Tests.pdb

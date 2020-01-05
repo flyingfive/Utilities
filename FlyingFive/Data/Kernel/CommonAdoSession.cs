@@ -428,7 +428,7 @@ namespace FlyingFive.Data.Kernel
         }
         #endregion
 
-        private void CheckDisposed()
+        public void CheckDisposed()
         {
             if (this._disposed)
             {
