@@ -1,9 +1,10 @@
 
 *.cache
-.vs/Utilities/v15/.suo
+.vs
 *.lock
 *.ide
 *.suo
+*.user
 .vs/Utilities/v15/Server/sqlite3/storage.ide-shm
 .vs/Utilities/v15/Server/sqlite3/storage.ide-wal
 Utilities.v12.suo
