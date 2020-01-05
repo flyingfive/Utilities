@@ -9,6 +9,9 @@ using System.Text;
 
 namespace FlyingFive.Data.Kernel
 {
+    /// <summary>
+    /// DB会话抽象
+    /// </summary>
     public abstract class DbSession : IDbSession, IDisposable
     {
         /// <summary>
