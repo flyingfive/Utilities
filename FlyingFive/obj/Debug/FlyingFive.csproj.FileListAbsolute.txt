@@ -1,4 +1,0 @@
-D:\work\src\github\Utilities\FlyingFive\bin\Debug\FlyingFive.dll
-D:\work\src\github\Utilities\FlyingFive\bin\Debug\FlyingFive.pdb
-D:\work\src\github\Utilities\FlyingFive\obj\Debug\FlyingFive.dll
-D:\work\src\github\Utilities\FlyingFive\obj\Debug\FlyingFive.pdb
