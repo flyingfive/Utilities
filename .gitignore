@@ -8,3 +8,5 @@
 Utilities.v12.suo
 .vs/Utilities/v15/.suo
 bin
+/FlyingFive/obj/Debug
+/FlyingFive.Tests/obj/Debug
