@@ -77,12 +77,12 @@ namespace FlyingFive.Win
             {
                 control.Invoke(new Action<Control, string>((ctl, txt) =>
                 {
-                    Win32Utility.SetCueText(ctl, text);
+                    Win32Api.SetCueText(ctl, text);
                 }), new object[] { control, text });
             }
             else
             {
-                Win32Utility.SetCueText(control, text);
+                Win32Api.SetCueText(control, text);
             }
         }
 

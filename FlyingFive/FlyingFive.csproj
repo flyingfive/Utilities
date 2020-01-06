@@ -42,6 +42,7 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
@@ -81,6 +82,11 @@
     <Compile Include="Data\Mapper\IObjectActivator.cs" />
     <Compile Include="Data\Mapper\IValueSetter.cs" />
     <Compile Include="Data\UtilConstants.cs" />
+    <Compile Include="DynamicProxy\IProxyInvocationHandler.cs" />
+    <Compile Include="DynamicProxy\MetaDataFactory.cs" />
+    <Compile Include="DynamicProxy\ProxyObjectFactory.cs" />
+    <Compile Include="DynamicProxy\SecurityManager.cs" />
+    <Compile Include="DynamicProxy\DefaultInvocationHandler.cs" />
     <Compile Include="Extensions.AppDomain.cs" />
     <Compile Include="Extensions.Char.cs" />
     <Compile Include="Extensions.Convert.cs" />
@@ -99,17 +105,24 @@
     <Compile Include="Utils\CodeTimer.cs" />
     <Compile Include="Utils\Computer.cs" />
     <Compile Include="Utils\DES3CryptographicProvider.cs" />
+    <Compile Include="Utils\FileHelper.cs" />
     <Compile Include="Utils\ICryptographicProvider.cs" />
     <Compile Include="Utils\IniFileHelper.cs" />
     <Compile Include="Utils\ITypeFinder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Singleton.cs" />
+    <Compile Include="Utils\RegistryUtility.cs" />
     <Compile Include="Utils\SerializationHelper.cs" />
     <Compile Include="Web\Utility\WebAppTypeFinder.cs" />
     <Compile Include="Web\Utility\WebHelper.cs" />
     <Compile Include="Win\Extensions.Control.cs" />
     <Compile Include="Win\MsgBox.cs" />
-    <Compile Include="Win\Win32Utility.cs" />
+    <Compile Include="Win\ServiceInstaller\WindowsServiceAccountType.cs" />
+    <Compile Include="Win\ServiceInstaller\WindowsServiceInstallInfo.cs" />
+    <Compile Include="Win\ServiceInstaller\WindowsServiceInstallUtil.cs" />
+    <Compile Include="Win\Win32Api.cs" />
+    <Compile Include="Win\WindowsUtility.cs" />
+    <Compile Include="Win\WinServiceUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\Extensions.DbSession.cs" />
