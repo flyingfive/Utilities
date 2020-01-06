@@ -27,6 +27,7 @@ namespace FlyingFive.Tests
         [TestMethod]
         public void TestSBCMethod()
         {
+            var m = 7.125698520546M.TruncateDec(4);
             var list = new List<a>();
             var d = typeof(IList<>).IsAssignableFrom(list.GetType());
             var success = typeof(Int16?).IsNullableType();

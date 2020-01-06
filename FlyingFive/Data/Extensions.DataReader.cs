@@ -118,7 +118,7 @@ namespace FlyingFive.Data
         /// <returns></returns>
         public static IDataReader AsDataReader<T>(this IEnumerable<T> collection) where T : class
         {
-            return new EntityDataReader<T>(collection);
+            return new ListDataReader<T>(collection);
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace FlyingFive.Data
             var data = new DataTable();
             data.Locale = System.Globalization.CultureInfo.CurrentCulture;
             data.TableName = typeof(T).Name;
-            var dr = new EntityDataReader<T>(collection);
+            var dr = new ListDataReader<T>(collection);
             data.Load(dr);
             return data;
         }
