@@ -45,19 +45,26 @@ namespace FlyingFive.Tests
             var list = new List<Employee>();
             try
             {
-                var result = CodeTimer.Time("test", 10, (() =>
+                var result = CodeTimer.Time("test", 1, (() =>
                 {
                     using (var connection = new SqlConnection("Data Source=173.31.15.53,2012;Initial Catalog=Northwind;User Id=sa;Password=sa;"))
                     {
                         var command = connection.CreateCommand();
-                        command.CommandText = "select * from Employees";
+                        command.CommandText = "select  TOP  1000 * from Employees";
                         connection.Open();
                         using (var reader = command.ExecuteReader())
                         {
                             list = reader.AsEnumerable<Employee>().ToList();
                         }
+                        command.CommandText = "SELECT TOP  1000 * FROM Employees";
+                        var da = new SqlDataAdapter(command);
+                        var dt = new DataTable();
+                        da.Fill(dt);
+                        var list1 = dt.ToList<Employee>();
+                        var list2 = dt.ToList();
                     }
                 }));
+                Debug.WriteLine(result.ToString());
                 Console.WriteLine(result.ToString());
             }
             catch (Exception ex)

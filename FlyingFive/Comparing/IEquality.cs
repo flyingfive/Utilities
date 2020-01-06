@@ -49,6 +49,11 @@ namespace FlyingFive.Comparing
             typeof(BigInteger).Name
         };
 
+        /// <summary>
+        /// 创建类型比较器
+        /// </summary>
+        /// <param name="dataType">数据类型</param>
+        /// <returns></returns>
         public static IEqualityComparer CreateObjectEquality(Type dataType)
         {
             if (dataType.IsArray && dataType.GetArrayRank() == 1)

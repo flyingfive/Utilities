@@ -1,4 +1,5 @@
-﻿using FlyingFive.Data.Emit;
+﻿using FlyingFive.Data.CodeDom;
+using FlyingFive.Data.Emit;
 using FlyingFive.Data.Mapper;
 using System;
 using System.Collections.Generic;
@@ -18,23 +19,101 @@ namespace FlyingFive.Data
         /// <summary>
         /// 将DataReader中的数据转换为对象集合
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="reader"></param>
+        /// <typeparam name="T">数据类型</typeparam>
+        /// <param name="reader">dataReader数据读取器</param>
         /// <returns></returns>
         public static IEnumerable<T> AsEnumerable<T>(this IDataReader reader) where T : class, new()
         {
-            var properties = typeof(T).GetProperties().Where(p => p.CanWrite)
-                .Select(prop => new { prop, mapper = MemberMapperHelper.CreateMemberMapper(prop), ordinal = reader.GetOrdinal(prop.Name) });
-            while (reader.Read())
+            var fakeReader = reader as Fakes.FakeDataReader;
+            if (fakeReader == null)
+            {
+                fakeReader = new Fakes.FakeDataReader(reader);
+            }
+            var mappings = typeof(T).GetProperties().Where(p => p.CanWrite)
+                .Select(prop => new MappingData() { Ordinal = reader.GetOrdinal(prop.Name), Property = prop, Mapper = MemberMapperHelper.CreateMemberMapper(prop) });
+            while (fakeReader.Read())
             {
                 var obj = Activator.CreateInstance<T>();
-                foreach (var item in properties)
-                {
-                    if (item.mapper == null || item.ordinal < 0) { continue; }
-                    item.mapper.Map(obj, reader, item.ordinal);
-                }
+                MapData(obj, reader, mappings);
                 yield return obj;
             }
+        }
+
+        /// <summary>
+        /// 将DataReader中的数据转换为对象集合
+        /// </summary>
+        /// <param name="reader">dataReader数据读取器</param>
+        /// <param name="dataType">数据类型</param>
+        /// <returns></returns>
+        public static IEnumerable<object> AsEnumerable(this IDataReader reader, Type dataType)
+        {
+            var fakeReader = reader as Fakes.FakeDataReader;
+            if (fakeReader == null)
+            {
+                fakeReader = new Fakes.FakeDataReader(reader);
+            }
+            var mappings = dataType.GetProperties().Where(p => p.CanWrite)
+                .Select(prop => new MappingData() { Ordinal = reader.GetOrdinal(prop.Name), Property = prop, Mapper = MemberMapperHelper.CreateMemberMapper(prop) });
+            while (fakeReader.Read())
+            {
+                var obj = Activator.CreateInstance(dataType);
+                MapData(obj, reader, mappings);
+                yield return obj;
+            }
+        }
+        private static void MapData(object instance, IDataReader reader, IEnumerable<MappingData> mappings)
+        {
+            foreach (var item in mappings)
+            {
+                if (item.Mapper == null || item.Ordinal < 0) { continue; }
+                item.Mapper.Map(instance, reader, item.Ordinal);
+            }
+        }
+
+        /// <summary>
+        /// 将DataReader转成匿名对象集合（对象类型根据DataReader数据结构生成，名称随机）
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        public static List<object> ToList(this IDataReader reader)
+        {
+            var schema = reader.GetSchemaTable();
+            var name = new StringBuilder();
+            var fields = new Dictionary<string, Type>();
+            foreach (DataRow r in schema.Rows)
+            {
+                var allowDbNull = Convert.ToBoolean(r["AllowDBNull"]);
+                var ordinal = Convert.ToInt32(r["ColumnOrdinal"]);
+                var dataType = reader.GetFieldType(ordinal);
+                var fieldName = reader.GetName(ordinal);
+                name.AppendFormat("{0}@{1}{2}&", fieldName, dataType.Name, allowDbNull && dataType.IsValueType ? "?" : "");
+                if (allowDbNull && dataType.IsValueType)
+                {
+                    dataType = typeof(Nullable<>).MakeGenericType(dataType);
+                }
+                if (fields.ContainsKey(fieldName))
+                {
+                    throw new InvalidOperationException(string.Format("无效的操作：动态类型转换不支持重复的成员名称：{0}", fieldName));
+                }
+                fields.Add(fieldName, dataType);
+            }
+            var key = name.ToString().GetHashCode().ToString();
+            var modelType = _dynamicTypeCache.GetOrAdd(key, (str) =>
+            {
+                var className = string.Format("DynamicDataModel_{0}", Guid.NewGuid().ToString("D").Split(new char[] { '-' }).Last());
+                var sourceCodeCreater = new SourceCodeCreater(className, fields);
+                var type = sourceCodeCreater.BuildCSharpType();
+                return type;
+            });
+            var list = reader.AsEnumerable(modelType).ToList();
+            return list;
+        }
+
+        internal class MappingData
+        {
+            public int Ordinal { get; set; }
+            public PropertyInfo Property { get; set; }
+            public IMemberMapper Mapper { get; set; }
         }
 
         /// <summary>

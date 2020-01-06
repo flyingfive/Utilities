@@ -60,6 +60,7 @@
     <Compile Include="Comparing\IEquality.cs" />
     <Compile Include="Comparing\ListEquality.cs" />
     <Compile Include="Comparing\ValueEquality.cs" />
+    <Compile Include="Data\CodeDom\SourceCodeCreater.cs" />
     <Compile Include="Data\DataAccessException.cs" />
     <Compile Include="Data\Drivers\SqlServer\DefaultDbConnectionFactory.cs" />
     <Compile Include="Data\Drivers\SqlServer\MsSqlHelper.cs" />
@@ -93,6 +94,7 @@
     <Compile Include="IStartupTask.cs" />
     <Compile Include="ITask.cs" />
     <Compile Include="Utils\AppDomainTypeFinder.cs" />
+    <Compile Include="Utils\ChineseCalendar.cs" />
     <Compile Include="Utils\ChinesePinYinHelper.cs" />
     <Compile Include="Utils\CodeTimer.cs" />
     <Compile Include="Utils\Computer.cs" />
@@ -118,6 +120,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions.Reflection.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Data\Extensions.DataTable.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

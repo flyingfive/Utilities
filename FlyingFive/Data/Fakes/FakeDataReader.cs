@@ -13,11 +13,16 @@ namespace FlyingFive.Data.Fakes
     public class FakeDataReader : IDataReader, IDataRecord, IDisposable
     {
         private CommonAdoSession _session = null;
-        private IDataReader _dataReader = null;
-        private IDbCommand _command = null;
+        private IDataReader _innerReader = null;
+        private IDbCommand _innerCommand = null;
         private IList<OutputParameter> _outputParameters = null;
         private bool _disposed = false;
 
+        public FakeDataReader(IDataReader reader)
+        {
+            if (reader == null) { throw new ArgumentNullException("参数: reader不能为null"); }
+            this._innerReader = reader;
+        }
 
         public FakeDataReader(CommonAdoSession commonSession, IDataReader reader, IDbCommand command, List<OutputParameter> outputParameters)
         {
@@ -26,8 +31,8 @@ namespace FlyingFive.Data.Fakes
             if (command == null) { throw new ArgumentNullException("参数: command不能为null"); }
 
             this._session = commonSession;
-            this._dataReader = reader;
-            this._command = command;
+            this._innerReader = reader;
+            this._innerCommand = command;
             this._outputParameters = outputParameters;
         }
 
@@ -36,32 +41,32 @@ namespace FlyingFive.Data.Fakes
         /// <summary>
         /// 指示读取器当前行的嵌套深度
         /// </summary>
-        public int Depth { get { return this._dataReader.Depth; } }
+        public int Depth { get { return this._innerReader.Depth; } }
         /// <summary>
         /// 读取器是否关闭
         /// </summary>
-        public bool IsClosed { get { return this._dataReader.IsClosed; } }
+        public bool IsClosed { get { return this._innerReader.IsClosed; } }
         /// <summary>
         /// 影响行数
         /// </summary>
-        public int RecordsAffected { get { return this._dataReader.RecordsAffected; } }
+        public int RecordsAffected { get { return this._innerReader.RecordsAffected; } }
 
         /// <summary>
         /// 关闭结果集读取器
         /// </summary>
         public void Close()
         {
-            if (!this._dataReader.IsClosed)
+            if (!this._innerReader.IsClosed)
             {
                 try
                 {
-                    this._dataReader.Close();
-                    this._dataReader.Dispose();
-                    OutputParameter.CallMapValue(this._outputParameters);
+                    this._innerReader.Close();
+                    this._innerReader.Dispose();
+                    if (_outputParameters != null) { OutputParameter.CallMapValue(this._outputParameters); }
                 }
                 finally
                 {
-                    this._session.Complete();
+                    if (this._session != null) { this._session.Complete(); }
                 }
             }
         }
@@ -72,17 +77,17 @@ namespace FlyingFive.Data.Fakes
         /// <returns></returns>
         public DataTable GetSchemaTable()
         {
-            return this._dataReader.GetSchemaTable();
+            return this._innerReader.GetSchemaTable();
         }
 
         public bool NextResult()
         {
-            return this._dataReader.NextResult();
+            return this._innerReader.NextResult();
         }
 
         public bool Read()
         {
-            return this._dataReader.Read();
+            return this._innerReader.Read();
         }
 
         public void Dispose()
@@ -92,104 +97,107 @@ namespace FlyingFive.Data.Fakes
                 return;
             }
             this.Close();
-            this._command.Dispose();
+            if (this._innerCommand != null)
+            {
+                this._innerCommand.Dispose();
+            }
             this._disposed = true;
         }
         #endregion
 
         #region IDataRecord
-        public int FieldCount { get { return this._dataReader.FieldCount; } }
+        public int FieldCount { get { return this._innerReader.FieldCount; } }
 
-        public object this[int i] { get { return this._dataReader[i]; } }
-        public object this[string name] { get { return this._dataReader[name]; } }
+        public object this[int i] { get { return this._innerReader[i]; } }
+        public object this[string name] { get { return this._innerReader[name]; } }
 
         public bool GetBoolean(int i)
         {
-            return this._dataReader.GetBoolean(i);
+            return this._innerReader.GetBoolean(i);
         }
         public byte GetByte(int i)
         {
-            return this._dataReader.GetByte(i);
+            return this._innerReader.GetByte(i);
         }
         public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
         {
-            return this._dataReader.GetBytes(i, fieldOffset, buffer, bufferoffset, length);
+            return this._innerReader.GetBytes(i, fieldOffset, buffer, bufferoffset, length);
         }
         public char GetChar(int i)
         {
-            return this._dataReader.GetChar(i);
+            return this._innerReader.GetChar(i);
         }
         public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
         {
-            return this._dataReader.GetChars(i, fieldoffset, buffer, bufferoffset, length);
+            return this._innerReader.GetChars(i, fieldoffset, buffer, bufferoffset, length);
         }
         public IDataReader GetData(int i)
         {
-            return this._dataReader.GetData(i);
+            return this._innerReader.GetData(i);
         }
         public string GetDataTypeName(int i)
         {
-            return this._dataReader.GetDataTypeName(i);
+            return this._innerReader.GetDataTypeName(i);
         }
         public DateTime GetDateTime(int i)
         {
-            return this._dataReader.GetDateTime(i);
+            return this._innerReader.GetDateTime(i);
         }
         public decimal GetDecimal(int i)
         {
-            return this._dataReader.GetDecimal(i);
+            return this._innerReader.GetDecimal(i);
         }
         public double GetDouble(int i)
         {
-            return this._dataReader.GetDouble(i);
+            return this._innerReader.GetDouble(i);
         }
         public Type GetFieldType(int i)
         {
-            return this._dataReader.GetFieldType(i);
+            return this._innerReader.GetFieldType(i);
         }
         public float GetFloat(int i)
         {
-            return this._dataReader.GetFloat(i);
+            return this._innerReader.GetFloat(i);
         }
         public Guid GetGuid(int i)
         {
-            return this._dataReader.GetGuid(i);
+            return this._innerReader.GetGuid(i);
         }
         public short GetInt16(int i)
         {
-            return this._dataReader.GetInt16(i);
+            return this._innerReader.GetInt16(i);
         }
         public int GetInt32(int i)
         {
-            return this._dataReader.GetInt32(i);
+            return this._innerReader.GetInt32(i);
         }
         public long GetInt64(int i)
         {
-            return this._dataReader.GetInt64(i);
+            return this._innerReader.GetInt64(i);
         }
         public string GetName(int i)
         {
-            return this._dataReader.GetName(i);
+            return this._innerReader.GetName(i);
         }
         public int GetOrdinal(string name)
         {
-            return this._dataReader.GetOrdinal(name);
+            return this._innerReader.GetOrdinal(name);
         }
         public string GetString(int i)
         {
-            return this._dataReader.GetString(i);
+            return this._innerReader.GetString(i);
         }
         public object GetValue(int i)
         {
-            return this._dataReader.GetValue(i);
+            return this._innerReader.GetValue(i);
         }
         public int GetValues(object[] values)
         {
-            return this._dataReader.GetValues(values);
+            return this._innerReader.GetValues(values);
         }
         public bool IsDBNull(int i)
         {
-            return this._dataReader.IsDBNull(i);
+            return this._innerReader.IsDBNull(i);
         }
         #endregion
 

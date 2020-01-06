@@ -13,16 +13,16 @@ using System.Threading;
 namespace FlyingFive.Data.Mapper
 {
     /// <summary>
-    /// 表示成员映射器
+    /// 表示对象成员映射器
     /// </summary>
     public interface IMemberMapper
     {
         /// <summary>
         /// 根据映射从DataReader赋值给实体对象的属性
         /// </summary>
-        /// <param name="instance"></param>
-        /// <param name="reader"></param>
-        /// <param name="ordinal"></param>
+        /// <param name="instance">数据对象实例</param>
+        /// <param name="reader">dataReader数据读取器</param>
+        /// <param name="ordinal">给当前属性赋值的dataReader数据源中的位置</param>
         void Map(object instance, IDataReader reader, int ordinal);
     }
 
@@ -67,7 +67,7 @@ namespace FlyingFive.Data.Mapper
                 {
                     if (!_moduleBuilders.TryGetValue(assembly, out dynamicModuleBuilder))
                     {
-                        var assemblyName = new AssemblyName(String.Format(CultureInfo.InvariantCulture, "DynamicMemberMappers.{0}", assembly.FullName));
+                        var assemblyName = new AssemblyName(String.Format(CultureInfo.InvariantCulture, "__FlyingFive.DynamicMemberMappers.{0}", assembly.FullName));
                         assemblyName.Version = new Version(1, 0, 0, 0);
                         var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
                         dynamicModuleBuilder = assemblyBuilder.DefineDynamicModule("DynamicMemberMapperModule");
