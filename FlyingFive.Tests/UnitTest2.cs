@@ -47,6 +47,7 @@ namespace FlyingFive.Tests
         public void TestFlying()
         {
             FlyingFive.Data.Interception.GlobalDbInterception.Add(new a());
+
             var connectionString = @"Data Source=10.0.0.18;Initial Catalog=AIS20121019142414;User Id=sa;Password=sa.;Connect Timeout=5;";
             var session = new MsSqlHelper(connectionString);
             var obj = session.ExecuteScalar("SELECT count(*) FROM t_Item");
