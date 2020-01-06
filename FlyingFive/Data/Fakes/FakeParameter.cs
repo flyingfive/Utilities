@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace FlyingFive.Data
+namespace FlyingFive.Data.Fakes
 {
     /// <summary>
     /// 表示数据库的伪装参数

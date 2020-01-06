@@ -21,23 +21,20 @@ namespace FlyingFive.Data
         /// <typeparam name="T"></typeparam>
         /// <param name="reader"></param>
         /// <returns></returns>
-        public static List<T> ToList<T>(this IDataReader reader) where T : class,new()
+        public static IEnumerable<T> AsEnumerable<T>(this IDataReader reader) where T : class, new()
         {
-            var list = new List<T>();
-            var properties = typeof(T).GetProperties().Where(p => p.CanWrite);
+            var properties = typeof(T).GetProperties().Where(p => p.CanWrite)
+                .Select(prop => new { prop, mapper = MemberMapperHelper.CreateMemberMapper(prop), ordinal = reader.GetOrdinal(prop.Name) });
             while (reader.Read())
             {
                 var obj = Activator.CreateInstance<T>();
-                foreach (var prop in properties)
+                foreach (var item in properties)
                 {
-                    var ordinal = reader.GetOrdinal(prop.Name);
-                    var mapper = MemberMapperHelper.CreateMemberMapper(prop);
-                    if (mapper == null) { continue; }
-                    mapper.Map(obj, reader, ordinal);
+                    if (item.mapper == null || item.ordinal < 0) { continue; }
+                    item.mapper.Map(obj, reader, item.ordinal);
                 }
-                list.Add(obj);
+                yield return obj;
             }
-            return list;
         }
 
         /// <summary>

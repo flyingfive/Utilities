@@ -1,4 +1,5 @@
-﻿using FlyingFive.Data.Interception;
+﻿using FlyingFive.Data.Fakes;
+using FlyingFive.Data.Interception;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -12,10 +13,6 @@ namespace FlyingFive.Data
     /// </summary>
     public interface IDbSession : IDisposable
     {
-        /// <summary>
-        /// 该会话上的DB上下文
-        /// </summary>
-        DbContext DbContext { get; }
         /// <summary>
         /// 会话是否在事务处理中
         /// </summary>
@@ -31,7 +28,7 @@ namespace FlyingFive.Data
         /// <param name="cmdType"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        int ExecuteNonQuery(string cmdText, CommandType cmdType, params FakeParameter[] parameters);
+        int ExecuteNonQuery(string cmdText, CommandType cmdType = CommandType.Text, params FakeParameter[] parameters);
         /// <summary>
         /// 执行单一查询语句
         /// </summary>
@@ -39,7 +36,7 @@ namespace FlyingFive.Data
         /// <param name="cmdType"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        object ExecuteScalar(string cmdText, CommandType cmdType, params FakeParameter[] parameters);
+        object ExecuteScalar(string cmdText, CommandType cmdType = CommandType.Text, params FakeParameter[] parameters);
         /// <summary>
         /// 执行DataReader查询语句
         /// </summary>
@@ -47,7 +44,7 @@ namespace FlyingFive.Data
         /// <param name="cmdType"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        IDataReader ExecuteReader(string cmdText, CommandType cmdType, params FakeParameter[] parameters);
+        IDataReader ExecuteReader(string cmdText, CommandType cmdType = CommandType.Text, params FakeParameter[] parameters);
         /// <summary>
         /// 开始事务
         /// </summary>

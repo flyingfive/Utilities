@@ -11,10 +11,10 @@ namespace FlyingFive.Data.Drivers.SqlServer
     /// <summary>
     /// 默认的MsSql数据库连接工厂
     /// </summary>
-    public class DefaultDbConnectionFactory : IDbConnectionFactory
+    public class SqlServerDbConnectionFactory : IDbConnectionFactory
     {
         private string _connectionString = string.Empty;
-        public DefaultDbConnectionFactory(string connectionString)
+        public SqlServerDbConnectionFactory(string connectionString)
         {
             if (string.IsNullOrWhiteSpace(connectionString)) { throw new ArgumentException("参数: connectionString无效!"); }
             this._connectionString = connectionString;

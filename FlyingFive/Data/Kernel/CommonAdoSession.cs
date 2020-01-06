@@ -355,7 +355,7 @@ namespace FlyingFive.Data.Kernel
         }
 
         /// <summary>
-        /// 表示一次会话中一次DB操作完成(非事务中关闭连接)
+        /// 表示会话中一次DB操作完成(非事务中关闭连接)
         /// </summary>
         public void Complete()
         {
@@ -428,7 +428,7 @@ namespace FlyingFive.Data.Kernel
         }
         #endregion
 
-        private void CheckDisposed()
+        public void CheckDisposed()
         {
             if (this._disposed)
             {
