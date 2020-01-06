@@ -37,7 +37,7 @@ namespace FlyingFive
         /// </summary>
         /// <param name="input">字符内容</param>
         /// <returns></returns>
-        public static char ToDBCChar(this char input)
+        public static char ToDBCChar(char input)
         {
             if (input == 12288)
             {
