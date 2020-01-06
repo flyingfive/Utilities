@@ -106,6 +106,18 @@ namespace FlyingFive
             return underlyingType != null;
         }
 
+        /// <summary>
+        /// 是否泛型集合类型
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsListType(this Type type)
+        {
+            var flag = type.IsGenericType &&
+                type.GetGenericTypeDefinition().GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>));
+            return flag;
+        }
+
 
         /// <summary>
         /// 判断指定该类型是否为匿名类型
@@ -121,7 +133,7 @@ namespace FlyingFive
         }
 
         /// <summary>
-        /// 获取类型的实际类型,如:int? => int
+        /// 获取可空类型的实际值类型,如:int? => int
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>

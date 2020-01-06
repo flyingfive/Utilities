@@ -14,16 +14,30 @@ using System.Diagnostics;
 
 namespace FlyingFive.Tests
 {
+    public enum A
+    {
+        [System.ComponentModel.Description("这是测试枚举项1")]
+        Field1,
+        [System.ComponentModel.Description("this is test enum item 2")]
+        Field2
+    }
     [TestClass]
     public class UnitTest2
     {
         [TestMethod]
         public void TestSBCMethod()
         {
+            var list = new List<a>();
+            var d = typeof(IList<>).IsAssignableFrom(list.GetType());
+            var success = typeof(Int16?).IsNullableType();
+            var xx = list.GetType().GetGenericTypeDefinition().GetInterfaces().Any(tt => tt.IsGenericType && tt.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+            var t = typeof(Int16?).GetUnderlyingType();
             var s = System.Globalization.CultureInfo.GetCultureInfo("zh-CN");
             var a = "ABC".ToSBC();
             var b = a.ToDBC();
             var flag = a.GetType().IsCustomType();
+            var text = A.Field1.GetEnumDescription();
+            var t2 = A.Field2.GetEnumDescription();
         }
         [TestMethod]
         public void TestMapping()

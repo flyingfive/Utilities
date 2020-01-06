@@ -175,17 +175,17 @@ namespace FlyingFive
         }
 
         /// <summary>
-        /// 字符串是否为真([1\Y\true].PS:不区分大小写)
+        /// 字符串是否为真([1\Y\T\TRUE].PS:不区分大小写)
         /// </summary>
         /// <param name="str">字符串内容</param>
         /// <returns></returns>
         public static bool IsTrue(this string str)
         {
             if (string.IsNullOrEmpty(str)) { return false; }
-            if (Boolean.TrueString.Equals(str, StringComparison.CurrentCultureIgnoreCase)) { return true; }
-            if (Boolean.FalseString.Equals(str, StringComparison.CurrentCultureIgnoreCase)) { return false; }
-            var flag = str.Equals("y", StringComparison.CurrentCultureIgnoreCase) ||
-                str.Equals("1", StringComparison.CurrentCultureIgnoreCase);
+            var flag = str.Equals("Y", StringComparison.CurrentCultureIgnoreCase) ||            //y or n
+                str.Equals("T", StringComparison.CurrentCultureIgnoreCase) ||                   //t or f
+                str.Equals("1", StringComparison.CurrentCultureIgnoreCase) ||                   //1 or 0
+                str.Equals(bool.TrueString, StringComparison.CurrentCultureIgnoreCase);         //true or false
             return flag;
         }
 

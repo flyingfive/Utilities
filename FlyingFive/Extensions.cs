@@ -26,40 +26,6 @@ namespace FlyingFive
         }
 
         /// <summary>
-        /// 获取自定义特性
-        /// </summary>
-        /// <typeparam name="T">特性类型</typeparam>
-        /// <param name="member">成员对象</param>
-        /// <param name="inherit">是否从继承关系中查找</param>
-        /// <param name="throwExceptionOnUndefined">没有找到时是否抛出异常</param>
-        /// <returns></returns>
-        public static T GetCustomAttribute<T>(this MemberInfo member, bool inherit, bool throwExceptionOnUndefined = false) where T : Attribute
-        {
-            T attribute = default(T);
-            var atts = member.GetCustomAttributes(typeof(T), inherit);
-            if (atts.Length == 0)
-            {
-                if (throwExceptionOnUndefined)
-                {
-                    throw new ArgumentException(string.Format("类型{0}的成员:{1}上没有找到名称为:{2}的标记"
-                        , member.DeclaringType.FullName
-                        , member.Name
-                        , typeof(T).FullName));
-                }
-                return null;
-            }
-            attribute = atts[0] as T;
-            if (attribute == null && throwExceptionOnUndefined)
-            {
-                throw new ArgumentException(string.Format("类型{0}的成员:{1}上没有找到名称为:{2}的标记"
-                    , member.DeclaringType.FullName
-                    , member.Name
-                    , typeof(T).FullName));
-            }
-            return attribute;
-        }
-
-        /// <summary>
         /// 根据时间的有序GUID
         /// 注意：需要网卡，否则只能保证本机环境中唯一
         /// </summary>

@@ -36,6 +36,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
     <Reference Include="System.Net" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Runtime.Serialization" />
@@ -54,6 +55,11 @@
     <Compile Include="Caching\CacheExtensions.cs" />
     <Compile Include="Caching\ICacheManager.cs" />
     <Compile Include="Caching\MemoryCacheManager.cs" />
+    <Compile Include="Comparing\ArrayEquality.cs" />
+    <Compile Include="Comparing\ClassEquality.cs" />
+    <Compile Include="Comparing\IEquality.cs" />
+    <Compile Include="Comparing\ListEquality.cs" />
+    <Compile Include="Comparing\ValueEquality.cs" />
     <Compile Include="Data\DataAccessException.cs" />
     <Compile Include="Data\Drivers\SqlServer\DefaultDbConnectionFactory.cs" />
     <Compile Include="Data\Drivers\SqlServer\MsSqlHelper.cs" />
@@ -103,6 +109,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\Extensions.DbSession.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Data\Extensions.IQueryable.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Extensions.Boolean.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Extensions.Reflection.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
