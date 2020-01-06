@@ -55,6 +55,7 @@ namespace FlyingFive.Tests
                         using (var reader = command.ExecuteReader())
                         {
                             list = reader.AsEnumerable<Employee>().ToList();
+                            //var data = list.ToDataTable();
                         }
                         command.CommandText = "SELECT TOP  1000 * FROM Employees";
                         var da = new SqlDataAdapter(command);

@@ -84,7 +84,7 @@ namespace FlyingFive.Data.Mapper
             var parameterStartIndex = 1;
             il.Emit(OpCodes.Ldarg_S, parameterStartIndex);          //加载第一个参数instance
             il.Emit(OpCodes.Castclass, instanceType);
-            var getDataMethod = Extensions.DataReaderMethods.GetReaderMethod(member.GetMemberType());
+            var getDataMethod = DataReaderMethods.GetReaderMethod(member.GetMemberType());
 
             il.Emit(OpCodes.Ldarg_S, parameterStartIndex + 1);      //加载第二个参数dataReader
             il.Emit(OpCodes.Ldarg_S, parameterStartIndex + 2);      //加载第三个参数ordinal

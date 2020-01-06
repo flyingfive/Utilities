@@ -39,7 +39,7 @@ namespace FlyingFive.Data.Emit
             {
                 if (SupportedMappingTypes.IsMappingType(item.ParameterType))
                 {
-                    var readerMethod = Extensions.DataReaderMethods.GetReaderMethod(item.ParameterType);
+                    var readerMethod = DataReaderMethods.GetReaderMethod(item.ParameterType);
                     //调用DataReaderOrdinalEnumerator的Next方法,此时返回了DataReader的下一个读取序列
                     var readerOrdinal = Expression.Call(paraReaderOridinalEnumeratorExp, DataReaderOrdinalEnumerator.MethodOfNext);
                     //调用DataReaderMethods对应的方法,从DataReader中读取数据
@@ -72,7 +72,7 @@ namespace FlyingFive.Data.Emit
         {
             var parameterReader = Expression.Parameter(typeof(IDataReader), "reader");
             var parameterOrdinal = Expression.Parameter(typeof(int), "ordinal");
-            var readerMethod = Extensions.DataReaderMethods.GetReaderMethod(dataType);
+            var readerMethod = DataReaderMethods.GetReaderMethod(dataType);
             var getValue = Expression.Call(readerMethod, parameterReader, parameterOrdinal);
             var methodBody = Expression.Convert(getValue, typeof(object));
             Func<IDataReader, int, object> ret = Expression.Lambda<Func<IDataReader, int, object>>(methodBody, parameterReader, parameterOrdinal).Compile();
