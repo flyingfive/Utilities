@@ -105,6 +105,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Singleton.cs" />
     <Compile Include="Utils\SerializationHelper.cs" />
+    <Compile Include="Web\Utility\WebAppTypeFinder.cs" />
+    <Compile Include="Web\Utility\WebHelper.cs" />
     <Compile Include="Win\Extensions.Control.cs" />
     <Compile Include="Win\MsgBox.cs" />
     <Compile Include="Win\Win32Utility.cs" />

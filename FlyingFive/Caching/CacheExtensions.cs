@@ -41,7 +41,7 @@ namespace FlyingFive.Caching
             else
             {
                 var result = acquire();
-                cacheManager.Set(key, result, cacheTime);
+                cacheManager.Set(key, result, new TimeSpan(0, cacheTime, 0));
                 return result;
             }
         }

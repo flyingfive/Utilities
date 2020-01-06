@@ -12,16 +12,15 @@ namespace FlyingFive.Caching
     /// </summary>
     public class MemoryCacheManager : ICacheManager
     {
+        public MemoryCacheManager()
+        {
+            this.Cache = new MemoryCache("_DefaultCache");
+        }
+
         /// <summary>
         /// 缓存实例
         /// </summary>
-        protected ObjectCache Cache
-        {
-            get
-            {
-                return MemoryCache.Default;
-            }
-        }
+        protected ObjectCache Cache { get; private set; }
 
         /// <summary>
         /// 获取缓存
@@ -31,7 +30,21 @@ namespace FlyingFive.Caching
         /// <returns></returns>
         public T Get<T>(string key)
         {
+            if (string.IsNullOrEmpty(key)) { throw new ArgumentNullException("key不能为null"); }
             return (T)Cache[key];
+        }
+
+        /// <summary>
+        /// 设置长期缓存(没有有效期)
+        /// </summary>
+        /// <param name="key">缓存键</param>
+        /// <param name="data">对象</param>
+        public void Set(string key, object data)
+        {
+            if (string.IsNullOrEmpty(key)) { throw new ArgumentNullException("key不能为null"); }
+            if (data == null) { return; }
+            var policy = new CacheItemPolicy();
+            Cache.Add(new CacheItem(key, data), policy);
         }
 
         /// <summary>
@@ -39,12 +52,13 @@ namespace FlyingFive.Caching
         /// </summary>
         /// <param name="key">缓存键</param>
         /// <param name="data">对象</param>
-        /// <param name="cacheTime">缓存时间(分钟)</param>
-        public void Set(string key, object data, int cacheTime)
+        /// <param name="expires">失效期（从本地当前时间开始计算）</param>
+        public void Set(string key, object data, TimeSpan expires)
         {
+            if (string.IsNullOrEmpty(key)) { throw new ArgumentNullException("key不能为null"); }
             if (data == null) { return; }
             var policy = new CacheItemPolicy();
-            policy.AbsoluteExpiration = DateTime.Now + TimeSpan.FromMinutes(cacheTime);
+            policy.AbsoluteExpiration = DateTime.Now.Add(expires);
             Cache.Add(new CacheItem(key, data), policy);
         }
 
@@ -54,6 +68,7 @@ namespace FlyingFive.Caching
         /// <param name="key">缓存键</param>
         public void Remove(string key)
         {
+            if (string.IsNullOrEmpty(key)) { throw new ArgumentNullException("key不能为null"); }
             Cache.Remove(key);
         }
 
@@ -63,6 +78,7 @@ namespace FlyingFive.Caching
         /// <param name="pattern">缓存键模式</param>
         public void RemoveByPattern(string pattern)
         {
+            if (string.IsNullOrEmpty(pattern)) { throw new ArgumentNullException("pattern不能为null"); }
             var regex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
             var keysToRemove = new List<String>();
 
@@ -83,6 +99,7 @@ namespace FlyingFive.Caching
         /// <returns></returns>
         public bool IsSet(string key)
         {
+            if (string.IsNullOrEmpty(key)) { throw new ArgumentNullException("key不能为null"); }
             return (Cache.Contains(key));
         }
 

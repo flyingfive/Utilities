@@ -111,5 +111,25 @@ namespace FlyingFive
             var flag = current >= begin && current <= end;
             return flag;
         }
+
+        /// <summary>
+        /// 转换指定日期到当天的开始时间
+        /// </summary>
+        /// <param name="current">任何时间的指定日期</param>
+        /// <returns></returns>
+        public static DateTime ToBeginTime(this DateTime current)
+        {
+            return current.Date;
+        }
+
+        /// <summary>
+        /// 转换指定日期到当天的结束时间
+        /// </summary>
+        /// <param name="current">任何时间的指定日期</param>
+        /// <returns></returns>
+        public static DateTime ToEndTime(this DateTime current)
+        {
+            return current.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+        }
     }
 }

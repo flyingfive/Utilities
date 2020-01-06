@@ -18,12 +18,18 @@ namespace FlyingFive.Caching
         /// <returns></returns>
         T Get<T>(string key);
         /// <summary>
+        /// 设置长期缓存(没有有效期)
+        /// </summary>
+        /// <param name="key">缓存键</param>
+        /// <param name="data">缓存数据</param>
+        void Set(string key, object data);
+        /// <summary>
         /// 设置缓存
         /// </summary>
         /// <param name="key">缓存键</param>
         /// <param name="data">缓存数据</param>
-        /// <param name="cacheTime">缓存时间</param>
-        void Set(string key, object data, int cacheTime);
+        /// <param name="expires">失效期（从本地当前时间开始计算）</param>
+        void Set(string key, object data, TimeSpan expires);
         /// <summary>
         /// 移除一个缓存
         /// </summary>
