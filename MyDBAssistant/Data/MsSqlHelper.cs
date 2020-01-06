@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.IO;
 using System.Configuration;
+using FlyingFive.Data;
 
 namespace MyDBAssistant.Data
 {
@@ -332,12 +333,12 @@ namespace MyDBAssistant.Data
         /// <param name="cmdType">命令类型</param>
         /// <param name="paras">查询参数</param>
         /// <returns></returns>
-        public IList<T> ExecuteQueryAsList<T>(string cmdText, CommandType cmdType, params DbParameter[] paras) where T : class//, new()
+        public IList<T> ExecuteQueryAsList<T>(string cmdText, CommandType cmdType, params DbParameter[] paras) where T : class, new()
         {
             IList<T> lst = new List<T>();
             var dt = ExecuteQueryAsDataTable(cmdText, cmdType, paras);
             if (dt == null || dt.Rows.Count <= 0) { return lst; }
-            lst = DataReaderConverter.ToList<T>(dt.CreateDataReader()).ToList();
+            lst = dt.ToList<T>();//DataReaderConverter.ToList<T>(dt.CreateDataReader()).ToList();
             return lst;
         }
 

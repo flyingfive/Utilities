@@ -1,5 +1,6 @@
 ﻿using MyDBAssistant.Data;
 using MyDBAssistant.Schema;
+using FlyingFive.Data;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -626,12 +627,12 @@ namespace MyDBAssistant
         {
             var str = "SELECT a.* FROM dbo.v_sys_DataDict a  ORDER BY a.ColumnOrder";
             var data = _mssqlHelper.ExecuteQueryAsDataTable(str, CommandType.Text);
-            var dt1 = data.DefaultView.ToTable(true, new string[] { "TableName", "TableId", "IsView", "TableDescription" });
-            var tables = DataReaderConverter.ToList<Table>(dt1.CreateDataReader()).OrderBy(t => t.IsView).ToList();// .ToList<Table>().OrderBy(t => t.IsView).ToList();
-            var columns = DataReaderConverter.ToList<Column>(data.CreateDataReader());//data.ToList<Column>();
+            var dtTable = data.DefaultView.ToTable(true, new string[] { "TableName", "TableId", "IsView", "TableDescription" });
+            var tables = dtTable.ToList<Table>();
             foreach (var item in tables)
             {
-                item.Columns = columns.Where(c => c.TableId == item.TableId).ToList();
+                var columns = data.Select(string.Format("TableId={0}", item.TableId)).CopyToDataTable();
+                item.Columns.AddRange(columns.ToList<Column>());
             }
             return tables;
         }

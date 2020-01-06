@@ -10,6 +10,7 @@ using System.Text;
 using System.Windows.Forms;
 using MyDBAssistant.Schema;
 using MyDBAssistant.Data;
+using FlyingFive.Data.Schema;
 
 namespace MyDBAssistant
 {
@@ -123,7 +124,7 @@ namespace MyDBAssistant
                 }
                 if (_tableId == 0)
                 {
-                    _table.Columns = lst;
+                    _table.Columns = lst.OfType<ColumnInfo>().ToList();
                     if (!hasPrimaryKeyDefined) { MessageBox.Show(string.Format("还没有没表:{0}指定主键!", txtName.Text.Trim()), "提示", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
                     _table.Create(_mssqlHelper);
                     MessageBox.Show(string.Format("创建表表:{0}成功!", _table.TableName), "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);

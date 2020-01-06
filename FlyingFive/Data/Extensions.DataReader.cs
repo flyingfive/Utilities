@@ -29,7 +29,7 @@ namespace FlyingFive.Data
             {
                 fakeReader = new Fakes.FakeDataReader(reader);
             }
-            var mappings = typeof(T).GetProperties().Where(p => p.CanWrite)
+            var mappings = typeof(T).GetProperties().Where(p => p.CanWrite).Where(p => !p.PropertyType.IsListType())
                 .Select(prop => new MappingData() { Ordinal = reader.GetOrdinal(prop.Name), Property = prop, Mapper = MemberMapperHelper.CreateMemberMapper(prop) });
             while (fakeReader.Read())
             {
@@ -142,7 +142,7 @@ namespace FlyingFive.Data
             public int Ordinal { get; set; }
             public PropertyInfo Property { get; set; }
             public IMemberMapper Mapper { get; set; }
-            public Func<object,object> ValueAccessor { get; set; }
+            public Func<object, object> ValueAccessor { get; set; }
         }
     }
 

@@ -17,21 +17,26 @@ namespace FlyingFive.Data.Fakes
         private IDbCommand _innerCommand = null;
         private IList<OutputParameter> _outputParameters = null;
         private bool _disposed = false;
+        private IDictionary<int, string> _keyNames = null; 
 
         public FakeDataReader(IDataReader reader)
         {
             if (reader == null) { throw new ArgumentNullException("参数: reader不能为null"); }
             this._innerReader = reader;
+            this._keyNames = new Dictionary<int, string>();
+            for (int i = 0; i < this._innerReader.FieldCount; i++)
+            {
+                var name = this._innerReader.GetName(i);
+                this._keyNames.Add(i, name);
+            }
         }
 
-        public FakeDataReader(CommonAdoSession commonSession, IDataReader reader, IDbCommand command, List<OutputParameter> outputParameters)
+        public FakeDataReader(CommonAdoSession commonSession, IDataReader reader, IDbCommand command, List<OutputParameter> outputParameters) : this(reader)
         {
             if (commonSession == null) { throw new ArgumentNullException("参数: commonSession不能为null"); }
-            if (reader == null) { throw new ArgumentNullException("参数: reader不能为null"); }
             if (command == null) { throw new ArgumentNullException("参数: command不能为null"); }
 
             this._session = commonSession;
-            this._innerReader = reader;
             this._innerCommand = command;
             this._outputParameters = outputParameters;
         }
@@ -181,6 +186,10 @@ namespace FlyingFive.Data.Fakes
         }
         public int GetOrdinal(string name)
         {
+            if (!this._keyNames.Values.Contains(name))
+            {
+                return -1;
+            }
             return this._innerReader.GetOrdinal(name);
         }
         public string GetString(int i)

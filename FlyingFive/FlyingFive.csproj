@@ -65,6 +65,8 @@
     <Compile Include="Data\DataAccessException.cs" />
     <Compile Include="Data\Drivers\SqlServer\DefaultDbConnectionFactory.cs" />
     <Compile Include="Data\Drivers\SqlServer\MsSqlHelper.cs" />
+    <Compile Include="Data\Schema\ColumnInfo.cs" />
+    <Compile Include="Data\Schema\TableInfo.cs" />
     <Compile Include="Data\ListDataReader.cs" />
     <Compile Include="Data\Extensions.Reflection.cs" />
     <Compile Include="Data\Fakes\FakeDataReader.cs" />

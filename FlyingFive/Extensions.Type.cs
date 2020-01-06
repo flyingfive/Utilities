@@ -114,7 +114,7 @@ namespace FlyingFive
         public static bool IsListType(this Type type)
         {
             var flag = type.IsGenericType &&
-                type.GetGenericTypeDefinition().GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>));
+                type.GetGenericTypeDefinition().GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>));
             return flag;
         }
 

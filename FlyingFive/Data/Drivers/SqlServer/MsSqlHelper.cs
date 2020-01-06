@@ -33,17 +33,17 @@ namespace FlyingFive.Data.Drivers.SqlServer
         AS
             SELECT  d.name AS TableName ,
                     d.id AS TableId ,
-                    CASE d.type
+                    CAST(CASE d.type
                       WHEN 'U' THEN 0
                       ELSE 1
-                    END AS IsView ,
+                    END AS BIT) AS IsView ,
                     ISNULL(f.value, '') AS TableDescription ,
                     a.colorder AS [ColumnOrder] ,
                     a.name AS ColumnName ,
-                    CASE WHEN COLUMNPROPERTY(a.id, a.name, 'IsIdentity') = 1 THEN 1
+                    CAST(CASE WHEN COLUMNPROPERTY(a.id, a.name, 'IsIdentity') = 1 THEN 1
                          ELSE 0
-                    END AS IsIdentity ,
-                    CASE WHEN EXISTS ( SELECT   1
+                    END AS BIT) AS IsIdentity ,
+                    CAST(CASE WHEN EXISTS ( SELECT   1
                                        FROM     sysobjects
                                        WHERE    xtype = 'PK'
                                                 AND parent_obj = a.id
@@ -57,7 +57,7 @@ namespace FlyingFive.Data.Drivers.SqlServer
                                                                 AND colid = a.colid ) ) )
                          THEN 1
                          ELSE 0
-                    END AS IsPrimaryKey ,
+                    END AS BIT) AS IsPrimaryKey ,
                     --LOWER(b.name) AS SqlType ,
                     CASE WHEN b.xtype = b.xusertype THEN 0 ELSE 1 END AS IsUserType ,
                     b.name AS UserTypeName ,
@@ -65,9 +65,9 @@ namespace FlyingFive.Data.Drivers.SqlServer
                     a.length AS Size ,
                     COLUMNPROPERTY(a.id, a.name, 'PRECISION') AS [Precision] ,
                     ISNULL(COLUMNPROPERTY(a.id, a.name, 'Scale'), 0) AS Scale ,
-                    CASE WHEN a.isnullable = 1 THEN 1
+                    CAST(CASE WHEN a.isnullable = 1 THEN 1
                          ELSE 0
-                    END AS IsNullable ,
+                    END AS BIT) AS IsNullable ,
                     ISNULL(e.[text], '') AS DefaultValue ,
                     ISNULL(g.[value], '') AS ColumnDescription
             FROM    syscolumns a
@@ -92,17 +92,17 @@ namespace FlyingFive.Data.Drivers.SqlServer
         AS
             SELECT  d.name AS TableName ,
                     d.id AS TableId ,
-                    CASE d.type
+                    CAST(CASE d.type
                       WHEN 'U' THEN 0
                       ELSE 1
-                    END AS IsView ,
+                    END AS BIT) AS IsView ,
                     ISNULL(f.value, '') AS TableDescription ,
                     a.colorder AS [ColumnOrder] ,
                     a.name AS ColumnName ,
-                    CASE WHEN COLUMNPROPERTY(a.id, a.name, 'IsIdentity') = 1 THEN 1
+                    CAST(CASE WHEN COLUMNPROPERTY(a.id, a.name, 'IsIdentity') = 1 THEN 1
                          ELSE 0
-                    END AS IsIdentity ,
-                    CASE WHEN EXISTS ( SELECT   1
+                    END AS BIT) AS IsIdentity ,
+                    CAST(CASE WHEN EXISTS ( SELECT   1
                                        FROM     sysobjects
                                        WHERE    xtype = 'PK'
                                                 AND parent_obj = a.id
@@ -116,17 +116,17 @@ namespace FlyingFive.Data.Drivers.SqlServer
                                                                 AND colid = a.colid ) ) )
                          THEN 1
                          ELSE 0
-                    END AS IsPrimaryKey ,
+                    END AS BIT) AS IsPrimaryKey ,
                     --LOWER(b.name) AS SqlType ,
-                    CASE WHEN b.xtype = b.xusertype THEN 0 ELSE 1 END AS IsUserType ,
+                    CAST(CASE WHEN b.xtype = b.xusertype THEN 0 ELSE 1 END AS BIT) AS IsUserType ,
                     b.name AS UserTypeName ,
                     LOWER(CASE WHEN b.xtype = b.xusertype THEN b.NAME ELSE b2.NAME END) AS SqlType ,
                     a.length AS Size ,
                     COLUMNPROPERTY(a.id, a.name, 'PRECISION') AS [Precision] ,
                     ISNULL(COLUMNPROPERTY(a.id, a.name, 'Scale'), 0) AS Scale ,
-                    CASE WHEN a.isnullable = 1 THEN 1
+                    CAST(CASE WHEN a.isnullable = 1 THEN 1
                          ELSE 0
-                    END AS IsNullable ,
+                    END AS BIT) AS IsNullable ,
                     ISNULL(e.[text], '') AS DefaultValue ,
                     ISNULL(g.[value], '') AS ColumnDescription
             FROM    syscolumns a

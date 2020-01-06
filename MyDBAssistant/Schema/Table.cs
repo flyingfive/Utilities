@@ -5,20 +5,14 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using FlyingFive.Data.Schema;
 using MyDBAssistant.Data;
 
 namespace MyDBAssistant.Schema
 {
-    public class Table
+    public class Table : TableInfo
     {
-        public string TableName { get; set; }
-        public int TableId { get; set; }
-        public bool IsView { get; set; }
-        public string TableDescription { get; set; }
-
-        public IList<Column> Columns { get; set; }
-
-        public Table() { Columns = new List<Column>(); }
+        public Table() {  }
 
         public string ExportSheetName
         {

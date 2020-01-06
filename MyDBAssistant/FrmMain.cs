@@ -11,6 +11,8 @@ using MyDBAssistant.Schema;
 using System.IO;
 using System.Xml;
 using System.Xml.Linq;
+using FlyingFive.Caching;
+using FlyingFive;
 
 namespace MyDBAssistant
 {

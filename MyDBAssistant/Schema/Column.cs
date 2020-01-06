@@ -1,70 +1,18 @@
-﻿using System;
+﻿using FlyingFive.Data.Schema;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace MyDBAssistant.Schema
 {
-    public class Column
+    public class Column : ColumnInfo
     {
-        /// <summary>
-        /// 表ID
-        /// </summary>
-        public int TableId { get; set; }
-        /// <summary>
-        /// 列顺序
-        /// </summary>
-        public int ColumnOrder { get; set; }
-        /// <summary>
-        /// 列名
-        /// </summary>
-        public string ColumnName { get; set; }
-        /// <summary>
-        /// 是否标识
-        /// </summary>
-        public bool IsIdentity { get; set; }
-        /// <summary>
-        /// 是否主键
-        /// </summary>
-        public bool IsPrimaryKey { get; set; }
-        /// <summary>
-        /// SQL数据类型
-        /// </summary>
-        public string SqlType { get; set; }
         /// <summary>
         /// C#数据类型
         /// </summary>
         public string CSharpType { get { string typeName = GetCSharpType(SqlType, "String", IsNullable); return typeName; /*Type t = Type.GetType("System." + typeName); if (t.IsValueType && IsNullable) { typeName = string.Concat(typeName, "?"); } return typeName;*/ } }
-        /// <summary>
-        /// 大小
-        /// </summary>
-        public int Size { get; set; }
-        //长度
-        public int Precision { get; set; }
-        /// <summary>
-        /// 精度
-        /// </summary>
-        public int Scale { get; set; }
-        /// <summary>
-        /// 是否可空
-        /// </summary>
-        public bool IsNullable { get; set; }
-        /// <summary>
-        /// 默认值
-        /// </summary>
-        public string DefaultValue { get; set; }
-        /// <summary>
-        /// 列描述
-        /// </summary>
-        public string ColumnDescription { get; set; }
-        /// <summary>
-        /// SQL用户自定义类型名称
-        /// </summary>
-        public string UserTypeName { get; set; }
-        /// <summary>
-        /// 是否用户自定义类型
-        /// </summary>
-        public bool IsUserType { get; set; }
+
         /// <summary>
         /// 分隔符
         /// </summary>

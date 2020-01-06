@@ -13,8 +13,9 @@ using System.Text;
 using System.Xml;
 using System.Data.SqlClient;
 using MyDBAssistant.Schema;
-using MyDBAssistant.Utils;
-using MyDBAssistant.Caching;
+using FlyingFive.Caching;
+using FlyingFive;
+using FlyingFive.Data;
 
 namespace MyDBAssistant.Data
 {
@@ -32,17 +33,17 @@ namespace MyDBAssistant.Data
         AS
             SELECT  d.name AS TableName ,
                     d.id AS TableId ,
-                    CASE d.type
+                    CAST(CASE d.type
                       WHEN 'U' THEN 0
                       ELSE 1
-                    END AS IsView ,
+                    END AS BIT) AS IsView ,
                     ISNULL(f.value, '') AS TableDescription ,
                     a.colorder AS [ColumnOrder] ,
                     a.name AS ColumnName ,
-                    CASE WHEN COLUMNPROPERTY(a.id, a.name, 'IsIdentity') = 1 THEN 1
+                    CAST(CASE WHEN COLUMNPROPERTY(a.id, a.name, 'IsIdentity') = 1 THEN 1
                          ELSE 0
-                    END AS IsIdentity ,
-                    CASE WHEN EXISTS ( SELECT   1
+                    END AS BIT) AS IsIdentity ,
+                    CAST(CASE WHEN EXISTS ( SELECT   1
                                        FROM     sysobjects
                                        WHERE    xtype = 'PK'
                                                 AND parent_obj = a.id
@@ -56,7 +57,7 @@ namespace MyDBAssistant.Data
                                                                 AND colid = a.colid ) ) )
                          THEN 1
                          ELSE 0
-                    END AS IsPrimaryKey ,
+                    END AS BIT) AS IsPrimaryKey ,
                     --LOWER(b.name) AS SqlType ,
                     CASE WHEN b.xtype = b.xusertype THEN 0 ELSE 1 END AS IsUserType ,
                     b.name AS UserTypeName ,
@@ -64,9 +65,9 @@ namespace MyDBAssistant.Data
                     a.length AS Size ,
                     COLUMNPROPERTY(a.id, a.name, 'PRECISION') AS [Precision] ,
                     ISNULL(COLUMNPROPERTY(a.id, a.name, 'Scale'), 0) AS Scale ,
-                    CASE WHEN a.isnullable = 1 THEN 1
+                    CAST(CASE WHEN a.isnullable = 1 THEN 1
                          ELSE 0
-                    END AS IsNullable ,
+                    END AS BIT) AS IsNullable ,
                     ISNULL(e.[text], '') AS DefaultValue ,
                     ISNULL(g.[value], '') AS ColumnDescription
             FROM    syscolumns a
@@ -91,17 +92,17 @@ namespace MyDBAssistant.Data
         AS
             SELECT  d.name AS TableName ,
                     d.id AS TableId ,
-                    CASE d.type
+                    CAST(CASE d.type
                       WHEN 'U' THEN 0
                       ELSE 1
-                    END AS IsView ,
+                    END AS BIT) AS IsView ,
                     ISNULL(f.value, '') AS TableDescription ,
                     a.colorder AS [ColumnOrder] ,
                     a.name AS ColumnName ,
-                    CASE WHEN COLUMNPROPERTY(a.id, a.name, 'IsIdentity') = 1 THEN 1
+                    CAST(CASE WHEN COLUMNPROPERTY(a.id, a.name, 'IsIdentity') = 1 THEN 1
                          ELSE 0
-                    END AS IsIdentity ,
-                    CASE WHEN EXISTS ( SELECT   1
+                    END AS BIT) AS IsIdentity ,
+                    CAST(CASE WHEN EXISTS ( SELECT   1
                                        FROM     sysobjects
                                        WHERE    xtype = 'PK'
                                                 AND parent_obj = a.id
@@ -115,17 +116,17 @@ namespace MyDBAssistant.Data
                                                                 AND colid = a.colid ) ) )
                          THEN 1
                          ELSE 0
-                    END AS IsPrimaryKey ,
+                    END AS BIT) AS IsPrimaryKey ,
                     --LOWER(b.name) AS SqlType ,
-                    CASE WHEN b.xtype = b.xusertype THEN 0 ELSE 1 END AS IsUserType ,
+                    CAST(CASE WHEN b.xtype = b.xusertype THEN 0 ELSE 1 END AS BIT) AS IsUserType ,
                     b.name AS UserTypeName ,
                     LOWER(CASE WHEN b.xtype = b.xusertype THEN b.NAME ELSE b2.NAME END) AS SqlType ,
                     a.length AS Size ,
                     COLUMNPROPERTY(a.id, a.name, 'PRECISION') AS [Precision] ,
                     ISNULL(COLUMNPROPERTY(a.id, a.name, 'Scale'), 0) AS Scale ,
-                    CASE WHEN a.isnullable = 1 THEN 1
+                    CAST(CASE WHEN a.isnullable = 1 THEN 1
                          ELSE 0
-                    END AS IsNullable ,
+                    END AS BIT) AS IsNullable ,
                     ISNULL(e.[text], '') AS DefaultValue ,
                     ISNULL(g.[value], '') AS ColumnDescription
             FROM    syscolumns a
@@ -227,14 +228,12 @@ namespace MyDBAssistant.Data
             {
                 CreateDataDictView();
                 var dt = ExecuteQueryAsDataTable("SELECT TableName, TableId, IsView, TableDescription, ColumnOrder, ColumnName, IsIdentity, IsPrimaryKey, SqlType, Size, [Precision], Scale, IsNullable, DefaultValue, ColumnDescription FROM dbo.v_sys_DataDict", CommandType.Text);
-                var dtTables = dt.Copy();
-                var dtColumns = dt.Copy();
-                dtTables = dtTables.DefaultView.ToTable(true, new string[] { "TableId", "TableName", "IsView", "TableDescription" });
-                var lst = DataReaderConverter.ToList<Table>(dtTables.CreateDataReader()).ToList();
-                var columns = DataReaderConverter.ToList<Column>(dtColumns.Copy().CreateDataReader()).ToList();
+                var dtTables = dt.DefaultView.ToTable(true, new string[] { "TableId", "TableName", "IsView", "TableDescription" });
+                var lst = dtTables.ToList<Table>();//DataReaderConverter.ToList<Table>(dtTables.CreateDataReader()).ToList();
                 foreach (var table in lst)
                 {
-                    table.Columns = columns.Where(c => c.TableId == table.TableId).ToList();
+                    var columns = dt.Select(string.Format("TableId={0}", table.TableId)).CopyToDataTable();
+                    table.Columns.AddRange(columns.ToList<Column>());
                 }
                 return lst;
             });

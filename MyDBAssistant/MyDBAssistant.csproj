@@ -101,10 +101,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Caching\CacheExtensions.cs" />
-    <Compile Include="Caching\ICacheManager.cs" />
-    <Compile Include="Caching\MemoryCacheManager.cs" />
-    <Compile Include="Data\DataReaderConverter.cs" />
     <Compile Include="Data\DbAccessException.cs" />
     <Compile Include="Data\MsSqlHelper.cs" />
     <Compile Include="Data\MsSqlHelper.Schema.cs" />
@@ -184,7 +180,6 @@
     <Compile Include="Schema\DatabaseSchemaHistory.cs" />
     <Compile Include="Schema\MsSqlVersion.cs" />
     <Compile Include="Schema\Table.cs" />
-    <Compile Include="Utils\Singleton.cs" />
     <Compile Include="VelocityHelper.cs" />
     <EmbeddedResource Include="FrmAbout.resx">
       <DependentUpon>FrmAbout.cs</DependentUpon>
@@ -263,6 +258,9 @@
       <Project>{1e1fc264-62d6-400a-bc97-3241f19fb1ba}</Project>
       <Name>FlyingFive</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Utils\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
