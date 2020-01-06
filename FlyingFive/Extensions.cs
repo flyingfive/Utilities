@@ -13,13 +13,14 @@ namespace FlyingFive
     public static partial class Extensions
     {
         /// <summary>
-        /// 是否为空或默认值
+        /// 判断值类型是否为空或默认值
         /// </summary>
         /// <typeparam name="T">值类型</typeparam>
         /// <param name="value">值</param>
         /// <returns></returns>
         public static bool IsNullOrDefault<T>(this T? value) where T : struct
         {
+            if (!value.HasValue) { return true; }
             bool flag = default(T).Equals(value.GetValueOrDefault());
             return flag;
         }
@@ -82,36 +83,36 @@ namespace FlyingFive
             return newId;
         }
 
-        /// <summary>
-        /// 字符串转换为decimal 
-        /// </summary>
-        /// <param name="obj">输入字符串</param>
-        /// <param name="defDec">转换失败时的默认值</param>
-        /// <returns></returns>
-        public static decimal TryDecimal(this object obj, decimal defDec = 0M)
-        {
-            decimal decVal = 0M;
-            if (obj == null || obj == DBNull.Value || obj.Equals(string.Empty))
-                return defDec;
-            obj = obj.ToString();
-            if (decimal.TryParse(obj.ToString(), out decVal))
-                return decVal;
-            else
-                return defDec;
-        }
+        ///// <summary>
+        ///// 字符串转换为decimal 
+        ///// </summary>
+        ///// <param name="obj">输入字符串</param>
+        ///// <param name="defDec">转换失败时的默认值</param>
+        ///// <returns></returns>
+        //public static decimal TryDecimal(this object obj, decimal defDec = 0M)
+        //{
+        //    decimal decVal = 0M;
+        //    if (obj == null || obj == DBNull.Value || obj.Equals(string.Empty))
+        //        return defDec;
+        //    obj = obj.ToString();
+        //    if (decimal.TryParse(obj.ToString(), out decVal))
+        //        return decVal;
+        //    else
+        //        return defDec;
+        //}
 
-        /// <summary>
-        /// 任意对象转换成字符串
-        /// </summary>
-        /// <param name="obj">一个对象</param>
-        /// <param name="trimEmpty">是否去空格</param>
-        /// <returns></returns>
-        public static string TryString(this object obj, bool trimEmpty = false)
-        {
-            if (obj == null || DBNull.Value.Equals(obj)) { return string.Empty; }
-            var str = obj.ToString();
-            if (trimEmpty) { str = str.Trim(); }
-            return str;
-        }
+        ///// <summary>
+        ///// 任意对象转换成字符串
+        ///// </summary>
+        ///// <param name="obj">一个对象</param>
+        ///// <param name="trimEmpty">是否去空格</param>
+        ///// <returns></returns>
+        //public static string TryString(this object obj, bool trimEmpty = false)
+        //{
+        //    if (obj == null || DBNull.Value.Equals(obj)) { return string.Empty; }
+        //    var str = obj.ToString();
+        //    if (trimEmpty) { str = str.Trim(); }
+        //    return str;
+        //}
     }
 }

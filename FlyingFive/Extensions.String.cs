@@ -203,13 +203,15 @@ namespace FlyingFive
         /// <summary>
         /// 判断字符串是否日期类型
         /// </summary>
-        /// <param name="str">字符串内容</param>
+        /// <param name="text">字符串内容</param>
+        /// <param name="format">日期格式</param>
         /// <returns></returns>
-        public static bool IsDateTime(this string str)
+        public static bool IsDateTime(this string text, string format = "yyy-MM-dd HH:mm:ss")
         {
-            if (string.IsNullOrWhiteSpace(str)) { return false; }
+            if (string.IsNullOrWhiteSpace(text)) { return false; }
             var dt = DateTime.MinValue;
-            var flag = DateTime.TryParse(str, out dt);
+            var culture = System.Globalization.CultureInfo.GetCultureInfo("zh-CN");
+            var flag = DateTime.TryParseExact(text, format, culture, System.Globalization.DateTimeStyles.AssumeLocal, out dt);
             return flag;
         }
 

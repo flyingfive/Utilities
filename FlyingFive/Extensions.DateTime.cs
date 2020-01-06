@@ -17,7 +17,7 @@ namespace FlyingFive
         /// <param name="end">结束时间</param>
         /// <param name="dateformat">间隔格式(y:年,M:月,d:天,h:小时,m:分钟,s:秒,fff:毫秒)</param>
         /// <returns></returns>
-        public static long CompareInterval(this DateTime begin, DateTime end, string dateformat)
+        public static long CompareInterval(this DateTime begin, DateTime end, string dateformat = "d")
         {
             long interval = begin.Ticks - end.Ticks;
             DateTime dt11;

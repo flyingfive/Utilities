@@ -30,7 +30,7 @@ namespace FlyingFive.Utils
             set { _loadAppDomainAssemblies = value; }
         }
 
-        private string _assemblySkipLoadingPattern = "^System|^mscorlib|^Microsoft|^CppCodeProvider|^VJSharpCodeProvider|^WebDev|^Castle|^Iesi|^log4net|^NHibernate|^nunit|^TestDriven|^MbUnit|^Rhino|^QuickGraph|^TestFu|^Telerik|^ComponentArt|^MvcContrib|^AjaxControlToolkit|^Antlr3|^Remotion|^Recaptcha|^Autofac|^EntityFramework";
+        private string _assemblySkipLoadingPattern = "^System|^mscorlib|^Microsoft|^CppCodeProvider|^VJSharpCodeProvider|^WebDev|^Castle|^Iesi|^log4net|^NHibernate|^nunit|^TestDriven|^MbUnit|^Rhino|^QuickGraph|^TestFu|^Telerik|^ComponentArt|^MvcContrib|^Antlr3|^Remotion|^Recaptcha|^Autofac|^AutoMapper|^EntityFramework";
         /// <summary>
         /// 忽略加载的程序集
         /// </summary>

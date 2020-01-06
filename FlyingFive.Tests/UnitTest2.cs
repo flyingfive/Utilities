@@ -18,6 +18,14 @@ namespace FlyingFive.Tests
     public class UnitTest2
     {
         [TestMethod]
+        public void TestSBCMethod()
+        {
+            var s = System.Globalization.CultureInfo.GetCultureInfo("zh-CN");
+            var a = "ABC".ToSBC();
+            var b = a.ToDBC();
+            var flag = a.GetType().IsCustomType();
+        }
+        [TestMethod]
         public void TestMapping()
         {
             var list = new List<Employee>();

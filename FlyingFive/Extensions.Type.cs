@@ -50,7 +50,7 @@ namespace FlyingFive
                 case "float": return SqlDbType.Float;
                 case "decimal": return SqlDbType.Decimal;
                 case "string":
-                default: return SqlDbType.NVarChar;
+                default: return SqlDbType.VarChar;
             }
         }
 

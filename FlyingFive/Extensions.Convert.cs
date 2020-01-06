@@ -12,67 +12,102 @@ namespace FlyingFive
     /// </summary>
     public static partial class Extensions
     {
+        ///// <summary>
+        ///// 类型转换(如果为null则转换为T类型的默认值)
+        ///// </summary>
+        ///// <typeparam name="T">要转换的目标类型</typeparam>
+        ///// <param name="convertibleValue">要转换的值</param>
+        ///// <param name="useDefaultValWhenFailure">转换失败时是否使用默认值</param>
+        ///// <param name="defaultVal">默认值</param>
+        ///// <returns></returns>
+        //public static T TryConvert<T>(this IConvertible convertibleValue, bool useDefaultValWhenFailure = true, T defaultVal = default(T))
+        //{
+        //    try
+        //    {
+        //        if (null == convertibleValue)
+        //        {
+        //            if (useDefaultValWhenFailure) { return defaultVal; }
+        //            throw new InvalidCastException(string.Format("不能从null转换成类型：", typeof(T).FullName));
+        //        }
+        //        if (!typeof(T).IsGenericType)
+        //        {
+        //            return (T)Convert.ChangeType(convertibleValue, typeof(T));
+        //        }
+        //        else
+        //        {
+        //            Type genericTypeDefinition = typeof(T).GetGenericTypeDefinition();
+        //            if (genericTypeDefinition == typeof(Nullable<>))
+        //            {
+        //                return (T)Convert.ChangeType(convertibleValue, Nullable.GetUnderlyingType(typeof(T)));
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        if (useDefaultValWhenFailure) { return defaultVal; }
+        //        throw new InvalidCastException("数据转换失败", ex);
+        //    }
+        //    throw new InvalidCastException(string.Format("类型无法无法从: \"{0}\" 转换为: \"{1}\".", convertibleValue.GetType().FullName, typeof(T).FullName));
+        //}
+
+        ///// <summary>
+        ///// 将任意值转换为指定类型(如果为null则转换为T类型的默认值)
+        ///// </summary>
+        ///// <typeparam name="T">转换的目标类型</typeparam>
+        ///// <param name="srcValue">任意源值</param>
+        ///// <param name="defaultVal">转换失败时的默认值</param>
+        ///// <returns></returns>
+        //public static T TryConvert<T>(this object srcValue, T defaultVal = default(T))
+        //{
+        //    try
+        //    {
+        //        if (null == srcValue) { return defaultVal; }
+        //        T destVal = (T)Convert.ChangeType(srcValue, typeof(T));
+        //        return destVal;
+        //    }
+        //    catch
+        //    {
+        //        return defaultVal;
+        //    }
+        //}
+
         /// <summary>
-        /// 类型转换(如果为null则转换为T类型的默认值)
+        /// 非null值的指定类型转换
         /// </summary>
-        /// <typeparam name="T">要转换的目标类型</typeparam>
-        /// <param name="convertibleValue">要转换的值</param>
-        /// <param name="useDefaultValWhenFailure">转换失败时是否使用默认值</param>
-        /// <param name="defaultVal">默认值</param>
+        /// <typeparam name="T">转换目标类型</typeparam>
+        /// <param name="srcValue">源值</param>
         /// <returns></returns>
-        public static T TryConvert<T>(this IConvertible convertibleValue, bool useDefaultValWhenFailure = true, T defaultVal = default(T))
+        public static T TryConvert<T>(this object srcValue)
         {
-            try
+            if (srcValue == null || DBNull.Value.Equals(srcValue))
             {
-                if (null == convertibleValue)
-                {
-                    if (useDefaultValWhenFailure) { return defaultVal; }
-                    throw new InvalidCastException(string.Format("不能从null转换成类型：", typeof(T).FullName));
-                }
-                if (!typeof(T).IsGenericType)
-                {
-                    return (T)Convert.ChangeType(convertibleValue, typeof(T));
-                }
-                else
-                {
-                    Type genericTypeDefinition = typeof(T).GetGenericTypeDefinition();
-                    if (genericTypeDefinition == typeof(Nullable<>))
-                    {
-                        return (T)Convert.ChangeType(convertibleValue, Nullable.GetUnderlyingType(typeof(T)));
-                    }
-                }
+                throw new ArgumentNullException("null值不能参与转换。");
             }
-            catch (Exception ex)
-            {
-                if (useDefaultValWhenFailure) { return defaultVal; }
-                throw new InvalidCastException("数据转换失败", ex);
-            }
-            throw new InvalidCastException(string.Format("类型无法无法从: \"{0}\" 转换为: \"{1}\".", convertibleValue.GetType().FullName, typeof(T).FullName));
+            T destValue = (T)srcValue.TryConvert(typeof(T));
+            return destValue;
         }
 
         /// <summary>
-        /// 将任意值转换为指定类型(如果为null则转换为T类型的默认值)
+        /// 含null值的指定类型转换
         /// </summary>
-        /// <typeparam name="T">转换的目标类型</typeparam>
-        /// <param name="srcValue">任意源值</param>
-        /// <param name="defaultVal">转换失败时的默认值</param>
+        /// <typeparam name="T">转换目标类型</typeparam>
+        /// <param name="srcValue">源值</param>
+        /// <param name="defaultValue">替换null的默认值</param>
         /// <returns></returns>
-        public static T TryConvert<T>(this object srcValue, T defaultVal = default(T))
+        public static T TryConvert<T>(this object srcValue, T defaultValue = default(T))
         {
-            try
+            if (srcValue == null || DBNull.Value.Equals(srcValue))
             {
-                if (null == srcValue) { return defaultVal; }
-                T destVal = (T)Convert.ChangeType(srcValue, typeof(T));
-                return destVal;
+                return defaultValue;
             }
-            catch
-            {
-                return defaultVal;
-            }
+            T destValue = (T)srcValue.TryConvert(typeof(T));
+            return destValue;
         }
 
+
+
         /// <summary>
-        /// 类型转换
+        /// 类型转换，包括为object
         /// </summary>
         /// <param name="srcValue">源值</param>
         /// <param name="destinationType">目标类型</param>
