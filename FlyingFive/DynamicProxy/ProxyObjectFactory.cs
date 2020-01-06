@@ -68,7 +68,7 @@ namespace FlyingFive.DynamicProxy
         }
 
         private static readonly Dictionary<Assembly, ModuleBuilder> _moduleBuilders = new Dictionary<Assembly, ModuleBuilder>();
-        private const string DYNAMIC_ASSEMBLY_NAME = "FlyingFive.LocalDynamicProxies";
+        private const string DYNAMIC_ASSEMBLY_NAME = "__FlyingFive.LocalDynamicProxies";
         /// <summary>
         /// 构造接口的本地代理实现类
         /// </summary>
