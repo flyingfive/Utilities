@@ -5,12 +5,6 @@
 *.ide
 *.suo
 *.user
-.vs/Utilities/v16/Server/sqlite3/storage.ide-shm
-.vs/Utilities/v16/Server/sqlite3/storage.ide-wal
-.vs/Utilities/v15/Server/sqlite3/storage.ide-shm
-.vs/Utilities/v15/Server/sqlite3/storage.ide-wal
-Utilities.v12.suo
-.vs/Utilities/v15/.suo
 bin
 obj
 
