@@ -88,7 +88,6 @@
     <Compile Include="DynamicProxy\IProxyInvocationHandler.cs" />
     <Compile Include="DynamicProxy\MetaDataFactory.cs" />
     <Compile Include="DynamicProxy\ProxyObjectFactory.cs" />
-    <Compile Include="DynamicProxy\SecurityManager.cs" />
     <Compile Include="DynamicProxy\DefaultInvocationHandler.cs" />
     <Compile Include="Extensions.AppDomain.cs" />
     <Compile Include="Extensions.Char.cs" />

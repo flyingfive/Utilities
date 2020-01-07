@@ -71,6 +71,7 @@
             this.chkBatchColumns.TabIndex = 4;
             this.chkBatchColumns.Text = "同时修改列描述";
             this.chkBatchColumns.UseVisualStyleBackColor = true;
+            this.chkBatchColumns.Visible = false;
             // 
             // btnDescription
             // 

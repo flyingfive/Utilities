@@ -10,7 +10,7 @@ namespace FlyingFive.DynamicProxy
     /// <summary>
     /// 代理过的接口类型元数据
     /// </summary>
-    public class MetaDataFactory
+    internal class MetaDataFactory
     {
         private static Hashtable typeMap = new Hashtable();
 
@@ -39,7 +39,7 @@ namespace FlyingFive.DynamicProxy
         /// <summary>
         /// 获取接口方法信息的方法
         /// </summary>
-        public static readonly MethodInfo GetInterfaceMethod = typeof(MetaDataFactory).GetMethod("GetMethod", new Type[] { typeof(string), typeof(int) });
+        internal static readonly MethodInfo GetInterfaceMethod = typeof(MetaDataFactory).GetMethod("GetMethod", new Type[] { typeof(string), typeof(int) });
 
         /// <summary>
         /// 根据索引位置返回接口方法信息

@@ -55,8 +55,8 @@ namespace MyDBAssistant
                 txtName.Text = _table.TableName;
                 txtDescription.Text = _table.TableDescription;
                 txtName.ReadOnly = true;
-                txtDescription.ReadOnly = true;
-                btnSave.Enabled = false;
+                //txtDescription.ReadOnly = true;
+                //btnSave.Enabled = false;
             }
             txtName.Focus();
         }
@@ -67,20 +67,23 @@ namespace MyDBAssistant
             var sqlTypes = Column.GetSqlTypes();
             sqlTypes.Insert(0, "--请选择--");
             dgvColumns.Columns.Clear();
-            dgvColumns.ReadOnly = _tableId != 0;
+            //dgvColumns.ReadOnly = _tableId != 0;
             dgvColumns.AutoGenerateColumns = false;
+            dgvColumns.AllowUserToOrderColumns = false;
             dgvColumns.MultiSelect = false;
+            var readOnly = _tableId != 0;
+            dgvColumns.AllowUserToAddRows = !readOnly;
             dgvColumns.Columns.AddRange(new DataGridViewColumn[] {
-                new DataGridViewTextBoxColumn(){ Name = "TableId", DataPropertyName = "TableId", Visible = false },
-                new DataGridViewTextBoxColumn(){ Name = "ColumnOrder", DataPropertyName = "ColumnOrder", Visible = false },
-                new DataGridViewTextBoxColumn(){ Name= "ColumnName", DataPropertyName = "ColumnName", Width = 100, HeaderText = "列名" },
-                new DataGridViewComboBoxColumn(){ Name= "SqlType", DataPropertyName = "SqlType", Width = 120, HeaderText = "类型", DropDownWidth = 100, MaxDropDownItems = 5, DataSource = sqlTypes },
-                new DataGridViewTextBoxColumn(){ Name= "Precision", DataPropertyName = "Precision", Width = 60, HeaderText = "长度" },
-                new DataGridViewTextBoxColumn(){ Name= "Scale", DataPropertyName = "Scale", Width = 60, HeaderText = "精度" },
-                new DataGridViewCheckBoxColumn(){ Name= "IsPrimaryKey", DataPropertyName = "IsPrimaryKey", Width = 60, HeaderText = "主键", TrueValue = true, FalseValue = false  },
-                new DataGridViewCheckBoxColumn(){ Name= "IsNullable", DataPropertyName = "IsNullable", Width = 60, HeaderText = "可空", TrueValue = true, FalseValue = false },
-                new DataGridViewCheckBoxColumn(){ Name= "IsIdentity", DataPropertyName = "IsIdentity", Width = 60, HeaderText = "标识", TrueValue = true, FalseValue = false },
-                new DataGridViewTextBoxColumn(){ Name= "DefaultValue", DataPropertyName = "DefaultValue", Width = 100, HeaderText = "默认值" },
+                new DataGridViewTextBoxColumn(){ Name = "TableId", DataPropertyName = "TableId", Visible = false, ReadOnly = readOnly },
+                new DataGridViewTextBoxColumn(){ Name = "ColumnOrder", DataPropertyName = "ColumnOrder", Visible = false, ReadOnly = readOnly },
+                new DataGridViewTextBoxColumn(){ Name= "ColumnName", DataPropertyName = "ColumnName", Width = 100, HeaderText = "列名", ReadOnly = readOnly },
+                new DataGridViewComboBoxColumn(){ Name= "SqlType", DataPropertyName = "SqlType", Width = 120, HeaderText = "类型", ReadOnly = readOnly, DropDownWidth = 100, MaxDropDownItems = 5, DataSource = sqlTypes },
+                new DataGridViewTextBoxColumn(){ Name= "Precision", DataPropertyName = "Precision", Width = 60, HeaderText = "长度", ReadOnly = readOnly },
+                new DataGridViewTextBoxColumn(){ Name= "Scale", DataPropertyName = "Scale", Width = 60, HeaderText = "精度", ReadOnly = readOnly },
+                new DataGridViewCheckBoxColumn(){ Name= "IsPrimaryKey", DataPropertyName = "IsPrimaryKey", Width = 60, HeaderText = "主键", ReadOnly = readOnly, TrueValue = true, FalseValue = false  },
+                new DataGridViewCheckBoxColumn(){ Name= "IsNullable", DataPropertyName = "IsNullable", Width = 60, HeaderText = "可空", ReadOnly = readOnly, TrueValue = true, FalseValue = false },
+                new DataGridViewCheckBoxColumn(){ Name= "IsIdentity", DataPropertyName = "IsIdentity", Width = 60, HeaderText = "标识", ReadOnly = readOnly, TrueValue = true, FalseValue = false },
+                new DataGridViewTextBoxColumn(){ Name= "DefaultValue", DataPropertyName = "DefaultValue", Width = 100, HeaderText = "默认值", ReadOnly = readOnly },
                 new DataGridViewTextBoxColumn(){ Name= "ColumnDescription", DataPropertyName = "ColumnDescription", Width = 160, HeaderText = "描述"},
             });
         }
@@ -101,30 +104,37 @@ namespace MyDBAssistant
                 if (_tableId == 0)         //创建表
                 {
                     _table.TableName = txtName.Text.Trim();
-                    _table.TableDescription = txtDescription.Text.Trim();
                 }
-                foreach (Column column in lst)
+                _table.TableDescription = txtDescription.Text.Trim();
+                _table.Columns = lst.OfType<ColumnInfo>().ToList();
+                foreach (Column column in _table.Columns)
                 {
-                    if (string.IsNullOrWhiteSpace(column.ColumnName)) { continue; }
+                    if (string.IsNullOrWhiteSpace(column.ColumnName))
+                    {
+                        if (_tableId == 0)
+                        {
+                            MessageBox.Show("缺少列名。"); return;
+                        }
+                        continue;
+                    }
                     if (string.IsNullOrWhiteSpace(column.ColumnDescription))
                     {
                         MessageBox.Show(string.Format("列:{0},缺少描述信息", column.ColumnName), "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         return;
                     }
-                    else
-                    {
-                        if (chkBatchColumns.Checked)
-                        {
-                            this.UpdateColumnDescription(txtName.Text.Trim(), column.ColumnName, column.ColumnDescription);
-                        }
-                    }
+                    //else
+                    //{
+                    //    if (chkBatchColumns.Checked)
+                    //    {
+                    //        this.UpdateColumnDescription(txtName.Text.Trim(), column.ColumnName, column.ColumnDescription);
+                    //    }
+                    //}
                     if (string.IsNullOrWhiteSpace(column.SqlType) || column.SqlType.Contains("请选择")) { MessageBox.Show(string.Format("没有为列:{0}指定数据类型", column.ColumnName), "提示", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
                     if (column.IsPrimaryKey) { hasPrimaryKeyDefined = true; }
-                    _table.Columns.Add(column);
+                    //_table.Columns.Add(column);
                 }
                 if (_tableId == 0)
                 {
-                    _table.Columns = lst.OfType<ColumnInfo>().ToList();
                     if (!hasPrimaryKeyDefined) { MessageBox.Show(string.Format("还没有没表:{0}指定主键!", txtName.Text.Trim()), "提示", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
                     _table.Create(_mssqlHelper);
                     MessageBox.Show(string.Format("创建表表:{0}成功!", _table.TableName), "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -142,19 +152,8 @@ namespace MyDBAssistant
                         log.Insert(_mssqlHelper);
                         MessageBox.Show("表名修改成功!请注意同步修改数据库中的存储过程,视图...等引用此表的对象~", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
-                    if (!txtDescription.ReadOnly)   //修改描述
-                    {
-                        bool existsDescriptionSql = Convert.ToInt32(_mssqlHelper.ExecuteQueryAsSingle(string.Format("SELECT ISNULL(COUNT(0), 0) FROM ::fn_listextendedproperty ('MS_Description', 'user', 'dbo', 'table', '{0}', NULL, NULL)", txtName.Text.Trim()), CommandType.Text)) > 0;
-                        string sql = string.Format("EXEC sp_addextendedproperty 'MS_Description', '{0}', 'user', dbo, 'table', [{1}]", txtDescription.Text.Trim(), txtName.Text.Trim());
-                        if (existsDescriptionSql)
-                        {
-                            sql = string.Format("EXEC sp_updateextendedproperty 'MS_Description', '{0}', 'user', dbo, 'table', [{1}]", txtDescription.Text.Trim(), txtName.Text.Trim());
-                        }
-                        _mssqlHelper.ExecuteNonQuery(sql, CommandType.Text);
-                        DatabaseSchemaHistory log = new DatabaseSchemaHistory() { Description = string.Format("修改表描述信息", _table.TableName, txtName.Text.Trim()), SqlScript = sql };
-                        log.Insert(_mssqlHelper);
-                        MessageBox.Show("描述信息已成功修改!", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
+                    SaveTableDescriptionData();
+                    MessageBox.Show("描述信息已成功修改!", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     _table = _mssqlHelper.ExecuteQueryAsList<Table>("SELECT TOP 1 TableId, TableName, TableDescription FROM dbo.v_sys_DataDict WHERE TableId = @TableId", CommandType.Text, new DbParameter[] { new SqlParameter("@TableId", _tableId) }).FirstOrDefault();
                     if (_table == null) { throw new DataException(string.Format("数据库中不存在Id为:{0}的对象", _tableId)); }
                     btnSave.Enabled = false;
@@ -162,7 +161,6 @@ namespace MyDBAssistant
                     txtDescription.ReadOnly = true;
                     this.DialogResult = System.Windows.Forms.DialogResult.OK;
                 }
-
             }
             catch (Exception ex)
             {
@@ -174,6 +172,21 @@ namespace MyDBAssistant
                 this.btnSave.Text = "保存";
             }
 
+        }
+
+        private void SaveTableDescriptionData()
+        {
+            var exists = string.Format("SELECT 1 FROM ::fn_listextendedproperty ('MS_Description', 'user', 'dbo', 'table', '{0}', NULL, NULL)", txtName.Text.Trim());
+            var update = string.Format("EXEC sp_updateextendedproperty 'MS_Description', '{0}', 'user', dbo, 'table', [{1}]", _table.TableDescription, _table.TableName);
+            var insert = string.Format("EXEC sp_addextendedproperty 'MS_Description', '{0}', 'user', dbo, 'table', [{1}]", _table.TableDescription, _table.TableName);
+            var sql = string.Format("IF EXISTS ( {0} ) BEGIN {1} END ELSE BEGIN {2} END", exists, update, insert);
+            foreach (var item in _table.Columns)
+            {
+                sql = string.Format("{0}{1}{2}", sql, Environment.NewLine, UpdateColumnDescription(_table.TableName, item.ColumnName, item.ColumnDescription));
+            }
+            _mssqlHelper.ExecuteNonQuery(sql, CommandType.Text);
+            DatabaseSchemaHistory log = new DatabaseSchemaHistory() { Description = string.Format("修改表描述信息", _table.TableName, txtName.Text.Trim()), SqlScript = sql };
+            log.Insert(_mssqlHelper);
         }
 
         private void dgvColumns_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -226,17 +239,13 @@ namespace MyDBAssistant
         /// <param name="tableName">表名</param>
         /// <param name="column">列名</param>
         /// <param name="description">描述</param>
-        private void UpdateColumnDescription(string tableName, string column, string description)
+        private string UpdateColumnDescription(string tableName, string column, string description)
         {
-            bool existsDescriptionSql = Convert.ToInt32(_mssqlHelper.ExecuteQueryAsSingle(string.Format("SELECT ISNULL(COUNT(0), 0) FROM ::fn_listextendedproperty ('MS_Description', 'user', 'dbo', 'table', '{0}', 'column', '{1}')", tableName, column), CommandType.Text)) > 0;
-            string sql = string.Format("EXEC sp_addextendedproperty 'MS_Description', '{0}', 'user', dbo, 'table', [{1}], 'column', [{2}]", description.Trim(), tableName, column);
-            if (existsDescriptionSql)
-            {
-                sql = string.Format("EXEC sp_updateextendedproperty 'MS_Description', '{0}', 'user', dbo, 'table', [{1}], 'column', [{2}]", description.Trim(), tableName, column);
-            }
-            _mssqlHelper.ExecuteNonQuery(sql, CommandType.Text);
-            DatabaseSchemaHistory log = new DatabaseSchemaHistory() { Description = string.Format("修改列描述信息", tableName, column), SqlScript = sql };
-            log.Insert(_mssqlHelper);
+            var exists = string.Format("SELECT 1 FROM ::fn_listextendedproperty ('MS_Description', 'user', 'dbo', 'table', '{0}', 'column', '{1}')", tableName, column);
+            var update = string.Format("EXEC sp_updateextendedproperty 'MS_Description', '{0}', 'user', dbo, 'table', [{1}], 'column', [{2}]", description.Trim(), tableName, column);
+            var insert = string.Format("EXEC sp_addextendedproperty 'MS_Description', '{0}', 'user', dbo, 'table', [{1}], 'column', [{2}]", description.Trim(), tableName, column);
+            var sql = string.Format("IF EXISTS ( {0} ) BEGIN {1} END ELSE BEGIN {2} END", exists, update, insert);
+            return sql;
         }
 
         //private void btnNewColumn_Click(object sender, EventArgs e)
