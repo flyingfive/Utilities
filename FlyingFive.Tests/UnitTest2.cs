@@ -25,6 +25,32 @@ namespace FlyingFive.Tests
     public class UnitTest2
     {
         [TestMethod]
+        public void TestSnowflakeId()
+        {
+            var idCreator = SnowflakeId.Default;
+            var batchSize = 100000;
+            var count = 40;
+            var connectionString = @"Data Source=10.0.0.18;Initial Catalog=Northwind;User Id=sa;Password=sa.;Connect Timeout=5;";
+
+            System.Threading.Tasks.Parallel.For(0, count, (x) =>
+            {
+                var session = new MsSqlHelper(connectionString);
+                var dt = new DataTable("ID");
+                dt.Columns.AddRange(new DataColumn[] {
+                    new DataColumn("ID",typeof(long)){ AllowDBNull=false }
+                });
+                dt.PrimaryKey = new DataColumn[] { dt.Columns[0] };
+                for (int i = 0; i < batchSize; i++)
+                {
+                    var row = dt.NewRow();
+                    row["ID"] = idCreator.CreateUniqueId();
+                    dt.Rows.Add(row);
+                }
+                session.BulkCopy(dt);
+            });
+            Debug.WriteLine("complete");
+        }
+        [TestMethod]
         public void TestSBCMethod()
         {
             var m = 7.125698520546M.TruncateDec(4);

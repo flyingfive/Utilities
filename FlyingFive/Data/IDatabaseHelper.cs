@@ -9,9 +9,9 @@ using System.Text;
 namespace FlyingFive.Data
 {
     /// <summary>
-    /// 表示一个DB会话
+    /// DB工具
     /// </summary>
-    public interface IDbSession : IDisposable
+    public interface IDatabaseHelper : IDisposable
     {
         /// <summary>
         /// 会话是否在事务处理中

@@ -2,6 +2,8 @@
 using FlyingFive.Data.Kernel;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 
@@ -10,7 +12,7 @@ namespace FlyingFive.Data.Drivers.SqlServer
     /// <summary>
     /// SQL Server操作工具
     /// </summary>
-    public class MsSqlHelper : DbSession, IDbSession
+    public class MsSqlHelper : DatabaseHelper, IDatabaseHelper
     {
         public MsSqlHelper(string connectionString)
             : this(new SqlServerDbConnectionFactory(connectionString))
@@ -23,7 +25,47 @@ namespace FlyingFive.Data.Drivers.SqlServer
             //this._dbContextProvider = new MsSqlContextServiceProvider(dbConnectionFactory, this);
         }
 
-
+        /// <summary>
+        /// 批量插入数据
+        /// </summary>
+        /// <param name="data">数据表</param>
+        /// <param name="timeout">超时时间</param>
+        /// <param name="batchSize">分批大小</param>
+        /// <param name="options">插入选项</param>
+        /// <returns></returns>
+        public bool BulkCopy(DataTable data, int timeout = 60, int batchSize = 10000, SqlBulkCopyOptions options = SqlBulkCopyOptions.Default)
+        {
+            if (data == null) { UtilExceptions.CheckNull(data); }
+            if (data.Rows.Count == 0) { return true; }
+            if (timeout <= 0) { timeout = 60; }                //默认1分钟
+            if (batchSize <= 0) { batchSize = data.Rows.Count; }
+            using (var connection = (SqlConnection)this.DbConnectionFactory.CreateConnection())
+            {
+                connection.Open();
+                using (var transaction = connection.BeginTransaction())
+                using (var copy = new SqlBulkCopy(connection, options, transaction))
+                {
+                    copy.BatchSize = batchSize;
+                    copy.BulkCopyTimeout = timeout;
+                    copy.DestinationTableName = data.TableName;
+                    foreach (DataColumn col in data.Columns)
+                    {
+                        copy.ColumnMappings.Add(col.ColumnName, col.ColumnName);
+                    }
+                    try
+                    {
+                        copy.WriteToServer(data);
+                        transaction.Commit();
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        throw ex;
+                    }
+                }
+            }
+        }
         #region create schema info view script
         /// <summary>
         /// 创建2000版本数据字典的视图sql脚本

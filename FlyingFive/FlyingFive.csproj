@@ -71,7 +71,7 @@
     <Compile Include="Data\Extensions.Reflection.cs" />
     <Compile Include="Data\Fakes\FakeDataReader.cs" />
     <Compile Include="Data\Fakes\FakeParameter.cs" />
-    <Compile Include="Data\IDbSession.cs" />
+    <Compile Include="Data\IDatabaseHelper.cs" />
     <Compile Include="Data\Infrastructure\IDbConnectionFactory.cs" />
     <Compile Include="Data\Infrastructure\SupportedMappingTypes.cs" />
     <Compile Include="Data\Interception\DbCommandInterceptionContext.cs" />
@@ -79,7 +79,7 @@
     <Compile Include="Data\Interception\IDbCommandInterceptor.cs" />
     <Compile Include="Data\Kernel\CommonAdoSession.cs" />
     <Compile Include="Data\Emit\DelegateGenerator.cs" />
-    <Compile Include="Data\Kernel\DbSession.cs" />
+    <Compile Include="Data\Kernel\DatabaseHelper.cs" />
     <Compile Include="Data\Mapper\DataReaderOrdinalEnumerator.cs" />
     <Compile Include="Data\Mapper\IMemberMapper.cs" />
     <Compile Include="Data\Mapper\IObjectActivator.cs" />
@@ -115,6 +115,7 @@
     <Compile Include="Singleton.cs" />
     <Compile Include="Utils\RegistryUtility.cs" />
     <Compile Include="Utils\SerializationHelper.cs" />
+    <Compile Include="Utils\SnowflakeId.cs" />
     <Compile Include="Web\Utility\WebAppTypeFinder.cs" />
     <Compile Include="Web\Utility\WebHelper.cs" />
     <Compile Include="Win\Extensions.Control.cs" />
@@ -127,7 +128,7 @@
     <Compile Include="Win\WinServiceUtility.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data\Extensions.DbSession.cs" />
+    <Compile Include="Data\Extensions.DatabaseHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\Extensions.IQueryable.cs" />

@@ -12,7 +12,7 @@ namespace FlyingFive.Data.Kernel
     /// <summary>
     /// DB会话抽象
     /// </summary>
-    public abstract class DbSession : IDbSession, IDisposable
+    public abstract class DatabaseHelper : IDatabaseHelper, IDisposable
     {
         /// <summary>
         /// 
@@ -38,7 +38,7 @@ namespace FlyingFive.Data.Kernel
 
         public int CommandTimeout { get { return this.CommonSession.CommandTimeout; } set { this.CommonSession.CommandTimeout = value; } }
 
-        public DbSession(IDbConnectionFactory connectionFactory)
+        public DatabaseHelper(IDbConnectionFactory connectionFactory)
         {
             UtilExceptions.CheckNull(connectionFactory);
             this.DbConnectionFactory = connectionFactory;

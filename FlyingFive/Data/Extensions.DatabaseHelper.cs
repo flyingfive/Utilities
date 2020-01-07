@@ -17,7 +17,7 @@ namespace FlyingFive.Data
 		/// <param name="instance">包含执行SQL脚本中的参数值对象</param>
 		/// <param name="cmdType">命令类型</param>
 		/// <returns></returns>
-		public static IList<T> SqlQuery<T>(this IDbSession session, string plainSql, object instance, CommandType cmdType = CommandType.Text) where T : class, new()
+		public static IList<T> SqlQuery<T>(this IDatabaseHelper session, string plainSql, object instance, CommandType cmdType = CommandType.Text) where T : class, new()
 		{
 			var parameters = FindParameters(plainSql, instance);
 			using (var reader = session.ExecuteReader(plainSql, cmdType, parameters.ToArray()))
@@ -34,7 +34,7 @@ namespace FlyingFive.Data
 		/// <param name="instance">包含执行SQL脚本中的参数值对象</param>
 		/// <param name="cmdType">命令类型</param>
 		/// <returns></returns>
-		public static int SqlQuery(this IDbSession session, string plainSql, object instance, CommandType cmdType = CommandType.Text)
+		public static int SqlQuery(this IDatabaseHelper session, string plainSql, object instance, CommandType cmdType = CommandType.Text)
 		{
 			var parameters = FindParameters(plainSql, instance);
 			var cnt = session.ExecuteNonQuery(plainSql, cmdType, parameters.ToArray());
