@@ -1,11 +1,16 @@
-﻿using FlyingFive.Data.Infrastructure;
+﻿using FlyingFive.Caching;
+using FlyingFive.Data.Infrastructure;
 using FlyingFive.Data.Kernel;
+using FlyingFive.Data.Schema;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace FlyingFive.Data.Drivers.SqlServer
 {
@@ -15,14 +20,48 @@ namespace FlyingFive.Data.Drivers.SqlServer
     public class MsSqlHelper : DatabaseHelper, IDatabaseHelper
     {
         public MsSqlHelper(string connectionString)
-            : this(new SqlServerDbConnectionFactory(connectionString))
+            : this(new SqlServerConnectionFactory(connectionString))
         {
         }
 
         public MsSqlHelper(IDbConnectionFactory dbConnectionFactory) : base(dbConnectionFactory)
         {
-            //this.PagingMode = PagingMode.ROW_NUMBER;
-            //this._dbContextProvider = new MsSqlContextServiceProvider(dbConnectionFactory, this);
+            ReadServerVersion();
+            //默认创建sys_datadict视图，除非显示配置不用数据字典
+            var config = ConfigurationManager.AppSettings["UnusedDataDict"];
+            if (!string.IsNullOrEmpty(config))
+            {
+                if (config.IsTrue()) { return; }
+            }
+            Task.Factory.StartNew(CreateDataDictView);
+        }
+
+        /// <summary>
+        /// 读取服务器版本
+        /// </summary>
+        private void ReadServerVersion()
+        {
+            Func<string> readVersion = () =>
+            {
+                using (var connection = DbConnectionFactory.CreateConnection())
+                using (var command = connection.CreateCommand())
+                {
+                    connection.Open();
+                    command.CommandText = "SELECT SERVERPROPERTY('ProductVersion')";
+                    var obj = command.ExecuteScalar().ToString();
+                    return obj;
+                }
+            };
+            var cache = Singleton<ICacheManager>.Instance;
+            if (cache != null)
+            {
+                var ver = cache.TryGet<string>(base.DbConnectionFactory.ConnectionString, readVersion);
+                this.Version = ConvertToSqlVersion(ver);
+            }
+            else
+            {
+                this.Version = ConvertToSqlVersion(readVersion());
+            }
         }
 
         /// <summary>
@@ -66,12 +105,133 @@ namespace FlyingFive.Data.Drivers.SqlServer
                 }
             }
         }
+        /// <summary>
+        /// SQL服务器版本
+        /// </summary>
+        public SqlServerVersion Version { get; private set; }
+
+        private static bool? _hasSchemaViewCreated = false;
+
+        /// <summary>
+        /// 创建系统数据字典视图
+        /// </summary>
+        private void CreateDataDictView()
+        {
+            if (_hasSchemaViewCreated.HasValue && _hasSchemaViewCreated.Value)
+            {
+                return;
+            }
+            using (var connection = base.DbConnectionFactory.CreateConnection())
+            using (var command = connection.CreateCommand())
+            {
+                connection.Open();
+                command.CommandType = CommandType.Text;
+                command.CommandText = "SELECT OBJECT_ID('v_sys_DataDict', 'V')";
+                var obj = command.ExecuteScalar();
+                _hasSchemaViewCreated = obj != null && obj != DBNull.Value;
+                if (!_hasSchemaViewCreated.Value)
+                {
+                    if (Convert.ToInt32(this.Version) < Convert.ToInt32(SqlServerVersion.SQL2005))
+                    {
+                        command.CommandText = CREATE_DATA_DICT_VIEW_SQL2000;
+                    }
+                    else
+                    {
+                        command.CommandText = CREATE_DATA_DICT_VIEW_SQL2005;
+                    }
+                    command.ExecuteNonQuery();
+                    _hasSchemaViewCreated = true;
+                }
+                else
+                {
+                    try
+                    {
+                        command.CommandText = "SELECT TOP 1 TableName FROM dbo.v_sys_DataDict";
+                        var name = command.ExecuteScalar();
+                    }
+                    catch              //跨版本还原数据库（2000还原到2008上）后，视图绑定会出错，需要删除重建
+                    {
+                        _hasSchemaViewCreated = false;
+                        command.CommandText = "DROP VIEW dbo.v_sys_DataDict";
+                        command.ExecuteNonQuery();
+                        CreateDataDictView();
+                    }
+                }
+            }
+        }
+
+        private static object _syncSchemaObj = new object();
+        private static readonly ConcurrentDictionary<string, TableInfo> _loadedTables = new ConcurrentDictionary<string, TableInfo>();
+
+        /// <summary>
+        /// 获取表构架信息(不适用于同一实例下的跨库操作)
+        /// </summary>
+        /// <param name="tableName">表名称</param>
+        /// <returns></returns>
+        public TableInfo GetTableSchema(string tableName)
+        {
+            if (string.IsNullOrWhiteSpace(tableName)) { throw new ArgumentException("参数tableName不能为空"); }
+            TableInfo table = null;
+            if (_loadedTables.TryGetValue(tableName, out table))
+            {
+                return table;
+            }
+            lock (_syncSchemaObj)
+            {
+                table = _loadedTables.GetOrAdd(tableName, (key) =>
+                {
+                    var sql = "SELECT DISTINCT TableName, TableId, IsView, TableDescription FROM dbo.v_sys_DataDict WHERE TableName = @TableName";
+                    TableInfo schema = this.SqlQuery<TableInfo>(sql, new { TableName = key }).FirstOrDefault();
+                    if (schema != null)
+                    {
+                        sql = "SELECT TableId, ColumnOrder, ColumnName, IsIdentity, IsPrimaryKey, SqlType, Size, [Precision], Scale, IsNullable, DefaultValue, ColumnDescription FROM dbo.v_sys_DataDict WHERE TableId = @TableId";
+                        schema.Columns = this.SqlQuery<ColumnInfo>(sql, new { TableId = schema.TableId }).ToList();
+                    }
+                    return schema;
+                });
+                return table;
+            }
+        }
+
+        /// <summary>
+        /// 按ProdcutVersion转换SQLServer版本
+        /// </summary>
+        /// <param name="productVersion"></param>
+        /// <param name="throwOverflow"></param>
+        /// <returns></returns>
+        public static SqlServerVersion ConvertToSqlVersion(string productVersion, bool throwOverflow = false)
+        {
+            /// SQL Server 2008 的10。0
+            /// 10.50 2008 R2 SQL Server
+            /// 2012 SQL Server 11.0. xx
+            /// 12.0 SQL Server 2014
+            /// SQL Server 2016 的13。0
+            /// SQL Server 2017 的 14.0. xx
+            switch (productVersion.Substring(0, 4))
+            {
+                case "14.0": return SqlServerVersion.SQL2017;
+                case "13.0": return SqlServerVersion.SQL2016;
+                case "12.0": return SqlServerVersion.SQL2014;
+                case "11.0": return SqlServerVersion.SQL2012;
+                case "10.5": return SqlServerVersion.SQL2008R2;
+                case "10.0": return SqlServerVersion.SQL2008;
+                case "9.00": return SqlServerVersion.SQL2005;
+                case "8.00": return SqlServerVersion.SQL2000;
+                default:
+                    if (throwOverflow)
+                    {
+                        throw new ArgumentException(string.Format("无法识别的SQL版本：{0}", productVersion));
+                    }
+                    return SqlServerVersion.Unknown;
+            }
+        }
+
         #region create schema info view script
         /// <summary>
         /// 创建2000版本数据字典的视图sql脚本
         /// </summary>
         public const String CREATE_DATA_DICT_VIEW_SQL2000 = @"
-        CREATE VIEW v_sys_DataDict
+        CREATE VIEW dbo.v_sys_DataDict
         AS
             SELECT  d.name AS TableName ,
                     d.id AS TableId ,
@@ -130,7 +290,7 @@ namespace FlyingFive.Data.Drivers.SqlServer
         /// 创建2005及以上版本数据字典的视图sql脚本
         /// </summary>
         public const String CREATE_DATA_DICT_VIEW_SQL2005 = @"
-        CREATE VIEW v_sys_DataDict
+        CREATE VIEW dbo.v_sys_DataDict
         AS
             SELECT  d.name AS TableName ,
                     d.id AS TableId ,
@@ -186,5 +346,22 @@ namespace FlyingFive.Data.Drivers.SqlServer
                                                            AND f.name = 'MS_Description'";
         #endregion
 
+    }
+
+
+    /// <summary>
+    /// SqlServer版本
+    /// </summary>
+    public enum SqlServerVersion : uint
+    {
+        Unknown = 0,
+        SQL2000 = 1,
+        SQL2005 = 2,
+        SQL2008 = 3,
+        SQL2008R2 = 4,
+        SQL2012 = 5,
+        SQL2014 = 6,
+        SQL2016 = 7,
+        SQL2017 = 8,
     }
 }

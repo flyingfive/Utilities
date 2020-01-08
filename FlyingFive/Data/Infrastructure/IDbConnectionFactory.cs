@@ -12,6 +12,10 @@ namespace FlyingFive.Data.Infrastructure
     public interface IDbConnectionFactory
     {
         /// <summary>
+        /// 创建DB连接的字符串
+        /// </summary>
+        string ConnectionString { get; }
+        /// <summary>
         /// 创建一个数据库连接
         /// </summary>
         /// <returns></returns>

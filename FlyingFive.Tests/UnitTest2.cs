@@ -72,9 +72,11 @@ namespace FlyingFive.Tests
             var list = new List<Employee>();
             try
             {
+                var connectionString = "Data Source=173.31.15.53,2012;Initial Catalog=Northwind;User Id=sa;Password=sa;";
+                var dbHelper = new MsSqlHelper(connectionString);
                 var result = CodeTimer.Time("test", 1, (() =>
                 {
-                    using (var connection = new SqlConnection("Data Source=173.31.15.53,2012;Initial Catalog=Northwind;User Id=sa;Password=sa;"))
+                    using (var connection = new SqlConnection(connectionString))
                     {
                         var command = connection.CreateCommand();
                         command.CommandText = "select  TOP  1000 * from Employees";

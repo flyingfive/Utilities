@@ -163,6 +163,11 @@ namespace FlyingFive.Data.Fakes
             this.SqlDbType = type.ToSqlDbType();
         }
 
+        /// <summary>
+        /// 列出MsSql语法中的参数变量名称
+        /// </summary>
+        /// <param name="sql">SQL文本</param>
+        /// <returns></returns>
         public static IList<string> FindQueryParmeters(string sql)
         {
             IList<string> lst = new List<string>();
