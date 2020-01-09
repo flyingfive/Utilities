@@ -77,12 +77,20 @@ namespace FlyingSocket.Client
             this.ReceiveEventArgs.SetBuffer(ReceiveBuffer.Buffer, 0, SocketBufferSize);
             this.SendEventArgs = new SocketAsyncEventArgs();
             this.SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SocketBufferSize);
+            _connectBuffer = new byte[SocketBufferSize];
             this.ConnectEventArgs = new SocketAsyncEventArgs();
-            this.ConnectEventArgs.SetBuffer(0, SocketBufferSize);
+            this.ConnectEventArgs.SetBuffer(_connectBuffer, 0, SocketBufferSize);
             this.ReceiveEventArgs.Completed += IO_Completed;
             this.SendEventArgs.Completed += IO_Completed;
             this.ConnectEventArgs.Completed += IO_Completed;
+            _disConnectBuffer = new byte[SocketBufferSize];
+            this.DisconnectEventArgs = new SocketAsyncEventArgs();
+            this.DisconnectEventArgs.SetBuffer(_disConnectBuffer, 0, SocketBufferSize);
+            this.DisconnectEventArgs.Completed += IO_Completed;
         }
+
+        private byte[] _connectBuffer = null;
+        private byte[] _disConnectBuffer = null;
 
         public void Connect(string server_ip, int server_port)
         {
@@ -103,6 +111,7 @@ namespace FlyingSocket.Client
             }
             _remoteAddress = new IPEndPoint(IPAddress.Parse(server_ip), server_port);
             this.ConnectEventArgs.RemoteEndPoint = _remoteAddress;
+            this.DisconnectEventArgs.RemoteEndPoint = _remoteAddress;
             //this.ReceiveEventArgs.RemoteEndPoint = _remoteAddress;
             //this.SendEventArgs.RemoteEndPoint = _remoteAddress;
             this._clientSocket.ConnectAsync(this.ConnectEventArgs);
@@ -112,6 +121,7 @@ namespace FlyingSocket.Client
         }
 
         public event EventHandler<EventArgs> OnConnected;
+        public SocketAsyncEventArgs DisconnectEventArgs { get; private set; }
 
         private void IO_Completed(object sender, SocketAsyncEventArgs e)
         {
@@ -126,12 +136,20 @@ namespace FlyingSocket.Client
                 {
                     Console.WriteLine("客户端数据发送完成");
                 }
-                if (e.LastOperation == SocketAsyncOperation.Receive)
-                {
-                    Console.WriteLine("客户端数据接收完成");
-                }
                 if (e.LastOperation == SocketAsyncOperation.Disconnect)
                 {
+                    Console.WriteLine("客户端连接断开");
+                }
+                if (e.LastOperation == SocketAsyncOperation.Receive)
+                {
+                    if (e.BytesTransferred == 0)            //服务端请求关闭连接
+                    {
+                        _clientSocket.DisconnectAsync(DisconnectEventArgs);
+                    }
+                    else
+                    {
+                        Console.WriteLine("客户端数据接收完成");
+                    }
                 }
             }
         }

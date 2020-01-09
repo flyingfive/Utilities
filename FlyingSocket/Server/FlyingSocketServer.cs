@@ -166,6 +166,8 @@ namespace FlyingSocket.Server
             ConnectedClients.Add(userToken); //添加到正在连接列表,同步操作
             userToken.ConnectSocket = acceptEventArgs.AcceptSocket;
             userToken.ConnectSocket.Blocking = false;
+            userToken.ConnectSocket.SendBufferSize = 4096;
+            userToken.ConnectSocket.ReceiveBufferSize = 4096;
             userToken.ConnectDateTime = DateTime.Now;
             OnClientConnected?.Invoke(this, new UserTokenEvent(userToken));
             try
@@ -246,13 +248,13 @@ namespace FlyingSocket.Server
                     //Program.Logger.WarnFormat("Illegal client connection. Local Address: {0}, Remote Address: {1}", userToken.ConnectSocket.LocalEndPoint, 
                     //    userToken.ConnectSocket.RemoteEndPoint);
 
-                    userToken.AsyncSocketInvokeElement = new UploadSocketProtocol(this, userToken);
-                    bool willRaiseEvent = userToken.ConnectSocket.ReceiveAsync(userToken.ReceiveEventArgs); //投递接收请求
-                    if (!willRaiseEvent)
-                    {
-                        ProcessReceive(userToken.ReceiveEventArgs);
-                    }
-                    //CloseClientConnection(userToken);
+                    //userToken.AsyncSocketInvokeElement = new UploadSocketProtocol(this, userToken);
+                    //bool willRaiseEvent = userToken.ConnectSocket.ReceiveAsync(userToken.ReceiveEventArgs); //投递接收请求
+                    //if (!willRaiseEvent)
+                    //{
+                    //    ProcessReceive(userToken.ReceiveEventArgs);
+                    //}
+                    CloseClientConnection(userToken);
                 }
                 else
                 {
@@ -366,6 +368,10 @@ namespace FlyingSocket.Server
             //Program.Logger.InfoFormat("Client connection disconnected. {0}", socketInfo);
             try
             {
+                //var shutdownData = new byte[] { 0x1, 0x2, 0x3 };
+                //userToken.SendEventArgs.SetBuffer(shutdownData, 0, 4096);
+                //userToken.ConnectSocket.SendAsync(userToken.SendEventArgs);
+                //return;
                 userToken.ConnectSocket.Shutdown(SocketShutdown.Both);
                 //userToken.ConnectSocket.DisconnectAsync(userToken.SendEventArgs);
             }
@@ -375,6 +381,7 @@ namespace FlyingSocket.Server
                 //Program.Logger.ErrorFormat("CloseClientSocket Disconnect client {0} error, message: {1}", socketInfo, E.Message);
             }
             userToken.ConnectSocket.Close();
+            userToken.ConnectSocket.Dispose();
             userToken.ConnectSocket = null; //释放引用，并清理缓存，包括释放协议对象等资源
 
             _maxNumberAcceptedClients.Release();
