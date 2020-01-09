@@ -1,7 +1,4 @@
-*.cache
 .vs
-*.lock
-*.ide
 *.suo
 *.user
 bin

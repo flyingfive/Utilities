@@ -224,7 +224,7 @@ namespace MyDBAssistant.Data
             var builder = new SqlConnectionStringBuilder(ConnectionString);
             int cacheHours = 100 * 24 * 60;         //默认缓存100天
             var key = string.Format(DB_SCHEMA_CACHE_KEY_PATTERN, builder.InitialCatalog.ToLower());
-            var tables = cache.TryGet<IList<Table>>(key, cacheHours, () =>
+            var tables = cache.TryGet<IList<Table>>(key, () =>
             {
                 CreateDataDictView();
                 var dt = ExecuteQueryAsDataTable("SELECT TableName, TableId, IsView, TableDescription, ColumnOrder, ColumnName, IsIdentity, IsPrimaryKey, SqlType, Size, [Precision], Scale, IsNullable, DefaultValue, ColumnDescription FROM dbo.v_sys_DataDict", CommandType.Text);
@@ -236,7 +236,7 @@ namespace MyDBAssistant.Data
                     table.Columns.AddRange(columns.ToList<Column>());
                 }
                 return lst;
-            });
+            }, cacheHours);
             _tables = tables;
         }
 
