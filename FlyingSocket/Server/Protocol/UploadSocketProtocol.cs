@@ -354,7 +354,11 @@ namespace FlyingSocket.Server.Protocol
             return SendResult();
         }
 
-        public bool Upload()
+        /// <summary>
+        /// step1:开始文件上传。创建文件，并打开文件流准备数据写入。
+        /// </summary>
+        /// <returns></returns>
+        private bool Upload()
         {
             var dirName = "";
             var fileName = "";
@@ -433,9 +437,18 @@ namespace FlyingSocket.Server.Protocol
                 return result;
             }
             else
+            {
                 return false;
+            }
         }
 
+        /// <summary>
+        /// step1:写入文件数据到打开的文件流
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="offset"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
         private bool DoData(byte[] buffer, int offset, int count)
         {
             if (_fileStream == null)
@@ -453,6 +466,11 @@ namespace FlyingSocket.Server.Protocol
             //return DoSendResult(); //接收数据不发回响应
         }
 
+        /// <summary>
+        /// step3:收到该指令表示文件数据上传完成，服务端关闭文件流。
+        /// todo：应加上MD5校验文件完整性。
+        /// </summary>
+        /// <returns></returns>
         private bool Eof()
         {
             if (_fileStream == null)

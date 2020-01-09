@@ -137,8 +137,8 @@ namespace FlyingSocket.Client
         public void SendCommand(byte[] buffer, int offset, int count)
         {
             var commandText = OutgoingDataAssembler.GetProtocolText();
-            byte[] bufferUTF8 = Encoding.UTF8.GetBytes(commandText);
-            int totalLength = sizeof(int) + bufferUTF8.Length + count; //获取总大小
+            var bufferUTF8 = Encoding.UTF8.GetBytes(commandText);
+            var totalLength = sizeof(int) + bufferUTF8.Length + count; //获取总大小
             SendBuffer.Clear();
             SendBuffer.WriteInt(totalLength, false); //写入总大小
             SendBuffer.WriteInt(bufferUTF8.Length, false); //写入命令大小

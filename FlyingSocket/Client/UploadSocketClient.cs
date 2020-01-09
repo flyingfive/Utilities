@@ -28,6 +28,7 @@ namespace FlyingSocket.Client
             }
             try
             {
+                //step1:发送文件上传命令，DirName:文件上传目录，FileName：上传文件名
                 OutgoingDataAssembler.Clear();
                 OutgoingDataAssembler.AddRequest();
                 OutgoingDataAssembler.AddCommand(ProtocolKey.Upload);
@@ -42,9 +43,9 @@ namespace FlyingSocket.Client
                     {
                         success = IncomingDataParser.GetValue(ProtocolKey.FileSize, ref fileSize);
                     }
-                    //return success;
                     if (!success) { return false; }
-                    int PacketSize = 32 * 1024;         //32KB
+                    //成功后开始分包上传数据,此时服务端会创建指定的空文件并打开链接到此文件的流，准备开始数据写入
+                    int PacketSize = 32 * 1024;         //分包大小：32KB
                     using (var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
                     {
                         fileStream.Position = fileSize;
@@ -53,10 +54,16 @@ namespace FlyingSocket.Client
                         {
                             int count = fileStream.Read(readBuffer, 0, PacketSize);
                             if (!this.DoData(readBuffer, 0, count))
+                            {
                                 throw new Exception(this.ErrorString);
+                            }
                         }
+                        //发送EOF命令告诉服务端文件上传完成，此时服务端会关闭写入文件流。
+                        //todo:最好加上文件MD5校验
                         if (!this.DoEof(fileStream.Length))
+                        {
                             throw new Exception(this.ErrorString);
+                        }
                         return true;
                     }
 
