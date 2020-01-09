@@ -129,10 +129,9 @@ namespace FlyingSocket.Client
             SendBuffer.WriteInt(totalLength, false); //写入总大小
             SendBuffer.WriteInt(bufferUTF8.Length, false); //写入命令大小
             SendBuffer.WriteBuffer(bufferUTF8); //写入命令内容
-            //_tcpClient.Client.Send(SendBuffer.Buffer, 0, SendBuffer.DataCount, SocketFlags.None); //使用阻塞模式，Socket会一次发送完所有数据后才返回
-            SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SendBuffer.DataCount);
-            _tcpClient.Client.SendAsync(this.SendEventArgs);
-
+            _tcpClient.Client.Send(SendBuffer.Buffer, 0, SendBuffer.DataCount, SocketFlags.None); //使用阻塞模式，Socket会一次发送完所有数据后才返回
+            //SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SendBuffer.DataCount);
+            //_tcpClient.Client.SendAsync(this.SendEventArgs);
         }
 
         public void SendCommand(byte[] buffer, int offset, int count)

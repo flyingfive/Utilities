@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,7 +32,7 @@ namespace FlyingSocket.Client
                 OutgoingDataAssembler.AddRequest();
                 OutgoingDataAssembler.AddCommand(ProtocolKey.Upload);
                 OutgoingDataAssembler.AddValue(ProtocolKey.DirName, dirName);
-                OutgoingDataAssembler.AddValue(ProtocolKey.FileName, fileName);
+                OutgoingDataAssembler.AddValue(ProtocolKey.FileName, Path.GetFileName(fileName));
                 SendCommand();
                 var success = ReceiveCommand();
                 if (success)
@@ -41,7 +42,24 @@ namespace FlyingSocket.Client
                     {
                         success = IncomingDataParser.GetValue(ProtocolKey.FileSize, ref fileSize);
                     }
-                    return success;
+                    //return success;
+                    if (!success) { return false; }
+                    int PacketSize = 32 * 1024;         //32KB
+                    using (var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+                    {
+                        fileStream.Position = fileSize;
+                        byte[] readBuffer = new byte[PacketSize];
+                        while (fileStream.Position < fileStream.Length)
+                        {
+                            int count = fileStream.Read(readBuffer, 0, PacketSize);
+                            if (!this.DoData(readBuffer, 0, count))
+                                throw new Exception(this.ErrorString);
+                        }
+                        if (!this.DoEof(fileStream.Length))
+                            throw new Exception(this.ErrorString);
+                        return true;
+                    }
+
                 }
                 else
                 {

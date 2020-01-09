@@ -368,12 +368,8 @@ namespace FlyingSocket.Server
             //Program.Logger.InfoFormat("Client connection disconnected. {0}", socketInfo);
             try
             {
-                //var shutdownData = new byte[] { 0x1, 0x2, 0x3 };
-                //userToken.SendEventArgs.SetBuffer(shutdownData, 0, 4096);
-                //userToken.ConnectSocket.SendAsync(userToken.SendEventArgs);
-                //return;
+                //Shutdown方法客户端会接收到0字节的消息
                 userToken.ConnectSocket.Shutdown(SocketShutdown.Both);
-                //userToken.ConnectSocket.DisconnectAsync(userToken.SendEventArgs);
             }
             catch (Exception E)
             {

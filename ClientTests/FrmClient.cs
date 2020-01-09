@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -49,15 +50,30 @@ namespace ClientTests
         private void btnConnect_Click(object sender, EventArgs e)
         {
             var host = txtHost.Text.Trim().Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-            _flyingSocketClient.ConnectAsync(host.First(), host.Last().TryConvert<int>(52520));
-            //_socketClient.Connect(host.First(), host.Last().TryConvert<int>(52520));
+            //_flyingSocketClient.ConnectAsync(host.First(), host.Last().TryConvert<int>(52520));
+            _socketClient.Connect(host.First(), host.Last().TryConvert<int>(52520));
 
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            _flyingSocketClient.SendAsync("你好，我是刘碧清。");
-            //_socketClient.DoLogin("admin", "123456");
+            //_flyingSocketClient.SendAsync("你好，我是刘碧清。");
+           var flag = _socketClient.DoLogin("admin", "admin");
+            if (flag)
+            {
+                var fileName = "";
+                using (var ofd = new OpenFileDialog() { Multiselect = false })
+                {
+                    if (ofd.ShowDialog() != DialogResult.OK)
+                    {
+                        return;
+                    }
+                    fileName = ofd.FileName;
+                }
+                var dir = new DirectoryInfo(Path.GetDirectoryName(fileName)).Name;
+                var size = 0L;
+                flag = _socketClient.Upload("", fileName, ref size);
+            }
         }
     }
 }
