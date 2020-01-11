@@ -68,14 +68,16 @@ namespace FlyingSocket.Server
 
         public DateTime ConnectDateTime { get; set; }
         public DateTime ActiveDateTime { get; set; }
+        private byte[] _receiveBuffer = null;
 
         public SocketUserToken(int receiveBufferSize)
         {
             SocketInvokeProtocol = null;
+            _receiveBuffer = new byte[receiveBufferSize];
             ReceiveBuffer = new DynamicBufferManager(receiveBufferSize);//ProtocolConst.InitBufferSize);
             ReceiveEventArgs = new SocketAsyncEventArgs();
             ReceiveEventArgs.UserToken = this;
-            ReceiveEventArgs.SetBuffer(ReceiveBuffer.Buffer, 0, ReceiveBuffer.Buffer.Length);
+            ReceiveEventArgs.SetBuffer(_receiveBuffer, 0, _receiveBuffer.Length);
             SendBuffer = new SendBufferManager(receiveBufferSize);// ProtocolConst.InitBufferSize);
             SendEventArgs = new SocketAsyncEventArgs();
             SendEventArgs.UserToken = this;
