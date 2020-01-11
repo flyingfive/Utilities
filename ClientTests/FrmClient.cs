@@ -82,6 +82,10 @@ namespace ClientTests
                 var dir = new DirectoryInfo(Path.GetDirectoryName(fileName)).Name;
                 var size = 0L;
                 flag = _socketClient.Upload("", fileName, ref size);
+                if (flag)
+                {
+                    DisplayMsg(string.Format("文件：{0}上传成功。", fileName));
+                }
             }
         }
 

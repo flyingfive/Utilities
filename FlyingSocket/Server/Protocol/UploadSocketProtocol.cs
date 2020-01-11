@@ -99,6 +99,11 @@ namespace FlyingSocket.Server.Protocol
             }
         }
 
+        protected override bool ProcessEndRequest()
+        {
+            return Eof();
+        }
+
         public UploadSocketCommand StrToCommand(string command)
         {
             if (command.Equals(ProtocolKey.Active, StringComparison.CurrentCultureIgnoreCase))
@@ -372,6 +377,7 @@ namespace FlyingSocket.Server.Protocol
                 {
                     dirName = Path.Combine(FileWorkingDirectory, dirName);
                 }
+                if (!Directory.Exists(dirName)) { Directory.CreateDirectory(dirName); }
                 fileName = Path.Combine(dirName, fileName);
                 //Program.Logger.Info("Start upload file: " + fileName);
                 if (_fileStream != null) //关闭上次传输的文件

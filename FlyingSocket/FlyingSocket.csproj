@@ -71,35 +71,19 @@
     <Compile Include="Core\IncomingDataParser.cs" />
     <Compile Include="Core\OutgoingDataAssembler.cs" />
     <Compile Include="Core\ProtocolKey.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Server\FlyingSocketServer.cs" />
     <Compile Include="Server\SocketUserToken.cs" />
     <Compile Include="Server\SocketUserTokenPool.cs" />
     <Compile Include="Utility\FileUtility.cs" />
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FlyingFive\FlyingFive.csproj">
       <Project>{1e1fc264-62d6-400a-bc97-3241f19fb1ba}</Project>
       <Name>FlyingFive</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
