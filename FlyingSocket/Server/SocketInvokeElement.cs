@@ -6,6 +6,8 @@ using System.Net.Sockets;
 using System.Threading;
 using FlyingSocket.Core;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace FlyingSocket.Server
 {
@@ -148,27 +150,6 @@ namespace FlyingSocket.Server
             //实际数据体在buffer中的起止位置
             var dataOffset = offset + _integer_size + commandLength;
             var dataLength = count - _integer_size - commandLength;
-            //if (string.Equals(IncomingDataParser.Command, ProtocolKey.Data))
-            //{
-            //    Console.WriteLine(string.Format("服务端写入数据长度：{0}", dataLength));
-            //    this.InputStream.Write(buffer, dataOffset, dataLength);
-            //    return true;
-            //}
-
-            //if (string.Equals(IncomingDataParser.Command, ProtocolKey.Eof))
-            //{
-            //    Console.WriteLine(string.Format("服务端结束写入。"));
-            //    this.InputStream.Position = 0;
-            //    using(InputStream)
-            //    using (var reader = new StreamReader(InputStream, Encoding.UTF8))
-            //    {
-            //        var content = reader.ReadToEnd();
-            //        Console.WriteLine(content);
-            //    }
-            //    InputStream = null;
-            //    return true;
-            //   //this.InputStream.Dispose()
-            //}
             return ProcessCommand(buffer, dataOffset, dataLength); //处理其它命令
         }
 
@@ -293,6 +274,28 @@ namespace FlyingSocket.Server
                 }
             }
             return result;
+        }
+
+
+        [DllImport("kernel32.dll", EntryPoint = "SetProcessWorkingSetSize")]
+        public static extern int SetProcessWorkingSetSize(IntPtr process, int minSize, int maxSize);
+
+        /// <summary>
+        /// 释放内存
+        /// </summary>
+        public void ClearMemory()
+        {
+            var proc = Process.GetCurrentProcess();
+            long usedMemory = proc.PrivateMemorySize64;
+            if (usedMemory > 1024 * 1024 * 50)          //控制一下内存
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                {
+                    SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle, -1, -1);
+                }
+            }
         }
     }
 }

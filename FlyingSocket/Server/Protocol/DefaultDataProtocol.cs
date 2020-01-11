@@ -43,17 +43,12 @@ namespace FlyingSocket.Server.Protocol
             {
                 var content = reader.ReadToEnd();
                 //Console.WriteLine("服务端接收到的数据：" + content);
-                var file = Path.Combine(FileWorkingDirectory, "data.txt");
+                var file = Path.Combine(FileWorkingDirectory, string.Format("{0}.txt", Guid.NewGuid().ToString()));
                 System.IO.File.WriteAllText(file, content, Encoding.UTF8);
                 length = InputStream.Length;
             }
             InputStream = null;
-            Array.Clear(SocketUserToken.ReceiveBuffer.Buffer, 0, SocketUserToken.ReceiveBuffer.DataCount);
-            for (int i = 0; i <= GC.MaxGeneration; i++)
-            {
-                GC.Collect(i);
-            }
-            GC.WaitForPendingFinalizers();
+            ClearMemory();
 
             //return true;
             OutgoingDataAssembler.AddSuccess();

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using FlyingFive;
+using FlyingFive.Utils;
 using FlyingSocket.Client;
 
 namespace ClientTests
@@ -81,11 +82,14 @@ namespace ClientTests
                 }
                 var dir = new DirectoryInfo(Path.GetDirectoryName(fileName)).Name;
                 var size = 0L;
-                flag = _socketClient.Upload("", fileName, ref size);
-                if (flag)
-                {
-                    DisplayMsg(string.Format("文件：{0}上传成功。", fileName));
-                }
+                var time = CodeTimer.Time("aa", 1, () => {
+                    flag = _socketClient.Upload("", fileName, ref size);
+                    if (flag)
+                    {
+                        DisplayMsg(string.Format("文件：{0}上传成功。", fileName));
+                    }
+                });
+                DisplayMsg("上传耗时：" + time.ElapsedMillisecondsOnce);
             }
         }
 
@@ -93,7 +97,10 @@ namespace ClientTests
         {
             var msg = txtContent.Text;
             if (string.IsNullOrWhiteSpace(msg)) { return; }
-            _flyingSocketClient.SendAsync(msg);
+           var time = CodeTimer.Time("aaa", 1, () => {
+                _flyingSocketClient.SendAsync(msg);
+            });
+            DisplayMsg("发送耗时：" + time.ElapsedMillisecondsOnce);
         }
     }
 }
