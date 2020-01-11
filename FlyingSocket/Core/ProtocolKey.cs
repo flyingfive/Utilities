@@ -92,6 +92,9 @@ namespace FlyingSocket.Core
         public static string Download = "Download";
         public static string SendFile = "SendFile";
         public static string CyclePacket = "CyclePacket";
+
+        public static readonly string BeginCommandKey = "BEGIN";
+        public static readonly string DataLengthKey = "LENGTH";
     }
 
     public class ProtocolCode

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -48,7 +49,7 @@ namespace FlyingSocket.Client
         /// <summary>
         /// 缓冲区大小
         /// </summary>
-        protected int SocketBufferSize { get; private set; }
+        protected int SocketBufferSize { get; private set; } = 4096;
 
         public Socket _clientSocket = null;
         protected Core.FlyingProtocolType _protocolFlag = Core.FlyingProtocolType.Upload;
@@ -61,22 +62,22 @@ namespace FlyingSocket.Client
         public FlyingSocketClient()
         {
             _clientSocket = new Socket(SocketType.Stream, System.Net.Sockets.ProtocolType.Tcp);
-            _clientSocket.Blocking = false;
+            //_clientSocket.Blocking = false;
 
             OutgoingDataAssembler = new OutgoingDataAssembler();
-            SocketBufferSize = 4096;
-            var size = ConfigurationManager.AppSettings["SocketBufferSize"];
-            if (!string.IsNullOrEmpty(size))
-            {
-                SocketBufferSize = size.TryConvert<int>(4096);
-            }
+            //SocketBufferSize = 4096;
+            //var size = ConfigurationManager.AppSettings["SocketBufferSize"];
+            //if (!string.IsNullOrEmpty(size))
+            //{
+            //    SocketBufferSize = size.TryConvert<int>(4096);
+            //}
             ReceiveBuffer = new DynamicBufferManager(SocketBufferSize);
             SendBuffer = new DynamicBufferManager(SocketBufferSize);
             IncomingDataParser = new IncomingDataParser();
-            this.ReceiveEventArgs = new SocketAsyncEventArgs();
+            this.ReceiveEventArgs = new SocketAsyncEventArgs() { SocketFlags = SocketFlags.None };
             this.ReceiveEventArgs.Completed += IO_Completed;
             this.ReceiveEventArgs.SetBuffer(ReceiveBuffer.Buffer, 0, SocketBufferSize);
-            this.SendEventArgs = new SocketAsyncEventArgs();
+            this.SendEventArgs = new SocketAsyncEventArgs() { SocketFlags = SocketFlags.None };
             this.SendEventArgs.Completed += IO_Completed;
             this.SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SocketBufferSize);
 
@@ -149,10 +150,13 @@ namespace FlyingSocket.Client
                     //SendBuffer.WriteInt(15, false);
                     //this.SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SendBuffer.DataCount);
                     //_clientSocket.SendAsync(this.SendEventArgs);
-                    _clientSocket.ReceiveAsync(this.ReceiveEventArgs);
+                    //todo...????
+                    //_clientSocket.ReceiveAsync(this.ReceiveEventArgs);
                 }
                 if (e.LastOperation == SocketAsyncOperation.Send)
                 {
+                    this.SendEventArgs.SetBuffer(null, 0, 0);
+                    resetEvent.Set();
                     Console.WriteLine("客户端数据发送完成");
                 }
                 if (e.LastOperation == SocketAsyncOperation.Disconnect)
@@ -181,26 +185,121 @@ namespace FlyingSocket.Client
         public void SendAsync(byte[] buffer)
         {
             if (!this.IsConnected) { throw new InvalidCastException("还未建立连接。"); }
+
             OutgoingDataAssembler.Clear();
             OutgoingDataAssembler.AddRequest();
-            OutgoingDataAssembler.AddCommand(ProtocolKey.Data);
-            SendCommand(buffer, 0, buffer.Length);
+            OutgoingDataAssembler.BeginRequest(buffer.Length);
+            Console.WriteLine("客户端发送消息头");
+            SendMessageHead();
+            
+            //OutgoingDataAssembler.AddValue(ProtocolKey.DirName, dirName);
+            //OutgoingDataAssembler.AddValue(ProtocolKey.FileName, Path.GetFileName(fileName));
+            var fileSize = 0;
+            using (var stream = new MemoryStream(buffer))
+            {
+                stream.Position = fileSize;
+                var readBuffer = new byte[SocketBufferSize];
+                var i = 1;
+                while (stream.Position < stream.Length)
+                {
+                    int count = stream.Read(readBuffer, 0, SocketBufferSize);
+                    Console.WriteLine(string.Format("客户端第{0}次发送数据体：{1}", i++,count));
+                    this.DoData(readBuffer, 0, count);
+                }
+                //发送EOF命令告诉服务端文件上传完成，此时服务端会关闭写入文件流。
+                //todo:最好加上文件MD5校验
+                Console.WriteLine("客户端发送结束消息。");
+                this.DoEof(stream.Length);
+            }
         }
 
 
+        //System.Threading.Semaphore resetEvent = new Semaphore(1,1);
+        AutoResetEvent resetEvent = new AutoResetEvent(true);
+
         private void SendCommand(byte[] buffer, int offset, int count)
         {
+            var success = resetEvent.WaitOne(3000);
+            if (!success)
+            {
+                Console.WriteLine("发送超时。");
+                return;
+            }
+            
             var commandText = OutgoingDataAssembler.GetProtocolText();
             byte[] bufferUTF8 = Encoding.UTF8.GetBytes(commandText);
             int totalLength = sizeof(int) + bufferUTF8.Length + count; //获取总大小
             SendBuffer.Clear();
+            //SendBuffer.Buffer = new byte[SocketBufferSize];
             SendBuffer.WriteInt(totalLength, false); //写入总大小
             SendBuffer.WriteInt(bufferUTF8.Length, false); //写入命令大小
             SendBuffer.WriteBuffer(bufferUTF8); //写入命令内容
             SendBuffer.WriteBuffer(buffer, offset, count); //写入二进制数据
-            //_tcpClient.Client.Send(SendBuffer.Buffer, 0, SendBuffer.DataCount, SocketFlags.None);
+            Send();
+        }
+
+        private void DoData(byte[] buffer, int offset, int count)
+        {
+            OutgoingDataAssembler.Clear();
+            OutgoingDataAssembler.AddRequest();
+            OutgoingDataAssembler.AddCommand(ProtocolKey.Data);
+            SendCommand(buffer, offset, count);
+        }
+        public void DoEof(Int64 fileSize)
+        {
+            OutgoingDataAssembler.Clear();
+            OutgoingDataAssembler.AddRequest();
+            OutgoingDataAssembler.AddCommand(ProtocolKey.Eof);
+            SendMessageHead();
+            //bool bSuccess = ReceiveCommand();
+            //if (bSuccess)
+            //{
+            //    return CheckErrorCode();
+            //}
+            //else
+            //{
+            //    return false;
+            //}
+        }
+
+        private void SendMessageHead()
+        {
+            var success = resetEvent.WaitOne(3000);
+            if (!success)
+            {
+                Console.WriteLine("发送超时。");
+                return;
+            }
+            var commandText = OutgoingDataAssembler.GetProtocolText();
+            var bufferUTF8 = Encoding.UTF8.GetBytes(commandText);
+            int totalLength = sizeof(int) + bufferUTF8.Length; //获取总大小
+            SendBuffer.Clear();
+            //SendBuffer.Buffer = new byte[SocketBufferSize];
+            SendBuffer.WriteInt(totalLength, false); //写入总大小
+            SendBuffer.WriteInt(bufferUTF8.Length, false); //写入命令大小
+            SendBuffer.WriteBuffer(bufferUTF8); //写入命令内容
+            Send();
+        }
+
+        private void Send()
+        {
             this.SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SendBuffer.DataCount);
-            _clientSocket.SendAsync(this.SendEventArgs);
+            var cnt = _clientSocket.Send(SendBuffer.Buffer, SocketFlags.None);
+            resetEvent.Set();
+            if (cnt != SendBuffer.DataCount)
+            {
+                Console.WriteLine("数据发送错误。");
+            }
+            return;
+            var willRaiseEvent = _clientSocket.SendAsync(this.SendEventArgs);
+            //true,异步，在IO_Complete中完成，false，同步完成，不触发IO_Complete
+            if (!willRaiseEvent)
+            {
+                this.SendEventArgs.SetBuffer(null, 0, 0);
+                resetEvent.Set();
+            }
+            //this.SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SendBuffer.DataCount);
+            //_clientSocket.SendAsync(this.SendEventArgs);
         }
     }
 }

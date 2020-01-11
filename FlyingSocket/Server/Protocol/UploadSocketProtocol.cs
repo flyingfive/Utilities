@@ -9,6 +9,7 @@ using FlyingSocket.Utility;
 
 namespace FlyingSocket.Server.Protocol
 {
+    [ProtocolName(FlyingProtocolType.Upload)]
     public class UploadSocketProtocol : BaseSocketProtocol
     {
         public string FileName { get; private set; }

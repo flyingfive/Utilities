@@ -59,8 +59,8 @@ namespace ClientTests
             }
             else
             {
-                //_socketClient.Connect(host.First(), host.Last().TryConvert<int>(52520));
-                _flyingSocketClient.ConnectAsync(host.First(), host.Last().TryConvert<int>(52520));
+                _socketClient.Connect(host.First(), host.Last().TryConvert<int>(52520));
+                //_flyingSocketClient.ConnectAsync(host.First(), host.Last().TryConvert<int>(52520));
             }
         }
 

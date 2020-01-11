@@ -252,7 +252,8 @@ namespace FlyingSocket.Server
                     if (count > 0) //处理接收数据
                     {
                         //如果处理数据返回失败，则断开连接
-                        if (!userToken.SocketInvokeProtocol.ProcessReceive(userToken.ReceiveEventArgs.Buffer, offset, count))
+                        var success = userToken.SocketInvokeProtocol.ProcessReceive(userToken.ReceiveEventArgs.Buffer, offset, count);
+                        if (!success)
                         {
                             CloseClientConnection(userToken);
                         }
@@ -330,7 +331,9 @@ namespace FlyingSocket.Server
         public bool SendAsyncEvent(Socket connectSocket, SocketAsyncEventArgs sendEventArgs, byte[] buffer, int offset, int count)
         {
             if (connectSocket == null)
+            {
                 return false;
+            }
             sendEventArgs.SetBuffer(buffer, offset, count);
             bool willRaiseEvent = connectSocket.SendAsync(sendEventArgs);
             if (!willRaiseEvent)

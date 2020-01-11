@@ -62,6 +62,15 @@ namespace FlyingSocket.Core
         }
 
         /// <summary>
+        /// 开始请求
+        /// </summary>
+        public void BeginRequest(int requestLength)
+        {
+            _protocolText.Add(string.Format("{0}{1}{2}", ProtocolKey.Command, ProtocolKey.EqualSign, ProtocolKey.BeginCommandKey));
+            _protocolText.Add(string.Format("{0}{1}{2}", ProtocolKey.DataLengthKey, ProtocolKey.EqualSign, requestLength));
+        }
+
+        /// <summary>
         /// 添加成功协议命令文本:Code=0
         /// </summary>
         public void AddSuccess()

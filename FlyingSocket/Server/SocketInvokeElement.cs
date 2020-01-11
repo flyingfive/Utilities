@@ -5,6 +5,7 @@ using System.Text;
 using System.Net.Sockets;
 using System.Threading;
 using FlyingSocket.Core;
+using System.IO;
 
 namespace FlyingSocket.Server
 {
@@ -89,15 +90,31 @@ namespace FlyingSocket.Server
                 {
                     result = ProcessPacket(receiveBuffer.Buffer, sizeof(int), packetLength);
                     if (result)
+                    {
                         receiveBuffer.Clear(packetLength + sizeof(int)); //从缓存中清理
+                    }
                     else
+                    {
                         return result;
+                    }
                 }
                 else
                 {
                     return true;
                 }
             }
+            return true;
+        }
+
+        private readonly int _integer_size = sizeof(int);
+
+        protected virtual bool ProcessBeginRequest()
+        {
+            return true;
+        }
+
+        protected virtual bool ProcessEndRequest()
+        {
             return true;
         }
 
@@ -114,14 +131,47 @@ namespace FlyingSocket.Server
             {
                 return false;
             }
-            int commandLen = BitConverter.ToInt32(buffer, offset); //取出命令长度
-            string tmpStr = Encoding.UTF8.GetString(buffer, offset + sizeof(int), commandLen);
-            if (!IncomingDataParser.DecodeProtocolText(tmpStr)) //解析命令
+            var commandLength = BitConverter.ToInt32(buffer, offset); //取出命令长度
+            var protocolText = Encoding.UTF8.GetString(buffer, offset + _integer_size, commandLength);
+            if (!IncomingDataParser.DecodeProtocolText(protocolText)) //解析命令
             {
                 return false;
             }
-            return ProcessCommand(buffer, offset + sizeof(int) + commandLen, count - sizeof(int) - commandLen); //处理命令
+            if (string.Equals(IncomingDataParser.Command, ProtocolKey.BeginCommandKey))
+            {
+                return ProcessBeginRequest();
+            }
+            if (string.Equals(IncomingDataParser.Command, ProtocolKey.Eof))
+            {
+                return ProcessEndRequest();
+            }
+            //实际数据体在buffer中的起止位置
+            var dataOffset = offset + _integer_size + commandLength;
+            var dataLength = count - _integer_size - commandLength;
+            //if (string.Equals(IncomingDataParser.Command, ProtocolKey.Data))
+            //{
+            //    Console.WriteLine(string.Format("服务端写入数据长度：{0}", dataLength));
+            //    this.InputStream.Write(buffer, dataOffset, dataLength);
+            //    return true;
+            //}
+
+            //if (string.Equals(IncomingDataParser.Command, ProtocolKey.Eof))
+            //{
+            //    Console.WriteLine(string.Format("服务端结束写入。"));
+            //    this.InputStream.Position = 0;
+            //    using(InputStream)
+            //    using (var reader = new StreamReader(InputStream, Encoding.UTF8))
+            //    {
+            //        var content = reader.ReadToEnd();
+            //        Console.WriteLine(content);
+            //    }
+            //    InputStream = null;
+            //    return true;
+            //   //this.InputStream.Dispose()
+            //}
+            return ProcessCommand(buffer, dataOffset, dataLength); //处理其它命令
         }
+
 
         /// <summary>
         /// 处理具体命令，子类从这个方法继承，buffer是收到的数据
