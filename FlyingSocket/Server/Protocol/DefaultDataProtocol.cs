@@ -22,6 +22,7 @@ namespace FlyingSocket.Server.Protocol
         {
             Console.WriteLine(string.Format("服务端写入数据长度：{0}", count));
             this.InputStream.Write(buffer, offset, count);
+            //Array.Clear(buffer, 0, buffer.Length);
             OutgoingDataAssembler.AddSuccess();
             OutgoingDataAssembler.AddValue(ProtocolKey.FileSize, InputStream.Length);
             return SendResult();
@@ -36,16 +37,27 @@ namespace FlyingSocket.Server.Protocol
         {
             Console.WriteLine(string.Format("服务端结束写入。"));
             this.InputStream.Position = 0;
+            var length = 0L;
             using (InputStream)
             using (var reader = new StreamReader(InputStream, Encoding.UTF8))
             {
                 var content = reader.ReadToEnd();
-                Console.WriteLine(content);
+                //Console.WriteLine("服务端接收到的数据：" + content);
+                var file = Path.Combine(FileWorkingDirectory, "data.txt");
+                System.IO.File.WriteAllText(file, content, Encoding.UTF8);
+                length = InputStream.Length;
             }
             InputStream = null;
+            Array.Clear(SocketUserToken.ReceiveBuffer.Buffer, 0, SocketUserToken.ReceiveBuffer.DataCount);
+            for (int i = 0; i <= GC.MaxGeneration; i++)
+            {
+                GC.Collect(i);
+            }
+            GC.WaitForPendingFinalizers();
+
             //return true;
             OutgoingDataAssembler.AddSuccess();
-            OutgoingDataAssembler.AddValue(ProtocolKey.FileSize, InputStream.Length);
+            OutgoingDataAssembler.AddValue(ProtocolKey.FileSize, length);
             return SendResult();
         }
 

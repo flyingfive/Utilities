@@ -7,7 +7,7 @@
     <ProjectGuid>{CED615B4-807E-47BE-A039-94DF407AE0D4}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>ClientTests</RootNamespace>
-    <AssemblyName>ClientTests</AssemblyName>
+    <AssemblyName>TestClient</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

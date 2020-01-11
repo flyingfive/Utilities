@@ -34,7 +34,7 @@
             this.btnConnect = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.btnSend = new System.Windows.Forms.Button();
-            this.txtContent = new System.Windows.Forms.TextBox();
+            this.txtContent = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
             // txtMsg
@@ -50,7 +50,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(143, 127);
+            this.label1.Location = new System.Drawing.Point(87, 168);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(65, 12);
             this.label1.TabIndex = 1;
@@ -58,7 +58,7 @@
             // 
             // txtHost
             // 
-            this.txtHost.Location = new System.Drawing.Point(209, 123);
+            this.txtHost.Location = new System.Drawing.Point(153, 164);
             this.txtHost.Name = "txtHost";
             this.txtHost.Size = new System.Drawing.Size(119, 21);
             this.txtHost.TabIndex = 2;
@@ -66,7 +66,7 @@
             // 
             // btnConnect
             // 
-            this.btnConnect.Location = new System.Drawing.Point(346, 122);
+            this.btnConnect.Location = new System.Drawing.Point(290, 163);
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(75, 23);
             this.btnConnect.TabIndex = 3;
@@ -76,17 +76,17 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(476, 115);
+            this.button1.Location = new System.Drawing.Point(483, 163);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 4;
-            this.button1.Text = "button1";
+            this.button1.Text = "文件上传";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // btnSend
             // 
-            this.btnSend.Location = new System.Drawing.Point(465, 167);
+            this.btnSend.Location = new System.Drawing.Point(381, 162);
             this.btnSend.Name = "btnSend";
             this.btnSend.Size = new System.Drawing.Size(75, 23);
             this.btnSend.TabIndex = 5;
@@ -98,10 +98,10 @@
             // 
             this.txtContent.Dock = System.Windows.Forms.DockStyle.Top;
             this.txtContent.Location = new System.Drawing.Point(0, 0);
-            this.txtContent.Multiline = true;
             this.txtContent.Name = "txtContent";
-            this.txtContent.Size = new System.Drawing.Size(800, 57);
+            this.txtContent.Size = new System.Drawing.Size(800, 126);
             this.txtContent.TabIndex = 6;
+            this.txtContent.Text = "";
             // 
             // FrmClient
             // 
@@ -135,7 +135,7 @@
         private System.Windows.Forms.Button btnConnect;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button btnSend;
-        private System.Windows.Forms.TextBox txtContent;
+        private System.Windows.Forms.RichTextBox txtContent;
     }
 }
 

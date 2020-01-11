@@ -49,7 +49,7 @@ namespace FlyingSocket.Client
         /// <summary>
         /// 缓冲区大小
         /// </summary>
-        protected int SocketBufferSize { get; private set; } = 4096;
+        protected int SocketBufferSize { get; private set; } = 64 * 1024;         //分包大小：32KB
 
         public Socket _clientSocket = null;
         protected Core.FlyingProtocolType _protocolFlag = Core.FlyingProtocolType.Upload;
@@ -71,12 +71,13 @@ namespace FlyingSocket.Client
             //{
             //    SocketBufferSize = size.TryConvert<int>(4096);
             //}
+            _receivedData = new byte[SocketBufferSize];
             ReceiveBuffer = new DynamicBufferManager(SocketBufferSize);
             SendBuffer = new DynamicBufferManager(SocketBufferSize);
             IncomingDataParser = new IncomingDataParser();
             this.ReceiveEventArgs = new SocketAsyncEventArgs() { SocketFlags = SocketFlags.None };
             this.ReceiveEventArgs.Completed += IO_Completed;
-            this.ReceiveEventArgs.SetBuffer(ReceiveBuffer.Buffer, 0, SocketBufferSize);
+            //this.ReceiveEventArgs.SetBuffer(ReceiveBuffer.Buffer, 0, SocketBufferSize);
             this.SendEventArgs = new SocketAsyncEventArgs() { SocketFlags = SocketFlags.None };
             this.SendEventArgs.Completed += IO_Completed;
             this.SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SocketBufferSize);
@@ -147,17 +148,17 @@ namespace FlyingSocket.Client
                 if (e.LastOperation == SocketAsyncOperation.Connect)
                 {
                     OnConnected?.Invoke(this, EventArgs.Empty);
-                    //SendBuffer.WriteInt(15, false);
-                    //this.SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SendBuffer.DataCount);
-                    //_clientSocket.SendAsync(this.SendEventArgs);
-                    //todo...????
-                    //_clientSocket.ReceiveAsync(this.ReceiveEventArgs);
                 }
                 if (e.LastOperation == SocketAsyncOperation.Send)
                 {
                     this.SendEventArgs.SetBuffer(null, 0, 0);
-                    resetEvent.Set();
+                    resetSending.Set();
                     Console.WriteLine("客户端数据发送完成");
+                    if (resetReceiving.WaitOne(3000))
+                    {
+                        this.ReceiveEventArgs.SetBuffer(_receivedData, 0, _receivedData.Length);
+                        _clientSocket.ReceiveAsync(this.ReceiveEventArgs);
+                    }
                 }
                 if (e.LastOperation == SocketAsyncOperation.Disconnect)
                 {
@@ -166,13 +167,14 @@ namespace FlyingSocket.Client
                 }
                 if (e.LastOperation == SocketAsyncOperation.Receive)
                 {
+                    resetReceiving.Set();
                     if (e.BytesTransferred == 0)            //服务端请求关闭连接
                     {
                         _clientSocket.DisconnectAsync(DisconnectEventArgs);
                     }
                     else
                     {
-                        Console.WriteLine("客户端数据接收完成");
+                        Console.WriteLine("客户端数据接收完成"+e.BytesTransferred);
                     }
                 }
             }
@@ -214,12 +216,12 @@ namespace FlyingSocket.Client
         }
 
 
-        //System.Threading.Semaphore resetEvent = new Semaphore(1,1);
-        AutoResetEvent resetEvent = new AutoResetEvent(true);
-
+        //System.Threading.Semaphore resetSending = new Semaphore(1,1);
+        AutoResetEvent resetSending = new AutoResetEvent(true);
+        AutoResetEvent resetReceiving = new AutoResetEvent(true);
         private void SendCommand(byte[] buffer, int offset, int count)
         {
-            var success = resetEvent.WaitOne(3000);
+            var success = resetSending.WaitOne(3000);
             if (!success)
             {
                 Console.WriteLine("发送超时。");
@@ -251,20 +253,11 @@ namespace FlyingSocket.Client
             OutgoingDataAssembler.AddRequest();
             OutgoingDataAssembler.AddCommand(ProtocolKey.Eof);
             SendMessageHead();
-            //bool bSuccess = ReceiveCommand();
-            //if (bSuccess)
-            //{
-            //    return CheckErrorCode();
-            //}
-            //else
-            //{
-            //    return false;
-            //}
         }
 
         private void SendMessageHead()
         {
-            var success = resetEvent.WaitOne(3000);
+            var success = resetSending.WaitOne(3000);
             if (!success)
             {
                 Console.WriteLine("发送超时。");
@@ -284,22 +277,29 @@ namespace FlyingSocket.Client
         private void Send()
         {
             this.SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SendBuffer.DataCount);
-            var cnt = _clientSocket.Send(SendBuffer.Buffer, SocketFlags.None);
-            resetEvent.Set();
-            if (cnt != SendBuffer.DataCount)
-            {
-                Console.WriteLine("数据发送错误。");
-            }
-            return;
+            //var cnt = _clientSocket.Send(SendBuffer.Buffer, SocketFlags.None);
+            //resetSending.Set();
+            //if (cnt != SendBuffer.DataCount)
+            //{
+            //    Console.WriteLine("数据发送错误。");
+            //}
             var willRaiseEvent = _clientSocket.SendAsync(this.SendEventArgs);
             //true,异步，在IO_Complete中完成，false，同步完成，不触发IO_Complete
             if (!willRaiseEvent)
             {
                 this.SendEventArgs.SetBuffer(null, 0, 0);
-                resetEvent.Set();
+                resetSending.Set();
+
+
+                var success = resetReceiving.WaitOne(3000);
+                if (success)
+                {
+                    this.ReceiveEventArgs.SetBuffer(_receivedData, 0, _receivedData.Length);
+                    _clientSocket.ReceiveAsync(this.ReceiveEventArgs);
+                }
             }
-            //this.SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SendBuffer.DataCount);
-            //_clientSocket.SendAsync(this.SendEventArgs);
         }
+
+        private byte[] _receivedData = null;
     }
 }

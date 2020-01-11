@@ -20,9 +20,15 @@ namespace ServerTests
         public FrmServer()
         {
             InitializeComponent();
+            this.FormClosing += FrmServer_FormClosing;
             _socketServer = FlyingSocketFactory.Default;
             _socketServer.ServerStarted += (s, e) => { DisplayMsg(string.Format("服务运行中,地址:{0}", _socketServer.WorkingAddress.ToString())); };
             _socketServer.ClientConnected += _socketServer_OnClientConnected;
+        }
+
+        private void FrmServer_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            _socketServer.Stop();
         }
 
         private void _socketServer_OnClientConnected(object sender, UserTokenEventArgs e)

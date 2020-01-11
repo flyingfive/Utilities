@@ -97,6 +97,7 @@ namespace FlyingSocket.Server
             _listenSocket = new Socket(WorkingAddress.AddressFamily, SocketType.Stream, System.Net.Sockets.ProtocolType.Tcp);
             _listenSocket.Bind(WorkingAddress);
             _listenSocket.Listen(SocketConfig.MaxConnections);
+
             //Program.Logger.InfoFormat("Start listen socket {0} success", localEndPoint.ToString());
             StartAccept(null);
             _daemonThread = new DaemonThread(this);
@@ -105,6 +106,12 @@ namespace FlyingSocket.Server
             {
                 ServerStarted(this, EventArgs.Empty);
             }
+        }
+
+        public void Stop()
+        {
+            //_listenSocket.Shutdown(SocketShutdown.Both);
+            _listenSocket.Close();
         }
 
         /// <summary>
@@ -149,13 +156,15 @@ namespace FlyingSocket.Server
         /// <param name="acceptEventArgs"></param>
         private void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
         {
+            var remoteSocket = acceptEventArgs.AcceptSocket;
+            if (remoteSocket == null || !remoteSocket.Connected) { return; }
             var userToken = _socketUserTokenPool.Pop();
             if (userToken == null)
             {
                 throw new InvalidOperationException("当前已达最大可用连接数。");
             }
             ConnectedClients.Add(userToken); //添加到正在连接列表,同步操作
-            userToken.ConnectSocket = acceptEventArgs.AcceptSocket;
+            userToken.ConnectSocket = remoteSocket;
             userToken.ConnectSocket.Blocking = false;                                   //同样使用异步非阻塞方式与客户端通讯
             userToken.ConnectSocket.SendBufferSize = SocketConfig.BufferSize;
             userToken.ConnectSocket.ReceiveBufferSize = SocketConfig.BufferSize;
@@ -188,28 +197,29 @@ namespace FlyingSocket.Server
         private void IO_Completed(object sender, SocketAsyncEventArgs asyncEventArgs)
         {
             var userToken = asyncEventArgs.UserToken as SocketUserToken;
+            if (userToken == null) { return; }
             userToken.ActiveDateTime = DateTime.Now;
+            lock (userToken)
+            {
+                if (asyncEventArgs.LastOperation == SocketAsyncOperation.Receive)
+                {
+                    ProcessReceive(asyncEventArgs);
+                }
+                else if (asyncEventArgs.LastOperation == SocketAsyncOperation.Send)
+                {
+                    ProcessSend(asyncEventArgs);
+                }
+                else if (asyncEventArgs.LastOperation == SocketAsyncOperation.Disconnect)
+                {
+                    ClientDisconnected?.Invoke(this, new UserTokenEventArgs(userToken));
+                }
+                else
+                {
+                    throw new ArgumentException("The last operation completed on the socket was not a receive or send");
+                }
+            }
             try
             {
-                lock (userToken)
-                {
-                    if (asyncEventArgs.LastOperation == SocketAsyncOperation.Receive)
-                    {
-                        ProcessReceive(asyncEventArgs);
-                    }
-                    else if (asyncEventArgs.LastOperation == SocketAsyncOperation.Send)
-                    {
-                        ProcessSend(asyncEventArgs);
-                    }
-                    else if (asyncEventArgs.LastOperation == SocketAsyncOperation.Disconnect)
-                    {
-                        ClientDisconnected?.Invoke(this, new UserTokenEventArgs(userToken));
-                    }
-                    else
-                    {
-                        throw new ArgumentException("The last operation completed on the socket was not a receive or send");
-                    }
-                }
             }
             catch (Exception E)
             {
