@@ -15,10 +15,9 @@ namespace FlyingSocket.Server.Protocol
         private FileStream _fileStream = null;
 
         public UploadSocketProtocol(FlyingSocketServer socketServer, SocketUserToken userToken)
-            : base(socketServer, userToken)
+            : base("Upload", socketServer, userToken)
         {
             _fileStream = null;
-            ProtocolName = "Upload";
             FileName = "";
             lock (FlyingSocketServer.UploadSocketProtocolMgr)
             {

@@ -24,9 +24,8 @@ namespace FlyingSocket.Server.Protocol
         private byte[] _readBuffer = null;
 
         public DownloadSocketProtocol(FlyingSocketServer socketServer, SocketUserToken userToken)
-            : base(socketServer, userToken)
+            : base("Download",socketServer, userToken)
         {
-            ProtocolName = "Download";
             FileName = "";
             _fileStream = null;
             _sendFile = false;

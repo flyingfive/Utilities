@@ -33,6 +33,8 @@
             this.txtHost = new System.Windows.Forms.TextBox();
             this.btnConnect = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.btnSend = new System.Windows.Forms.Button();
+            this.txtContent = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // txtMsg
@@ -41,13 +43,14 @@
             this.txtMsg.Location = new System.Drawing.Point(0, 246);
             this.txtMsg.Multiline = true;
             this.txtMsg.Name = "txtMsg";
+            this.txtMsg.ReadOnly = true;
             this.txtMsg.Size = new System.Drawing.Size(800, 204);
             this.txtMsg.TabIndex = 0;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(102, 71);
+            this.label1.Location = new System.Drawing.Point(143, 127);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(65, 12);
             this.label1.TabIndex = 1;
@@ -55,7 +58,7 @@
             // 
             // txtHost
             // 
-            this.txtHost.Location = new System.Drawing.Point(168, 67);
+            this.txtHost.Location = new System.Drawing.Point(209, 123);
             this.txtHost.Name = "txtHost";
             this.txtHost.Size = new System.Drawing.Size(119, 21);
             this.txtHost.TabIndex = 2;
@@ -63,7 +66,7 @@
             // 
             // btnConnect
             // 
-            this.btnConnect.Location = new System.Drawing.Point(305, 66);
+            this.btnConnect.Location = new System.Drawing.Point(346, 122);
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(75, 23);
             this.btnConnect.TabIndex = 3;
@@ -73,7 +76,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(435, 59);
+            this.button1.Location = new System.Drawing.Point(476, 115);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 4;
@@ -81,11 +84,32 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // btnSend
+            // 
+            this.btnSend.Location = new System.Drawing.Point(465, 167);
+            this.btnSend.Name = "btnSend";
+            this.btnSend.Size = new System.Drawing.Size(75, 23);
+            this.btnSend.TabIndex = 5;
+            this.btnSend.Text = "发送";
+            this.btnSend.UseVisualStyleBackColor = true;
+            this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
+            // 
+            // txtContent
+            // 
+            this.txtContent.Dock = System.Windows.Forms.DockStyle.Top;
+            this.txtContent.Location = new System.Drawing.Point(0, 0);
+            this.txtContent.Multiline = true;
+            this.txtContent.Name = "txtContent";
+            this.txtContent.Size = new System.Drawing.Size(800, 57);
+            this.txtContent.TabIndex = 6;
+            // 
             // FrmClient
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.txtContent);
+            this.Controls.Add(this.btnSend);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.btnConnect);
             this.Controls.Add(this.txtHost);
@@ -110,6 +134,8 @@
         private System.Windows.Forms.TextBox txtHost;
         private System.Windows.Forms.Button btnConnect;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnSend;
+        private System.Windows.Forms.TextBox txtContent;
     }
 }
 

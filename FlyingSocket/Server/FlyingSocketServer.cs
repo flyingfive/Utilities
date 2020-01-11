@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
@@ -6,6 +7,7 @@ using System.Threading;
 using FlyingSocket.Server.Protocol;
 using FlyingSocket.Core;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace FlyingSocket.Server
 {
@@ -52,9 +54,6 @@ namespace FlyingSocket.Server
         /// </summary>
         public FlyingSocketServer() : this(FlyingSocketConfig.GetConfig())
         {
-            //SocketTimeOut = 5 * 60 * 1000;
-            //_maxConnections = numConnections;
-            //_receiveBufferSize = ProtocolConst.ReceiveBufferSize;
         }
 
         /// <summary>
@@ -95,7 +94,7 @@ namespace FlyingSocket.Server
         public void Start()
         {
             WorkingAddress = new IPEndPoint(IPAddress.Parse("0.0.0.0"), SocketConfig.Port);
-            _listenSocket = new Socket(WorkingAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _listenSocket = new Socket(WorkingAddress.AddressFamily, SocketType.Stream, System.Net.Sockets.ProtocolType.Tcp);
             _listenSocket.Bind(WorkingAddress);
             _listenSocket.Listen(SocketConfig.MaxConnections);
             //Program.Logger.InfoFormat("Start listen socket {0} success", localEndPoint.ToString());
@@ -139,19 +138,10 @@ namespace FlyingSocket.Server
         /// <param name="acceptEventArgs"></param>
         private void AcceptEventArg_Completed(object sender, SocketAsyncEventArgs acceptEventArgs)
         {
-            try
-            {
-                ProcessAccept(acceptEventArgs);
-            }
-            catch (Exception E)
-            {
-                throw E;
-                //Program.Logger.ErrorFormat("Accept client {0} error, message: {1}", acceptEventArgs.AcceptSocket, E.Message);
-                //Program.Logger.Error(E.StackTrace);  
-            }
+            ProcessAccept(acceptEventArgs);
         }
 
-        public event EventHandler<UserTokenEvent> OnClientConnected;
+        public event EventHandler<UserTokenEventArgs> ClientConnected;
 
         /// <summary>
         /// 这里处理完表示一个成功建立1个客户端连接
@@ -159,17 +149,18 @@ namespace FlyingSocket.Server
         /// <param name="acceptEventArgs"></param>
         private void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
         {
-            //Program.Logger.InfoFormat("Client connection accepted. Local Address: {0}, Remote Address: {1}",
-            //    acceptEventArgs.AcceptSocket.LocalEndPoint, acceptEventArgs.AcceptSocket.RemoteEndPoint);
-
             var userToken = _socketUserTokenPool.Pop();
+            if (userToken == null)
+            {
+                throw new InvalidOperationException("当前已达最大可用连接数。");
+            }
             ConnectedClients.Add(userToken); //添加到正在连接列表,同步操作
             userToken.ConnectSocket = acceptEventArgs.AcceptSocket;
-            userToken.ConnectSocket.Blocking = false;
-            userToken.ConnectSocket.SendBufferSize = 4096;
-            userToken.ConnectSocket.ReceiveBufferSize = 4096;
+            userToken.ConnectSocket.Blocking = false;                                   //同样使用异步非阻塞方式与客户端通讯
+            userToken.ConnectSocket.SendBufferSize = SocketConfig.BufferSize;
+            userToken.ConnectSocket.ReceiveBufferSize = SocketConfig.BufferSize;
             userToken.ConnectDateTime = DateTime.Now;
-            OnClientConnected?.Invoke(this, new UserTokenEvent(userToken));
+            ClientConnected?.Invoke(this, new UserTokenEventArgs(userToken));
             try
             {
                 bool willRaiseEvent = userToken.ConnectSocket.ReceiveAsync(userToken.ReceiveEventArgs); //投递接收请求
@@ -181,15 +172,14 @@ namespace FlyingSocket.Server
                     }
                 }
             }
-            catch (Exception E)
+            catch (Exception ex)
             {
-                throw E;
-                //Program.Logger.ErrorFormat("Accept client {0} error, message: {1}", userToken.ConnectSocket, E.Message);
-                //Program.Logger.Error(E.StackTrace);                
+                throw ex;
             }
             StartAccept(acceptEventArgs); //把当前异步事件释放，等待下次连接
         }
 
+        public event EventHandler<UserTokenEventArgs> ClientDisconnected;
         /// <summary>
         /// 一次Socket端口完成事件
         /// </summary>
@@ -213,6 +203,7 @@ namespace FlyingSocket.Server
                     }
                     else if (asyncEventArgs.LastOperation == SocketAsyncOperation.Disconnect)
                     {
+                        ClientDisconnected?.Invoke(this, new UserTokenEventArgs(userToken));
                     }
                     else
                     {
@@ -237,13 +228,13 @@ namespace FlyingSocket.Server
             {
                 int offset = userToken.ReceiveEventArgs.Offset;
                 int count = userToken.ReceiveEventArgs.BytesTransferred;
-                if ((userToken.AsyncSocketInvokeElement == null) & (userToken.ConnectSocket != null)) //存在Socket对象，并且没有绑定协议对象，则进行协议对象绑定
+                if (userToken.SocketInvokeProtocol == null && userToken.ConnectSocket != null) //存在Socket对象，并且没有绑定协议对象，则进行协议对象绑定
                 {
-                    BuildingSocketInvokeElement(userToken);
+                    BuildingSocketInvokeProtocol(userToken);
                     offset = offset + 1;
                     count = count - 1;
                 }
-                if (userToken.AsyncSocketInvokeElement == null) //如果没有解析对象，提示非法连接并关闭连接
+                if (userToken.SocketInvokeProtocol == null) //如果没有解析对象，提示非法连接并关闭连接
                 {
                     //Program.Logger.WarnFormat("Illegal client connection. Local Address: {0}, Remote Address: {1}", userToken.ConnectSocket.LocalEndPoint, 
                     //    userToken.ConnectSocket.RemoteEndPoint);
@@ -261,7 +252,7 @@ namespace FlyingSocket.Server
                     if (count > 0) //处理接收数据
                     {
                         //如果处理数据返回失败，则断开连接
-                        if (!userToken.AsyncSocketInvokeElement.ProcessReceive(userToken.ReceiveEventArgs.Buffer, offset, count))
+                        if (!userToken.SocketInvokeProtocol.ProcessReceive(userToken.ReceiveEventArgs.Buffer, offset, count))
                         {
                             CloseClientConnection(userToken);
                         }
@@ -291,48 +282,43 @@ namespace FlyingSocket.Server
             }
         }
 
-        private void BuildingSocketInvokeElement(SocketUserToken userToken)
+        /// <summary>
+        /// 建立Socket连接后马上解析此客户端的通讯协议
+        /// </summary>
+        /// <param name="userToken">客户端用户对象</param>
+        private void BuildingSocketInvokeProtocol(SocketUserToken userToken)
         {
-            byte flag = userToken.ReceiveEventArgs.Buffer[userToken.ReceiveEventArgs.Offset];
-            if (flag == (byte)ProtocolFlag.Upload)
+            var dataFlag = userToken.ReceiveEventArgs.Buffer[userToken.ReceiveEventArgs.Offset];
+            if (!Enum.IsDefined(typeof(FlyingProtocolType), dataFlag))
             {
-                userToken.AsyncSocketInvokeElement = new UploadSocketProtocol(this, userToken);
+                throw new InvalidOperationException(string.Format("未定义的通讯协议：{0}", dataFlag.ToString()));
             }
-            else if (flag == (byte)ProtocolFlag.Download)
+            var protocolType = (FlyingProtocolType)Enum.ToObject(typeof(FlyingProtocolType), dataFlag);
+            var instanceType = this.GetType().Assembly.GetTypes()
+                .Where(t => t.IsClass)
+                .Where(t => t.IsDefined(typeof(ProtocolNameAttribute)))
+                .Where(t => t.GetCustomAttribute<ProtocolNameAttribute>().ProtocolType == protocolType).FirstOrDefault();
+            if (instanceType == null)
             {
-                userToken.AsyncSocketInvokeElement = new DownloadSocketProtocol(this, userToken);
+                throw new InvalidOperationException(string.Format("不受支持的通讯协议：{0}", dataFlag.ToString()));
             }
-            else if (flag == (byte)ProtocolFlag.RemoteStream)
+            var param = new object[] { this, userToken };
+            var element = Activator.CreateInstance(instanceType, param) as SocketInvokeElement;
+            if (element == null)
             {
-                userToken.AsyncSocketInvokeElement = new RemoteStreamSocketProtocol(this, userToken);
+                throw new InvalidCastException(string.Format("协议类型{0}不是正确的Socket调用", instanceType.Name));
             }
-            else if (flag == (byte)ProtocolFlag.Throughput)
-            {
-                userToken.AsyncSocketInvokeElement = new ThroughputSocketProtocol(this, userToken);
-            }
-            else if (flag == (byte)ProtocolFlag.Control)
-            {
-                userToken.AsyncSocketInvokeElement = new ControlSocketProtocol(this, userToken);
-            }
-            else if (flag == (byte)ProtocolFlag.LogOutput)
-            {
-                userToken.AsyncSocketInvokeElement = new LogOutputSocketProtocol(this, userToken);
-            }
-            if (userToken.AsyncSocketInvokeElement != null)
-            {
-                //Program.Logger.InfoFormat("Building socket invoke element {0}.Local Address: {1}, Remote Address: {2}",
-                //    userToken.AsyncSocketInvokeElement, userToken.ConnectSocket.LocalEndPoint, userToken.ConnectSocket.RemoteEndPoint);
-            }
+            userToken.SocketInvokeProtocol = element;
         }
 
         private bool ProcessSend(SocketAsyncEventArgs sendEventArgs)
         {
             SocketUserToken userToken = sendEventArgs.UserToken as SocketUserToken;
-            if (userToken.AsyncSocketInvokeElement == null) { return false; }
+            if (userToken.SocketInvokeProtocol == null) { return false; }
             userToken.ActiveDateTime = DateTime.Now;
             if (sendEventArgs.SocketError == SocketError.Success)
             {
-                return userToken.AsyncSocketInvokeElement.SendCompleted(); //调用子类回调函数
+                return userToken.SocketInvokeProtocol.SendCompleted(); //调用子类回调函数
             }
             else
             {
@@ -385,12 +371,18 @@ namespace FlyingSocket.Server
             _socketUserTokenPool.Push(userToken);
             ConnectedClients.Remove(userToken);
         }
+
+        public void ClientMessageReceived(byte[] data)
+        {
+            var msg = Encoding.UTF8.GetString(data);
+            Console.WriteLine(msg);
+        }
     }
 
-    public class UserTokenEvent : EventArgs
+    public class UserTokenEventArgs : EventArgs
     {
         public SocketUserToken UserToken { get; private set; }
 
-        public UserTokenEvent(SocketUserToken userToken) { this.UserToken = userToken; }
+        public UserTokenEventArgs(SocketUserToken userToken) { this.UserToken = userToken; }
     }
 }

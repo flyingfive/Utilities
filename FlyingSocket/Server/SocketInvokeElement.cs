@@ -117,8 +117,9 @@ namespace FlyingSocket.Server
             int commandLen = BitConverter.ToInt32(buffer, offset); //取出命令长度
             string tmpStr = Encoding.UTF8.GetString(buffer, offset + sizeof(int), commandLen);
             if (!IncomingDataParser.DecodeProtocolText(tmpStr)) //解析命令
+            {
                 return false;
-
+            }
             return ProcessCommand(buffer, offset + sizeof(int) + commandLen, count - sizeof(int) - commandLen); //处理命令
         }
 

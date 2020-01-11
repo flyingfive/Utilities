@@ -13,10 +13,7 @@ namespace FlyingSocket.Server.Protocol
     public class ControlSocketProtocol : BaseSocketProtocol
     {
         public ControlSocketProtocol(FlyingSocketServer socketServer, SocketUserToken userToken)
-            : base(socketServer, userToken)
-        {
-            ProtocolName = "Control";
-        }
+            : base("Control", socketServer, userToken) { }
 
         public override void Close()
         {
@@ -97,10 +94,10 @@ namespace FlyingSocket.Server.Protocol
                 {
                     socketText = userTokenArray[i].ConnectSocket.LocalEndPoint.ToString() + "\t"
                         + userTokenArray[i].ConnectSocket.RemoteEndPoint.ToString() + "\t"
-                        + (userTokenArray[i].AsyncSocketInvokeElement as BaseSocketProtocol).ProtocolName + "\t"
-                        + (userTokenArray[i].AsyncSocketInvokeElement as BaseSocketProtocol).UserName + "\t"
-                        + userTokenArray[i].AsyncSocketInvokeElement.ConnectTime.ToString() + "\t"
-                        + userTokenArray[i].AsyncSocketInvokeElement.ActiveTime.ToString();
+                        + (userTokenArray[i].SocketInvokeProtocol as BaseSocketProtocol).Name + "\t"
+                        + (userTokenArray[i].SocketInvokeProtocol as BaseSocketProtocol).UserName + "\t"
+                        + userTokenArray[i].SocketInvokeProtocol.ConnectTime.ToString() + "\t"
+                        + userTokenArray[i].SocketInvokeProtocol.ActiveTime.ToString();
                     OutgoingDataAssembler.AddValue(ProtocolKey.Item, socketText);
                 }
                 catch (Exception E)

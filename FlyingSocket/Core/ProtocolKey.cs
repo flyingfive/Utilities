@@ -5,50 +5,37 @@ using System.Text;
 
 namespace FlyingSocket.Core
 {
-    public class ProtocolConst
-    {
-        /// <summary>
-        /// 解析命令初始缓存大小
-        /// </summary>
-        //public static int InitBufferSize = 1024 * 4;
-        /// <summary>
-        /// IOCP接收数据缓存大小，设置过小会造成事件响应增多，设置过大会造成内存占用偏多
-        /// </summary>
-        //public static int ReceiveBufferSize = 1024 * 4;
-        /// <summary>
-        /// Socket超时设置为60秒
-        /// </summary>
-        //public static int SocketTimeOut = 60 * 1000;
-    }
-
     /// <summary>
     /// 支持的协议类型
     /// </summary>
-    public enum ProtocolFlag
+    public enum FlyingProtocolType : byte
     {
-        None = 0,
+        /// <summary>
+        /// 默认数据协议
+        /// </summary>
+        Default = 0xf,
         /// <summary>
         /// SQL协议
         /// </summary>
-        SQL = 1,
+        SQL = 0x1,
         /// <summary>
         /// 上传协议
         /// </summary>
-        Upload = 2,
+        Upload = 0x2,
         /// <summary>
         /// 下载协议
         /// </summary>
-        Download = 3,
+        Download = 0x3,
         /// <summary>
         /// 远程文件流协议
         /// </summary>
-        RemoteStream = 4,
+        //RemoteStream = 4,
         /// <summary>
         /// 吞吐量测试协议
         /// </summary>
-        Throughput = 5,
-        Control = 8,
-        LogOutput = 9,
+        Throughput = 0x5,
+        Control = 0x8,
+        LogOutput = 0x9,
     }
 
     public class ProtocolKey
@@ -131,32 +118,32 @@ namespace FlyingSocket.Core
         public static string GetErrorCodeString(int errorCode)
         {
             string errorString = null;
-            if (errorCode == NotExistCommand) 
+            if (errorCode == NotExistCommand)
                 errorString = "Not Exist Command";
             return errorString;
         }
     }
 
-    public enum RemoteStreamSocketCommand
-    {
-        None = 0,
-        FileExists = 1,
-        OpenFile = 2,
-        SetSize = 3,
-        GetSize = 4,
-        SetPosition = 5,
-        GetPosition = 6,
-        Read = 7,
-        Write = 8,
-        Seek = 9,
-        CloseFile = 10,
-    }
+    //public enum RemoteStreamSocketCommand
+    //{
+    //    None = 0,
+    //    FileExists = 1,
+    //    OpenFile = 2,
+    //    SetSize = 3,
+    //    GetSize = 4,
+    //    SetPosition = 5,
+    //    GetPosition = 6,
+    //    Read = 7,
+    //    Write = 8,
+    //    Seek = 9,
+    //    CloseFile = 10,
+    //}
 
-    public enum RemoteStreamMode
-    {
-        Read = 0,
-        ReadWrite = 1,
-    }
+    //public enum RemoteStreamMode
+    //{
+    //    Read = 0,
+    //    ReadWrite = 1,
+    //}
 
     /// <summary>
     /// 命令协议中支持的命令
@@ -203,17 +190,17 @@ namespace FlyingSocket.Core
         Download = 5,
     }
 
-    public enum SQLSocketCommand
-    {
-        None = 0,
-        Login = 1,
-        Active = 2,
-        SQLOpen = 3,
-        SQLExec = 4,
-        BeginTrans = 5,
-        CommitTrans = 6,
-        RollbackTrans = 7,
-    }
+    //public enum SQLSocketCommand
+    //{
+    //    None = 0,
+    //    Login = 1,
+    //    Active = 2,
+    //    SQLOpen = 3,
+    //    SQLExec = 4,
+    //    BeginTrans = 5,
+    //    CommitTrans = 6,
+    //    RollbackTrans = 7,
+    //}
 
     public enum ThroughputSocketCommand
     {

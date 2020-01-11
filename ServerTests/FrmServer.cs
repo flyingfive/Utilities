@@ -22,10 +22,10 @@ namespace ServerTests
             InitializeComponent();
             _socketServer = FlyingSocketFactory.Default;
             _socketServer.ServerStarted += (s, e) => { DisplayMsg(string.Format("服务运行中,地址:{0}", _socketServer.WorkingAddress.ToString())); };
-            _socketServer.OnClientConnected += _socketServer_OnClientConnected;
+            _socketServer.ClientConnected += _socketServer_OnClientConnected;
         }
 
-        private void _socketServer_OnClientConnected(object sender, UserTokenEvent e)
+        private void _socketServer_OnClientConnected(object sender, UserTokenEventArgs e)
         {
             var msg = string.Format("接收到新客户端{0}连接。地址:{1}", e.UserToken.TokenId, e.UserToken.ConnectSocket.RemoteEndPoint.ToString());
             DisplayMsg(msg);

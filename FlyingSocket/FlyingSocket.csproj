@@ -54,13 +54,14 @@
     <Compile Include="Client\SocketClientBase.cs" />
     <Compile Include="Client\ClientSocketInvokeElement.cs" />
     <Compile Include="Client\UploadSocketClient.cs" />
+    <Compile Include="FlyingSocketException.cs" />
     <Compile Include="Server\BaseSocketProtocol.cs" />
     <Compile Include="Server\DaemonThread.cs" />
     <Compile Include="Server\FlyingSocketFactory.cs" />
     <Compile Include="Server\Protocol\ControlSocketProtocol.cs" />
+    <Compile Include="Server\Protocol\DefaultDataProtocol.cs" />
     <Compile Include="Server\Protocol\DownloadSocketProtocol.cs" />
     <Compile Include="Server\Protocol\LogSocketProtocol.cs" />
-    <Compile Include="Server\Protocol\RemoteStreamSocketProtocol.cs" />
     <Compile Include="Server\Protocol\ThroughputSocketProtocol.cs" />
     <Compile Include="Server\Protocol\UploadSocketProtocol.cs" />
     <Compile Include="Server\SendBufferManager.cs" />

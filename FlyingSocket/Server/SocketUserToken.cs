@@ -17,7 +17,7 @@ namespace FlyingSocket.Server
         /// </summary>
         public string TokenId { get; set; }
 
-        private byte[] _receiveBuffer = null;
+        //private byte[] _receiveBuffer = null;
         /// <summary>
         /// 此Socket上的接收事件参数
         /// </summary>
@@ -36,11 +36,11 @@ namespace FlyingSocket.Server
         /// <summary>
         /// 协议对象
         /// </summary>
-        public SocketInvokeElement AsyncSocketInvokeElement { get; set; }
+        public SocketInvokeElement SocketInvokeProtocol { get; set; }
 
         private Socket _connectedSocket = null;
         /// <summary>
-        /// 已连接上的Socket对象
+        /// 已连接上客户端的Socket对象
         /// </summary>
         public Socket ConnectSocket
         {
@@ -53,14 +53,14 @@ namespace FlyingSocket.Server
                 _connectedSocket = value;
                 if (_connectedSocket == null) //清理缓存
                 {
-                    if (AsyncSocketInvokeElement != null)
+                    if (SocketInvokeProtocol != null)
                     {
-                        AsyncSocketInvokeElement.Close();
+                        SocketInvokeProtocol.Close();
                     }
                     ReceiveBuffer.Clear(ReceiveBuffer.DataCount);
                     SendBuffer.ClearPacket();
                 }
-                AsyncSocketInvokeElement = null;
+                SocketInvokeProtocol = null;
                 ReceiveEventArgs.AcceptSocket = _connectedSocket;
                 SendEventArgs.AcceptSocket = _connectedSocket;
             }
@@ -71,15 +71,15 @@ namespace FlyingSocket.Server
 
         public SocketUserToken(int receiveBufferSize)
         {
-            AsyncSocketInvokeElement = null;
+            SocketInvokeProtocol = null;
+            ReceiveBuffer = new DynamicBufferManager(receiveBufferSize);//ProtocolConst.InitBufferSize);
             ReceiveEventArgs = new SocketAsyncEventArgs();
             ReceiveEventArgs.UserToken = this;
-            _receiveBuffer = new byte[receiveBufferSize];
-            ReceiveEventArgs.SetBuffer(_receiveBuffer, 0, _receiveBuffer.Length);
+            ReceiveEventArgs.SetBuffer(ReceiveBuffer.Buffer, 0, ReceiveBuffer.Buffer.Length);
+            SendBuffer = new SendBufferManager(receiveBufferSize);// ProtocolConst.InitBufferSize);
             SendEventArgs = new SocketAsyncEventArgs();
             SendEventArgs.UserToken = this;
-            ReceiveBuffer = new DynamicBufferManager(receiveBufferSize);//ProtocolConst.InitBufferSize);
-            SendBuffer = new SendBufferManager(receiveBufferSize);// ProtocolConst.InitBufferSize); ;
+            SendEventArgs.SetBuffer(SendBuffer.DynamicBufferManager.Buffer, 0, SendBuffer.DynamicBufferManager.Buffer.Length);
         }
     }
 }

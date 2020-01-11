@@ -10,9 +10,8 @@ namespace FlyingSocket.Server.Protocol
     class ThroughputSocketProtocol : BaseSocketProtocol
     {
         public ThroughputSocketProtocol(FlyingSocketServer socketServer, SocketUserToken userToken)
-            : base(socketServer, userToken)
+            : base("Throughput",socketServer, userToken)
         {
-            ProtocolName = "Throughput";
         }
 
         public override void Close()

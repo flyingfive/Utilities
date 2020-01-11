@@ -13,9 +13,8 @@ namespace FlyingSocket.Server.Protocol
         public LogFixedBuffer LogFixedBuffer { get; private set; }
 
         public LogOutputSocketProtocol(FlyingSocketServer socketServer, SocketUserToken userToken)
-            : base(socketServer, userToken)
+            : base("LogOutput",socketServer, userToken)
         {
-            ProtocolName = "LogOutput";
             LogFixedBuffer = new LogFixedBuffer();
             lock (base.FlyingSocketServer.LogOutputSocketProtocolMgr)
             {

@@ -16,7 +16,7 @@ namespace FlyingSocket.Client
         public UploadSocketClient()
             : base()
         {
-            _protocolFlag = ProtocolFlag.Upload;
+            _protocolFlag = FlyingProtocolType.Upload;
         }
 
         public bool Upload(string dirName, string fileName, ref long fileSize)

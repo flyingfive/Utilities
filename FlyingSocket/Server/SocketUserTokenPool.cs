@@ -34,6 +34,7 @@ namespace FlyingSocket.Server
         {
             lock (_dataPool)
             {
+                if (_dataPool.Count == 0) { return null; }
                 var item = _dataPool.Pop();
                 item.TokenId = Guid.NewGuid().ToString("N");
                 return item;

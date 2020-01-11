@@ -18,7 +18,7 @@ namespace FlyingSocket.Client
         protected TcpClient _tcpClient = null;
         protected string _hostAddress = null;
         protected int _port = 0;
-        protected ProtocolFlag _protocolFlag;
+        protected Core.FlyingProtocolType _protocolFlag;
         public bool Connected { get { return _tcpClient != null && _tcpClient.Client.Connected; } }
 
         public event EventHandler<EventArgs> OnConnected;
@@ -62,7 +62,7 @@ namespace FlyingSocket.Client
         {
             _tcpClient = new TcpClient();
             _tcpClient.Client.Blocking = true; //使用阻塞模式，即同步模式
-            _protocolFlag = ProtocolFlag.None;
+            _protocolFlag = Core.FlyingProtocolType.Default;
             SocketTimeOut = 60 * 1000;//ProtocolConst.SocketTimeOut;
             OutgoingDataAssembler = new OutgoingDataAssembler();
             SocketBufferSize = 4096;

@@ -24,6 +24,7 @@ namespace ClientTests
             _socketClient = new UploadSocketClient();
             _socketClient.OnConnected += (s, e) => { DisplayMsg("客户端已连接。"); };
             _flyingSocketClient.OnConnected += (s, e) => { DisplayMsg("客户端已连接。"); };
+            _flyingSocketClient.OnDisconnected += (s, e) => { DisplayMsg("客户端已断开。"); };
         }
 
 
@@ -51,8 +52,16 @@ namespace ClientTests
         {
             var host = txtHost.Text.Trim().Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
             //_flyingSocketClient.ConnectAsync(host.First(), host.Last().TryConvert<int>(52520));
-            _socketClient.Connect(host.First(), host.Last().TryConvert<int>(52520));
-
+            if (_flyingSocketClient.IsConnected)
+            {
+                //_socketClient.Disconnect();
+                _flyingSocketClient.Disconnect();
+            }
+            else
+            {
+                //_socketClient.Connect(host.First(), host.Last().TryConvert<int>(52520));
+                _flyingSocketClient.ConnectAsync(host.First(), host.Last().TryConvert<int>(52520));
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -74,6 +83,13 @@ namespace ClientTests
                 var size = 0L;
                 flag = _socketClient.Upload("", fileName, ref size);
             }
+        }
+
+        private void btnSend_Click(object sender, EventArgs e)
+        {
+            var msg = txtContent.Text;
+            if (string.IsNullOrWhiteSpace(msg)) { return; }
+            _flyingSocketClient.SendAsync(msg);
         }
     }
 }

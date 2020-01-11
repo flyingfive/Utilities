@@ -12,7 +12,7 @@ namespace FlyingSocket.Server
     /// <summary>
     /// Socket自定义协议基类。所有的协议处理都从本类继承
     /// </summary>
-    public class BaseSocketProtocol : SocketInvokeElement
+    public abstract class BaseSocketProtocol : SocketInvokeElement
     {
         /// <summary>
         /// 登录的业务用户名
@@ -25,17 +25,17 @@ namespace FlyingSocket.Server
         /// <summary>
         /// 协议名
         /// </summary>
-        public string ProtocolName { get; protected set; }
+        public string Name { get; private set; }
         /// <summary>
         /// 文件协议工作目录
         /// </summary>
         public string FileWorkingDirectory { get; private set; }
 
-        public BaseSocketProtocol(FlyingSocketServer socketServer, SocketUserToken userToken)
+        public BaseSocketProtocol(string name, FlyingSocketServer socketServer, SocketUserToken userToken)
             : base(socketServer, userToken)
         {
             UserName = "";
-            ProtocolName = "";
+            Name = name;
             Logined = false;
             FileWorkingDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
             if (!Directory.Exists(FileWorkingDirectory)) { Directory.CreateDirectory(FileWorkingDirectory); }

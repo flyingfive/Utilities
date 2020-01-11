@@ -51,16 +51,16 @@ namespace FlyingSocket.Client
         protected int SocketBufferSize { get; private set; }
 
         public Socket _clientSocket = null;
-        protected ProtocolFlag _protocolFlag = ProtocolFlag.Upload;
+        protected Core.FlyingProtocolType _protocolFlag = Core.FlyingProtocolType.Upload;
 
         private IPEndPoint _remoteAddress = null;
         /// <summary>
         /// 客户端是否连接上
         /// </summary>
-        public bool Connected { get { return this._clientSocket != null && this._clientSocket.Connected; } }
+        public bool IsConnected { get { return this._clientSocket != null && this._clientSocket.Connected; } }
         public FlyingSocketClient()
         {
-            _clientSocket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            _clientSocket = new Socket(SocketType.Stream, System.Net.Sockets.ProtocolType.Tcp);
             _clientSocket.Blocking = false;
 
             OutgoingDataAssembler = new OutgoingDataAssembler();
@@ -74,14 +74,15 @@ namespace FlyingSocket.Client
             SendBuffer = new DynamicBufferManager(SocketBufferSize);
             IncomingDataParser = new IncomingDataParser();
             this.ReceiveEventArgs = new SocketAsyncEventArgs();
+            this.ReceiveEventArgs.Completed += IO_Completed;
             this.ReceiveEventArgs.SetBuffer(ReceiveBuffer.Buffer, 0, SocketBufferSize);
             this.SendEventArgs = new SocketAsyncEventArgs();
+            this.SendEventArgs.Completed += IO_Completed;
             this.SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SocketBufferSize);
+
             _connectBuffer = new byte[SocketBufferSize];
             this.ConnectEventArgs = new SocketAsyncEventArgs();
             this.ConnectEventArgs.SetBuffer(_connectBuffer, 0, SocketBufferSize);
-            this.ReceiveEventArgs.Completed += IO_Completed;
-            this.SendEventArgs.Completed += IO_Completed;
             this.ConnectEventArgs.Completed += IO_Completed;
             _disConnectBuffer = new byte[SocketBufferSize];
             this.DisconnectEventArgs = new SocketAsyncEventArgs();
@@ -94,18 +95,18 @@ namespace FlyingSocket.Client
 
         public void Connect(string server_ip, int server_port)
         {
-            if (this.Connected)
+            if (this.IsConnected)
             {
                 throw new InvalidOperationException("当前客户端处于已有连接中，不能重复连接。");
             }
             _remoteAddress = new IPEndPoint(IPAddress.Parse(server_ip), server_port);
             this._clientSocket.Connect(_remoteAddress);
-            if (this.Connected) { this.OnConnected?.Invoke(this, EventArgs.Empty); }
+            if (this.IsConnected) { this.OnConnected?.Invoke(this, EventArgs.Empty); }
         }
 
         public void ConnectAsync(string server_ip, int server_port)
         {
-            if (this.Connected)
+            if (this.IsConnected)
             {
                 throw new InvalidOperationException("当前客户端处于已有连接中，不能重复连接。");
             }
@@ -114,13 +115,28 @@ namespace FlyingSocket.Client
             this.DisconnectEventArgs.RemoteEndPoint = _remoteAddress;
             //this.ReceiveEventArgs.RemoteEndPoint = _remoteAddress;
             //this.SendEventArgs.RemoteEndPoint = _remoteAddress;
+            this.ConnectEventArgs.SetBuffer(new byte[] { Convert.ToByte(FlyingProtocolType.Default) }, 0, 1);
             this._clientSocket.ConnectAsync(this.ConnectEventArgs);
-            //byte[] socketFlag = new byte[1];
-            //socketFlag[0] = (byte)_protocolFlag;
-            //_tcpClient.Client.Send(socketFlag, SocketFlags.None); //发送标识
+        }
+
+        public void Disconnect()
+        {
+            if (this.IsConnected)
+            {
+                this._clientSocket.Disconnect(false);
+            }
+        }
+
+        public void DisconnectAsync()
+        {
+            if (this.IsConnected)
+            {
+                this._clientSocket.DisconnectAsync(this.DisconnectEventArgs);
+            }
         }
 
         public event EventHandler<EventArgs> OnConnected;
+        public event EventHandler<EventArgs> OnDisconnected;
         public SocketAsyncEventArgs DisconnectEventArgs { get; private set; }
 
         private void IO_Completed(object sender, SocketAsyncEventArgs e)
@@ -130,6 +146,9 @@ namespace FlyingSocket.Client
                 if (e.LastOperation == SocketAsyncOperation.Connect)
                 {
                     OnConnected?.Invoke(this, EventArgs.Empty);
+                    //SendBuffer.WriteInt(15, false);
+                    //this.SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SendBuffer.DataCount);
+                    //_clientSocket.SendAsync(this.SendEventArgs);
                     _clientSocket.ReceiveAsync(this.ReceiveEventArgs);
                 }
                 if (e.LastOperation == SocketAsyncOperation.Send)
@@ -138,7 +157,8 @@ namespace FlyingSocket.Client
                 }
                 if (e.LastOperation == SocketAsyncOperation.Disconnect)
                 {
-                    Console.WriteLine("客户端连接断开");
+                    OnDisconnected?.Invoke(this, EventArgs.Empty);
+                    //Console.WriteLine("客户端连接断开");
                 }
                 if (e.LastOperation == SocketAsyncOperation.Receive)
                 {
@@ -160,7 +180,7 @@ namespace FlyingSocket.Client
         }
         public void SendAsync(byte[] buffer)
         {
-            if (!this.Connected) { throw new InvalidCastException("还未建立连接。"); }
+            if (!this.IsConnected) { throw new InvalidCastException("还未建立连接。"); }
             OutgoingDataAssembler.Clear();
             OutgoingDataAssembler.AddRequest();
             OutgoingDataAssembler.AddCommand(ProtocolKey.Data);
