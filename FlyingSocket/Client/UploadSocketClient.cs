@@ -5,35 +5,36 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FlyingSocket.Common;
+using FlyingSocket.Server.Protocol;
 
 namespace FlyingSocket.Client
 {
     /// <summary>
     /// 数据上传协议的Socket客户端
     /// </summary>
+    [ProtocolName(SocketProtocolType.Upload)]
     public class UploadSocketClient : BaseSocketClient
     {
         public UploadSocketClient()
             : base()
         {
-            _protocolFlag = SocketProtocolType.Upload;
         }
 
         public bool Upload(string dirName, string fileName, ref long fileSize)
         {
-            bool bConnect = ReconnectAndLogin(); //检测连接是否还在，如果断开则重连并登录
-            if (!bConnect)
+            //bool bConnect = ReconnectAndLogin(); //检测连接是否还在，如果断开则重连并登录
+            if (!_tcpClient.Connected)
             {
-                return bConnect;
+                return false;
             }
             try
             {
                 //step1:发送文件上传命令，DirName:文件上传目录，FileName：上传文件名
                 OutgoingDataAssembler.Clear();
                 OutgoingDataAssembler.AddRequest();
-                OutgoingDataAssembler.AddCommand(ProtocolKey.Upload);
-                OutgoingDataAssembler.AddValue(ProtocolKey.DirName, dirName);
-                OutgoingDataAssembler.AddValue(ProtocolKey.FileName, Path.GetFileName(fileName));
+                OutgoingDataAssembler.AddCommand(UploadProtocolCommand.Upload.ToString());
+                OutgoingDataAssembler.AddValue(CommandKeys.DirName, dirName);
+                OutgoingDataAssembler.AddValue(CommandKeys.FileName, Path.GetFileName(fileName));
                 SendCommand();
                 var success = ReceiveCommand();
                 if (success)
@@ -41,7 +42,7 @@ namespace FlyingSocket.Client
                     success = CheckErrorCode();
                     if (success)
                     {
-                        success = IncomingDataParser.GetValue(ProtocolKey.FileSize, ref fileSize);
+                        success = IncomingDataParser.GetValue(CommandKeys.FileSize, ref fileSize);
                     }
                     if (!success) { return false; }
                     //成功后开始分包上传数据,此时服务端会创建指定的空文件并打开链接到此文件的流，准备开始数据写入
@@ -87,7 +88,7 @@ namespace FlyingSocket.Client
             {
                 OutgoingDataAssembler.Clear();
                 OutgoingDataAssembler.AddRequest();
-                OutgoingDataAssembler.AddCommand(ProtocolKey.Data);
+                OutgoingDataAssembler.AddCommand(CommandKeys.Data);
                 SendCommand(buffer, offset, count);
                 return true;
             }
@@ -105,7 +106,7 @@ namespace FlyingSocket.Client
             {
                 OutgoingDataAssembler.Clear();
                 OutgoingDataAssembler.AddRequest();
-                OutgoingDataAssembler.AddCommand(ProtocolKey.Eof);
+                OutgoingDataAssembler.AddCommand(CommandKeys.EOF);
                 SendCommand();
                 bool bSuccess = ReceiveCommand();
                 if (bSuccess)

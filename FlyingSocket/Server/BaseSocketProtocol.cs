@@ -37,37 +37,41 @@ namespace FlyingSocket.Server
         {
             UserName = "";
             var attr = this.GetType().GetCustomAttribute<ProtocolNameAttribute>(false);
+            if (attr == null)
+            {
+                throw new InvalidOperationException("无法识别到处理程序的协议类型。");
+            }
             ProtocolType = attr.ProtocolType;
             Logined = false;
             FileWorkingDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
             if (!Directory.Exists(FileWorkingDirectory)) { Directory.CreateDirectory(FileWorkingDirectory); }
         }
 
-        public bool DoLogin()
-        {
-            var userName = "";
-            var password = "";
-            if (IncomingDataParser.GetValue(ProtocolKey.UserName, ref userName) & IncomingDataParser.GetValue(ProtocolKey.Password, ref password))
-            {
-                if (password.Equals("admin".MD5(), StringComparison.CurrentCultureIgnoreCase))
-                {
-                    OutgoingDataAssembler.AddSuccess();
-                    UserName = userName;
-                    Logined = true;
-                    //Program.Logger.InfoFormat("{0} login success", userName);
-                }
-                else
-                {
-                    //OutgoingDataAssembler.AddFailure(ProtocolCode.UserOrPasswordError, "");
-                    //Program.Logger.ErrorFormat("{0} login failure,password error", userName);
-                }
-            }
-            else
-            {
-                OutgoingDataAssembler.AddFailure(ProtocolStatus.ParameterError, "");
-            }
-            return SendResult();
-        }
+        //public bool DoLogin()
+        //{
+        //    var userName = "";
+        //    var password = "";
+        //    if (IncomingDataParser.GetValue(CommandKeys.UserName, ref userName) & IncomingDataParser.GetValue(CommandKeys.Password, ref password))
+        //    {
+        //        if (password.Equals("admin".MD5(), StringComparison.CurrentCultureIgnoreCase))
+        //        {
+        //            OutgoingDataAssembler.AddSuccess();
+        //            UserName = userName;
+        //            Logined = true;
+        //            //Program.Logger.InfoFormat("{0} login success", userName);
+        //        }
+        //        else
+        //        {
+        //            //OutgoingDataAssembler.AddFailure(ProtocolCode.UserOrPasswordError, "");
+        //            //Program.Logger.ErrorFormat("{0} login failure,password error", userName);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        OutgoingDataAssembler.AddFailure(CommandResult.ParameterError, "");
+        //    }
+        //    return SendResult();
+        //}
 
         public bool DoActive()
         {

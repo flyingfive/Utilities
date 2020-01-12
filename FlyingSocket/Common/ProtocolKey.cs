@@ -13,6 +13,10 @@ namespace FlyingSocket.Common
     public enum SocketProtocolType : byte
     {
         /// <summary>
+        /// 未定义协议
+        /// </summary>
+        Undefine = 0x0,
+        /// <summary>
         /// 默认数据协议
         /// </summary>
         Default = 0xf,
@@ -30,7 +34,10 @@ namespace FlyingSocket.Common
         SQL = 0x3,
     }
 
-    public class ProtocolKey
+    /// <summary>
+    /// 命令标识的编码字符
+    /// </summary>
+    public class CommandKeys
     {
         /// <summary>
         /// 指定socket请求消息的编码字符
@@ -68,8 +75,10 @@ namespace FlyingSocket.Common
         /// 指定命令响应消息的字符
         /// </summary>
         public static readonly string Message = "Message";
-        public static string UserName = "UserName";
-        public static string Password = "Password";
+
+
+        //public static string UserName = "UserName";
+        //public static string Password = "Password";
         public static string FileName = "FileName";
         public static string Item = "Item";
         public static string ParentDir = "ParentDir";
@@ -82,29 +91,39 @@ namespace FlyingSocket.Common
         public static string Login = "Login";
         public static string Active = "Active";
 
-        public static string Dir = "Dir";
-        public static string CreateDir = "CreateDir";
-        public static string DeleteDir = "DeleteDir";
-        public static string FileList = "FileList";
-        public static string DeleteFile = "DeleteFile";
-        public static string Upload = "Upload";
-        public static string Data = "Data";
+        //public static string Dir = "Dir";
+        //public static string CreateDir = "CreateDir";
+        //public static string DeleteDir = "DeleteDir";
+        //public static string FileList = "FileList";
+        //public static string DeleteFile = "DeleteFile";
+
         /// <summary>
-        /// 指定操作结束的编码字符
+        /// 指定命令数据的字符
         /// </summary>
-        public static string Eof = "EOF";
+        public static readonly string Data = UploadProtocolCommand.Data.ToString();
+        /// <summary>
+        /// 指定命令操作结束的编码字符
+        /// </summary>
+        public static readonly string EOF = UploadProtocolCommand.EOF.ToString();
         /// <summary>
         /// 
         /// </summary>
-        //public static string Download = "Download";
         public static string SendFile = "SendFile";
 
-
-        public static readonly string BeginCommandKey = "BEGIN";
-        public static readonly string DataLengthKey = "LENGTH";
+        /// <summary>
+        /// 指定请求开始的编码字符
+        /// </summary>
+        public static readonly string Begin = "BEGIN";
+        /// <summary>
+        /// 指定请求数据长度的编码字符
+        /// </summary>
+        public static readonly string DataLength = "LENGTH";
     }
 
-    public enum ProtocolStatus : int
+    /// <summary>
+    /// 命令的响应结果
+    /// </summary>
+    public enum CommandResult : int
     {
         [Description("成功")]
         Success = 0x00000000,
@@ -123,7 +142,7 @@ namespace FlyingSocket.Common
 
     public class ProtocolCode
     {
-        public static string GetErrorString(ProtocolStatus status)
+        public static string GetErrorString(CommandResult status)
         {
             var desc = status.GetCustomAttribute<DescriptionAttribute>();
             return desc == null ? "" : desc.Description;
@@ -145,7 +164,7 @@ namespace FlyingSocket.Common
         DeleteFile = 7,
         Upload = 8,
         Data = 9,
-        Eof = 10,
+        EOF = 10,
     }
 
     /// <summary>
@@ -153,7 +172,6 @@ namespace FlyingSocket.Common
     /// </summary>
     public enum DownloadProtocolCommand
     {
-        //None = 0,
         Login = 0,
         Active = 2,
         Dir = 3,

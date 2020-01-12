@@ -196,7 +196,7 @@ namespace FlyingSocket.Client
             OutgoingDataAssembler.BeginRequest(buffer.Length);
             Console.WriteLine("客户端发送消息头");
             SendMessageHead();
-
+            //return;
             var fileSize = 0;
             using (var stream = new MemoryStream(buffer))
             {
@@ -246,14 +246,14 @@ namespace FlyingSocket.Client
         {
             OutgoingDataAssembler.Clear();
             OutgoingDataAssembler.AddRequest();
-            OutgoingDataAssembler.AddCommand(ProtocolKey.Data);
+            OutgoingDataAssembler.AddCommand(CommandKeys.Data);
             SendData(buffer, offset, count);
         }
         public void DoEof(Int64 fileSize)
         {
             OutgoingDataAssembler.Clear();
             OutgoingDataAssembler.AddRequest();
-            OutgoingDataAssembler.AddCommand(ProtocolKey.Eof);
+            OutgoingDataAssembler.AddCommand(CommandKeys.EOF);
             SendMessageHead();
         }
 

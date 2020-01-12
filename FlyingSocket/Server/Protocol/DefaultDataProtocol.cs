@@ -29,11 +29,19 @@ namespace FlyingSocket.Server.Protocol
 
         public override bool ProcessCommand(byte[] buffer, int offset, int count)
         {
+            if (string.Equals(IncomingDataParser.Command, CommandKeys.Begin))
+            {
+                return ProcessBeginRequest();
+            }
+            if (string.Equals(IncomingDataParser.Command, CommandKeys.EOF))
+            {
+                return ProcessEndRequest();
+            }
             Console.WriteLine(string.Format("服务端写入数据长度：{0}", count));
             this.InputStream.Write(buffer, offset, count);
             //Array.Clear(buffer, 0, buffer.Length);
             OutgoingDataAssembler.AddSuccess();
-            OutgoingDataAssembler.AddValue(ProtocolKey.FileSize, InputStream.Length);
+            OutgoingDataAssembler.AddValue(CommandKeys.FileSize, InputStream.Length);
             return SendResult();
             //return true;
             //var data = new byte[count];
@@ -42,7 +50,7 @@ namespace FlyingSocket.Server.Protocol
             //return true;
         }
 
-        protected override bool ProcessEndRequest()
+        protected bool ProcessEndRequest()
         {
             Console.WriteLine(string.Format("服务端结束写入。"));
             this.InputStream.Position = 0;
@@ -60,19 +68,19 @@ namespace FlyingSocket.Server.Protocol
 
             //return true;
             OutgoingDataAssembler.AddSuccess();
-            OutgoingDataAssembler.AddValue(ProtocolKey.FileSize, length);
+            OutgoingDataAssembler.AddValue(CommandKeys.FileSize, length);
             return SendResult();
         }
 
-        protected override bool ProcessBeginRequest()
+        protected bool ProcessBeginRequest()
         {
             Console.WriteLine(string.Format("服务端开始写入数据。"));
             var bodyLength = 0;
-            var success = IncomingDataParser.GetValue(ProtocolKey.DataLengthKey, ref bodyLength);
+            var success = IncomingDataParser.GetValue(CommandKeys.DataLength, ref bodyLength);
             if (!success || bodyLength <= 0) { return false; }
             InputStream = new MemoryStream();
             OutgoingDataAssembler.AddSuccess();
-            OutgoingDataAssembler.AddValue(ProtocolKey.FileSize, InputStream.Length);
+            OutgoingDataAssembler.AddValue(CommandKeys.FileSize, InputStream.Length);
             return SendResult();
         }
 

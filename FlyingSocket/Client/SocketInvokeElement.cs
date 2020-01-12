@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FlyingFive;
 using FlyingSocket.Common;
+using FlyingSocket.Server.Protocol;
 
 namespace FlyingSocket.Client
 {
@@ -18,7 +19,7 @@ namespace FlyingSocket.Client
         protected TcpClient _tcpClient = null;
         protected string _hostAddress = null;
         protected int _port = 0;
-        protected SocketProtocolType _protocolFlag;
+        protected SocketProtocolType SocketProtocolType { get; private set; }
         public bool Connected { get { return _tcpClient != null && _tcpClient.Client.Connected; } }
 
         public event EventHandler<EventArgs> OnConnected;
@@ -60,9 +61,14 @@ namespace FlyingSocket.Client
 
         public SocketInvokeElement()
         {
+            var attr = this.GetType().GetCustomAttribute<ProtocolNameAttribute>(false);
+            if (attr == null)
+            {
+                throw new InvalidOperationException("无法识别到处理程序的协议类型。");
+            }
+            SocketProtocolType = attr.ProtocolType;
             _tcpClient = new TcpClient();
             _tcpClient.Client.Blocking = true; //使用阻塞模式，即同步模式
-            _protocolFlag = Common.SocketProtocolType.Default;
             SocketTimeOut = 60 * 1000;//ProtocolConst.SocketTimeOut;
             OutgoingDataAssembler = new OutgoingDataAssembler();
             SocketBufferSize = 4096;
@@ -75,8 +81,8 @@ namespace FlyingSocket.Client
             SendBuffer = new DynamicBufferManager(SocketBufferSize);
             IncomingDataParser = new IncomingDataParser();
             this.ReceiveEventArgs = new SocketAsyncEventArgs();
-            this.SendEventArgs = new SocketAsyncEventArgs();
             this.ReceiveEventArgs.Completed += IO_Completed;
+            this.SendEventArgs = new SocketAsyncEventArgs();
             this.SendEventArgs.Completed += IO_Completed;
         }
 
@@ -91,8 +97,8 @@ namespace FlyingSocket.Client
             {
                 var task = _tcpClient.ConnectAsync(host, port);
                 task.Wait();
-                byte[] socketFlag = new byte[1];
-                socketFlag[0] = (byte)_protocolFlag;
+                var socketFlag = new byte[] { (byte)SocketProtocolType };
+                //socketFlag[0] = ;
                 _tcpClient.Client.Send(socketFlag, SocketFlags.None); //发送标识
                 _hostAddress = host;
                 _port = port;

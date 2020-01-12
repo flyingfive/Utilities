@@ -30,7 +30,7 @@ namespace FlyingSocket.Common
                 tmpStr = _protocolText[0];
                 for (int i = 1; i < _protocolText.Count; i++)
                 {
-                    tmpStr = tmpStr + ProtocolKey.ReturnWrap + _protocolText[i];
+                    tmpStr = tmpStr + CommandKeys.ReturnWrap + _protocolText[i];
                 }
             }
             return tmpStr;
@@ -41,7 +41,7 @@ namespace FlyingSocket.Common
         /// </summary>
         public void AddRequest()
         {
-            _protocolText.Add(ProtocolKey.LeftBrackets + ProtocolKey.Request + ProtocolKey.RightBrackets);
+            _protocolText.Add(CommandKeys.LeftBrackets + CommandKeys.Request + CommandKeys.RightBrackets);
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace FlyingSocket.Common
         /// </summary>
         public void AddResponse()
         {
-            _protocolText.Add(ProtocolKey.LeftBrackets + ProtocolKey.Response + ProtocolKey.RightBrackets);
+            _protocolText.Add(CommandKeys.LeftBrackets + CommandKeys.Response + CommandKeys.RightBrackets);
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace FlyingSocket.Common
         /// <param name="commandKey"></param>
         public void AddCommand(string commandKey)
         {
-            _protocolText.Add(ProtocolKey.Command + ProtocolKey.EqualSign + commandKey);
+            _protocolText.Add(CommandKeys.Command + CommandKeys.EqualSign + commandKey);
         }
 
         /// <summary>
@@ -66,8 +66,8 @@ namespace FlyingSocket.Common
         /// </summary>
         public void BeginRequest(int requestLength)
         {
-            _protocolText.Add(string.Format("{0}{1}{2}", ProtocolKey.Command, ProtocolKey.EqualSign, ProtocolKey.BeginCommandKey));
-            _protocolText.Add(string.Format("{0}{1}{2}", ProtocolKey.DataLengthKey, ProtocolKey.EqualSign, requestLength));
+            _protocolText.Add(string.Format("{0}{1}{2}", CommandKeys.Command, CommandKeys.EqualSign, CommandKeys.Begin));
+            _protocolText.Add(string.Format("{0}{1}{2}", CommandKeys.DataLength, CommandKeys.EqualSign, requestLength));
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace FlyingSocket.Common
         /// </summary>
         public void AddSuccess()
         {
-            _protocolText.Add(ProtocolKey.Code + ProtocolKey.EqualSign + ((int)ProtocolStatus.Success).ToString());
+            _protocolText.Add(CommandKeys.Code + CommandKeys.EqualSign + ((int)CommandResult.Success).ToString());
         }
 
 
@@ -84,46 +84,46 @@ namespace FlyingSocket.Common
         /// </summary>
         /// <param name="status"></param>
         /// <param name="message"></param>
-        public void AddFailure(ProtocolStatus status, string message = "")
+        public void AddFailure(CommandResult status, string message = "")
         {
-            _protocolText.Add(ProtocolKey.Code + ProtocolKey.EqualSign + Convert.ToInt32(status).ToString());
+            _protocolText.Add(CommandKeys.Code + CommandKeys.EqualSign + Convert.ToInt32(status).ToString());
             if (string.IsNullOrEmpty(message))
             {
                 message = ProtocolCode.GetErrorString(status);
             }
             if (string.IsNullOrEmpty(message)) { throw new InvalidOperationException("没有为客户端返回错误信息"); }
 
-            _protocolText.Add(ProtocolKey.Message + ProtocolKey.EqualSign + message);
+            _protocolText.Add(CommandKeys.Message + CommandKeys.EqualSign + message);
         }
 
         public void AddValue(string protocolKey, string value)
         {
-            _protocolText.Add(protocolKey + ProtocolKey.EqualSign + value);
+            _protocolText.Add(protocolKey + CommandKeys.EqualSign + value);
         }
 
         public void AddValue(string protocolKey, short value)
         {
-            _protocolText.Add(protocolKey + ProtocolKey.EqualSign + value.ToString());
+            _protocolText.Add(protocolKey + CommandKeys.EqualSign + value.ToString());
         }
 
         public void AddValue(string protocolKey, int value)
         {
-            _protocolText.Add(protocolKey + ProtocolKey.EqualSign + value.ToString());
+            _protocolText.Add(protocolKey + CommandKeys.EqualSign + value.ToString());
         }
 
         public void AddValue(string protocolKey, long value)
         {
-            _protocolText.Add(protocolKey + ProtocolKey.EqualSign + value.ToString());
+            _protocolText.Add(protocolKey + CommandKeys.EqualSign + value.ToString());
         }
 
         public void AddValue(string protocolKey, Single value)
         {
-            _protocolText.Add(protocolKey + ProtocolKey.EqualSign + value.ToString());
+            _protocolText.Add(protocolKey + CommandKeys.EqualSign + value.ToString());
         }
 
         public void AddValue(string protocolKey, double value)
         {
-            _protocolText.Add(protocolKey + ProtocolKey.EqualSign + value.ToString());
+            _protocolText.Add(protocolKey + CommandKeys.EqualSign + value.ToString());
         }
     }
 }

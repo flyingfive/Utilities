@@ -43,28 +43,28 @@ namespace FlyingSocket.Common
             Data.Clear();
             //Names.Clear();
             //Values.Clear();
-            var index = protocolText.IndexOf(ProtocolKey.ReturnWrap);
+            var index = protocolText.IndexOf(CommandKeys.ReturnWrap);
             if (index < 0)
             {
                 return false;
             }
             else
             {
-                var keyValues = protocolText.Split(new string[] { ProtocolKey.ReturnWrap }, StringSplitOptions.RemoveEmptyEntries);
+                var keyValues = protocolText.Split(new string[] { CommandKeys.ReturnWrap }, StringSplitOptions.RemoveEmptyEntries);
                 if (keyValues.Length < 2) //每次命令至少包括两行
                 {
                     return false;
                 }
                 foreach (var item in keyValues)
                 {
-                    var config = item.Split(new string[] { ProtocolKey.EqualSign }, StringSplitOptions.None);
+                    var config = item.Split(new string[] { CommandKeys.EqualSign }, StringSplitOptions.None);
                     if (config.Length < 1 || config.Length > 2) { return false; }
                     //if (config.Length == 1)
                     //{
                     //    Command = config.First();
                     //}
                     //if (config.Length != 2) { return false; }
-                    if (config.First().Equals(ProtocolKey.Command, StringComparison.CurrentCultureIgnoreCase))
+                    if (config.First().Equals(CommandKeys.Command, StringComparison.CurrentCultureIgnoreCase))
                     {
                         Command = config[1];
                     }

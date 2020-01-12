@@ -68,7 +68,7 @@ namespace ClientTests
         private void button1_Click(object sender, EventArgs e)
         {
             //_flyingSocketClient.SendAsync("你好，我是刘碧清。");
-           var flag = _socketClient.DoLogin("admin", "admin");
+            var flag = true;//_socketClient.DoLogin("admin", "admin");
             if (flag)
             {
                 var fileName = "";

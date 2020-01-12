@@ -58,26 +58,26 @@ namespace FlyingSocket.Server.Protocol
             OutgoingDataAssembler.Clear();
             if (!Enum.GetNames(typeof(DownloadProtocolCommand)).Contains(IncomingDataParser.Command))
             {
-                OutgoingDataAssembler.AddFailure(ProtocolStatus.UnSupportedCommand, "");
+                OutgoingDataAssembler.AddFailure(CommandResult.UnSupportedCommand, "");
                 return false;
             }
             var command = IncomingDataParser.Command.TryConvert<DownloadProtocolCommand>();
             OutgoingDataAssembler.AddResponse();
             OutgoingDataAssembler.AddCommand(IncomingDataParser.Command);
-            //if (!CheckLogined(command)) //检测登录
-            //{
-            //    OutgoingDataAssembler.AddFailure(ProtocolCode.UserHasLogined, "");
-            //    return SendResult();
-            //}
+            if (!CheckLogined(command)) //检测登录
+            {
+                OutgoingDataAssembler.AddFailure(CommandResult.Error, "用户未登录");
+                return SendResult();
+            }
             switch (command)
             {
-                case DownloadProtocolCommand.Login:return DoLogin();
+                //case DownloadProtocolCommand.Login:return DoLogin();
                 case DownloadProtocolCommand.Active:return DoActive();
                 case DownloadProtocolCommand.Dir:return DoDir();
                 case DownloadProtocolCommand.FileList:return DoFileList();
                 case DownloadProtocolCommand.Download:return DoDownload();
                 default:
-                    OutgoingDataAssembler.AddFailure(ProtocolStatus.UnSupportedCommand, "");
+                    OutgoingDataAssembler.AddFailure(CommandResult.UnSupportedCommand, "");
                     return false;
             }
         }
@@ -85,20 +85,21 @@ namespace FlyingSocket.Server.Protocol
 
         public bool CheckLogined(DownloadProtocolCommand command)
         {
-            if ((command == DownloadProtocolCommand.Login) | (command == DownloadProtocolCommand.Active))
-            {
-                return true;
-            }
-            else
-            {
-                return Logined;
-            }
+            //if ((command == DownloadProtocolCommand.Login) | (command == DownloadProtocolCommand.Active))
+            //{
+            //    return true;
+            //}
+            //else
+            //{
+            //    return Logined;
+            //}
+            return true;
         }
 
         public bool DoDir()
         {
             var parentDir = "";
-            if (IncomingDataParser.GetValue(ProtocolKey.ParentDir, ref parentDir))
+            if (IncomingDataParser.GetValue(CommandKeys.ParentDir, ref parentDir))
             {
                 if (parentDir == "")
                 {
@@ -117,17 +118,17 @@ namespace FlyingSocket.Server.Protocol
                     for (int i = 0; i < subDirectorys.Length; i++)
                     {
                         string[] directoryName = subDirectorys[i].Split(directorySeparator, StringSplitOptions.RemoveEmptyEntries);
-                        OutgoingDataAssembler.AddValue(ProtocolKey.Item, directoryName[directoryName.Length - 1]);
+                        OutgoingDataAssembler.AddValue(CommandKeys.Item, directoryName[directoryName.Length - 1]);
                     }
                 }
                 else
                 {
-                    OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, "目录不存在");
+                    OutgoingDataAssembler.AddFailure(CommandResult.Error, "目录不存在");
                 }
             }
             else
             {
-                OutgoingDataAssembler.AddFailure(ProtocolStatus.ParameterError, "");
+                OutgoingDataAssembler.AddFailure(CommandResult.ParameterError, "");
             }
             return SendResult();
         }
@@ -135,7 +136,7 @@ namespace FlyingSocket.Server.Protocol
         public bool DoFileList()
         {
             var dirName = "";
-            if (IncomingDataParser.GetValue(ProtocolKey.DirName, ref dirName))
+            if (IncomingDataParser.GetValue(CommandKeys.DirName, ref dirName))
             {
                 if (dirName == "")
                 {
@@ -154,17 +155,17 @@ namespace FlyingSocket.Server.Protocol
                     {
                         var fileInfo = new FileInfo(files[i]);
                         fileSize = fileInfo.Length;
-                        OutgoingDataAssembler.AddValue(ProtocolKey.Item, fileInfo.Name + ProtocolKey.TextSeperator + fileSize.ToString());
+                        OutgoingDataAssembler.AddValue(CommandKeys.Item, fileInfo.Name + CommandKeys.TextSeperator + fileSize.ToString());
                     }
                 }
                 else
                 {
-                    OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, "");
+                    OutgoingDataAssembler.AddFailure(CommandResult.Error, "");
                 }
             }
             else
             {
-                OutgoingDataAssembler.AddFailure(ProtocolStatus.ParameterError, "");
+                OutgoingDataAssembler.AddFailure(CommandResult.ParameterError, "");
             }
             return SendResult();
         }
@@ -175,8 +176,8 @@ namespace FlyingSocket.Server.Protocol
             string fileName = "";
             Int64 fileSize = 0;
             int packetSize = 0;
-            if (IncomingDataParser.GetValue(ProtocolKey.DirName, ref dirName) & IncomingDataParser.GetValue(ProtocolKey.FileName, ref fileName)
-                & IncomingDataParser.GetValue(ProtocolKey.FileSize, ref fileSize) & IncomingDataParser.GetValue(ProtocolKey.PacketSize, ref packetSize))
+            if (IncomingDataParser.GetValue(CommandKeys.DirName, ref dirName) && IncomingDataParser.GetValue(CommandKeys.FileName, ref fileName)
+                && IncomingDataParser.GetValue(CommandKeys.FileSize, ref fileSize) && IncomingDataParser.GetValue(CommandKeys.PacketSize, ref packetSize))
             {
                 if (dirName == "")
                 {
@@ -208,18 +209,18 @@ namespace FlyingSocket.Server.Protocol
                     }
                     else
                     {
-                        OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, "文件正在使用中");
+                        OutgoingDataAssembler.AddFailure(CommandResult.Error, "文件正在使用中");
                         //Program.Logger.Error("Start download file error, file is in use: " + fileName);
                     }
                 }
                 else
                 {
-                    OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, "文件不存在");
+                    OutgoingDataAssembler.AddFailure(CommandResult.Error, "文件不存在");
                 }
             }
             else
             {
-                OutgoingDataAssembler.AddFailure(ProtocolStatus.ParameterError);
+                OutgoingDataAssembler.AddFailure(CommandResult.ParameterError);
             }
             return SendResult();
         }
@@ -263,9 +264,9 @@ namespace FlyingSocket.Server.Protocol
                 {
                     OutgoingDataAssembler.Clear();
                     OutgoingDataAssembler.AddResponse();
-                    OutgoingDataAssembler.AddCommand(ProtocolKey.SendFile);
+                    OutgoingDataAssembler.AddCommand(CommandKeys.SendFile);
                     OutgoingDataAssembler.AddSuccess();
-                    OutgoingDataAssembler.AddValue(ProtocolKey.FileSize, _fileStream.Length - _fileStream.Position);
+                    OutgoingDataAssembler.AddValue(CommandKeys.FileSize, _fileStream.Length - _fileStream.Position);
                     result = SendResult();
                     _sendFile = false;
                 }
@@ -275,7 +276,7 @@ namespace FlyingSocket.Server.Protocol
                     {
                         OutgoingDataAssembler.Clear();
                         OutgoingDataAssembler.AddResponse();
-                        OutgoingDataAssembler.AddCommand(ProtocolKey.Data);
+                        OutgoingDataAssembler.AddCommand(CommandKeys.Data);
                         OutgoingDataAssembler.AddSuccess();
                         if (_readBuffer == null)
                         {
