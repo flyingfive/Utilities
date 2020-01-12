@@ -11,11 +11,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FlyingFive;
-using FlyingSocket.Core;
+using FlyingSocket.Common;
 
 namespace FlyingSocket.Client
 {
-    public class FlyingSocketClient
+    /// <summary>
+    /// 默认数据协议的Socket客户端（异步模式）
+    /// </summary>
+    public class DefaultSocketClient
     {
         protected string _hostAddress = null;
         protected int _port = 0;
@@ -54,7 +57,7 @@ namespace FlyingSocket.Client
         protected int SocketBufferSize { get; private set; } = 32 * 1024;         //分包大小：32KB
 
         public Socket _clientSocket = null;
-        protected Core.FlyingProtocolType _protocolFlag = Core.FlyingProtocolType.Upload;
+        protected SocketProtocolType _protocolFlag = SocketProtocolType.Upload;
 
         private IPEndPoint _remoteAddress = null;
         /// <summary>
@@ -65,7 +68,7 @@ namespace FlyingSocket.Client
         /// 临时接收数据
         /// </summary>
         private byte[] _receivedData = null;
-        public FlyingSocketClient()
+        public DefaultSocketClient()
         {
             _clientSocket = new Socket(SocketType.Stream, System.Net.Sockets.ProtocolType.Tcp);
             _clientSocket.Blocking = false;
@@ -116,7 +119,7 @@ namespace FlyingSocket.Client
             this.ConnectEventArgs.RemoteEndPoint = _remoteAddress;
             this.DisconnectEventArgs.RemoteEndPoint = _remoteAddress;
             //发送1字节的连接数据，标明使用默认数据协议
-            var connectData = new byte[] { Convert.ToByte(FlyingProtocolType.Default) };
+            var connectData = new byte[] { Convert.ToByte(SocketProtocolType.Default) };
             this.ConnectEventArgs.SetBuffer(connectData, 0, 1);
             this._clientSocket.ConnectAsync(this.ConnectEventArgs);
         }

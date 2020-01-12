@@ -17,11 +17,11 @@ namespace ClientTests
     public partial class FrmClient : Form
     {
         private UploadSocketClient _socketClient = null;
-        private FlyingSocketClient _flyingSocketClient = null;
+        private DefaultSocketClient _flyingSocketClient = null;
         public FrmClient()
         {
             InitializeComponent();
-            _flyingSocketClient = new FlyingSocketClient();
+            _flyingSocketClient = new DefaultSocketClient();
             _socketClient = new UploadSocketClient();
             _socketClient.OnConnected += (s, e) => { DisplayMsg("客户端已连接。"); };
             _flyingSocketClient.OnConnected += (s, e) => { DisplayMsg("客户端已连接。"); };
@@ -60,7 +60,7 @@ namespace ClientTests
             }
             else
             {
-                //_socketClient.Connect(host.First(), host.Last().TryConvert<int>(52520));
+                _socketClient.Connect(host.First(), host.Last().TryConvert<int>(52520));
                 _flyingSocketClient.ConnectAsync(host.First(), host.Last().TryConvert<int>(52520));
             }
         }

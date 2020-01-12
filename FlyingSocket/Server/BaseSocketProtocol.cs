@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Net.Sockets;
-using FlyingSocket.Core;
+using FlyingSocket.Common;
 using FlyingFive;
 using System.IO;
+using FlyingSocket.Server.Protocol;
 
 namespace FlyingSocket.Server
 {
@@ -23,19 +24,20 @@ namespace FlyingSocket.Server
         /// </summary>
         public bool Logined { get; private set; }
         /// <summary>
-        /// 协议名
+        /// 协议类型
         /// </summary>
-        public string Name { get; private set; }
+        public SocketProtocolType ProtocolType { get; protected set; }
         /// <summary>
         /// 文件协议工作目录
         /// </summary>
         public string FileWorkingDirectory { get; private set; }
 
-        public BaseSocketProtocol(string name, FlyingSocketServer socketServer, SocketUserToken userToken)
+        public BaseSocketProtocol(FlyingSocketServer socketServer, SocketUserToken userToken)
             : base(socketServer, userToken)
         {
             UserName = "";
-            Name = name;
+            var attr = this.GetType().GetCustomAttribute<ProtocolNameAttribute>(false);
+            ProtocolType = attr.ProtocolType;
             Logined = false;
             FileWorkingDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
             if (!Directory.Exists(FileWorkingDirectory)) { Directory.CreateDirectory(FileWorkingDirectory); }
@@ -56,13 +58,13 @@ namespace FlyingSocket.Server
                 }
                 else
                 {
-                    OutgoingDataAssembler.AddFailure(ProtocolCode.UserOrPasswordError, "");
+                    //OutgoingDataAssembler.AddFailure(ProtocolCode.UserOrPasswordError, "");
                     //Program.Logger.ErrorFormat("{0} login failure,password error", userName);
                 }
             }
             else
             {
-                OutgoingDataAssembler.AddFailure(ProtocolCode.ParameterError, "");
+                OutgoingDataAssembler.AddFailure(ProtocolStatus.ParameterError, "");
             }
             return SendResult();
         }

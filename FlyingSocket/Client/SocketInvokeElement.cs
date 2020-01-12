@@ -6,19 +6,19 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using FlyingFive;
-using FlyingSocket.Core;
+using FlyingSocket.Common;
 
 namespace FlyingSocket.Client
 {
     /// <summary>
     /// 客户端Socket调用节点（同步模式）
     /// </summary>
-    public abstract class ClientSocketInvokeElement
+    public abstract class SocketInvokeElement
     {
         protected TcpClient _tcpClient = null;
         protected string _hostAddress = null;
         protected int _port = 0;
-        protected Core.FlyingProtocolType _protocolFlag;
+        protected SocketProtocolType _protocolFlag;
         public bool Connected { get { return _tcpClient != null && _tcpClient.Client.Connected; } }
 
         public event EventHandler<EventArgs> OnConnected;
@@ -58,11 +58,11 @@ namespace FlyingSocket.Client
         /// </summary>
         protected int SocketBufferSize { get; private set; }
 
-        public ClientSocketInvokeElement()
+        public SocketInvokeElement()
         {
             _tcpClient = new TcpClient();
             _tcpClient.Client.Blocking = true; //使用阻塞模式，即同步模式
-            _protocolFlag = Core.FlyingProtocolType.Default;
+            _protocolFlag = Common.SocketProtocolType.Default;
             SocketTimeOut = 60 * 1000;//ProtocolConst.SocketTimeOut;
             OutgoingDataAssembler = new OutgoingDataAssembler();
             SocketBufferSize = 4096;

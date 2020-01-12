@@ -4,18 +4,20 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FlyingSocket.Core;
+using FlyingSocket.Common;
 
 namespace FlyingSocket.Server.Protocol
 {
     /// <summary>
     /// 默认数据通讯协议
     /// </summary>
-    [ProtocolName(FlyingProtocolType.Default)]
+    [ProtocolName(SocketProtocolType.Default)]
     public class DefaultDataProtocol : BaseSocketProtocol
     {
-        public DefaultDataProtocol(FlyingSocketServer socketServer, SocketUserToken userToken) : base("Default", socketServer, userToken) { }
-
+        public DefaultDataProtocol(FlyingSocketServer socketServer, SocketUserToken userToken) : base(socketServer, userToken) { }
+        /// <summary>
+        /// 临时数据流
+        /// </summary>
         protected Stream InputStream { get; private set; }
 
         public override bool ProcessCommand(byte[] buffer, int offset, int count)
@@ -73,9 +75,9 @@ namespace FlyingSocket.Server.Protocol
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class ProtocolNameAttribute : System.Attribute
     {
-        public FlyingProtocolType ProtocolType { get; private set; }
+        public SocketProtocolType ProtocolType { get; private set; }
 
-        public ProtocolNameAttribute(FlyingProtocolType type) { this.ProtocolType = type; }
+        public ProtocolNameAttribute(SocketProtocolType type) { this.ProtocolType = type; }
 
     }
 }

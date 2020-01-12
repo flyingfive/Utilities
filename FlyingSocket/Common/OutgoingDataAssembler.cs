@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace FlyingSocket.Core
+namespace FlyingSocket.Common
 {
     /// <summary>
     /// 数据发送组装器
@@ -75,17 +75,24 @@ namespace FlyingSocket.Core
         /// </summary>
         public void AddSuccess()
         {
-            _protocolText.Add(ProtocolKey.Code + ProtocolKey.EqualSign + ProtocolCode.Success.ToString());
+            _protocolText.Add(ProtocolKey.Code + ProtocolKey.EqualSign + ((int)ProtocolStatus.Success).ToString());
         }
+
 
         /// <summary>
         /// 添加失败协议命令文本:Code=xMessage=xxx
         /// </summary>
-        /// <param name="errorCode"></param>
+        /// <param name="status"></param>
         /// <param name="message"></param>
-        public void AddFailure(int errorCode, string message)
+        public void AddFailure(ProtocolStatus status, string message = "")
         {
-            _protocolText.Add(ProtocolKey.Code + ProtocolKey.EqualSign + errorCode.ToString());
+            _protocolText.Add(ProtocolKey.Code + ProtocolKey.EqualSign + Convert.ToInt32(status).ToString());
+            if (string.IsNullOrEmpty(message))
+            {
+                message = ProtocolCode.GetErrorString(status);
+            }
+            if (string.IsNullOrEmpty(message)) { throw new InvalidOperationException("没有为客户端返回错误信息"); }
+
             _protocolText.Add(ProtocolKey.Message + ProtocolKey.EqualSign + message);
         }
 

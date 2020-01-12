@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using FlyingSocket.Server.Protocol;
-using FlyingSocket.Core;
+using FlyingSocket.Common;
 using System.Diagnostics;
 using System.Reflection;
 
@@ -35,7 +35,7 @@ namespace FlyingSocket.Server
         /// 在线客户端列表
         /// </summary>
         public SocketUserTokenList ConnectedClients { get; private set; }
-        public LogOutputSocketProtocolMgr LogOutputSocketProtocolMgr { get; private set; }
+        //public LogOutputSocketProtocolMgr LogOutputSocketProtocolMgr { get; private set; }
         public UploadSocketProtocolMgr UploadSocketProtocolMgr { get; private set; }
         public DownloadSocketProtocolMgr DownloadSocketProtocolMgr { get; private set; }
 
@@ -67,7 +67,7 @@ namespace FlyingSocket.Server
             ConnectedClients = new SocketUserTokenList();
             _maxNumberAcceptedClients = new Semaphore(SocketConfig.MaxConnections, SocketConfig.MaxConnections);
 
-            LogOutputSocketProtocolMgr = new LogOutputSocketProtocolMgr();
+            //LogOutputSocketProtocolMgr = new LogOutputSocketProtocolMgr();
             DownloadSocketProtocolMgr = new DownloadSocketProtocolMgr();
             UploadSocketProtocolMgr = new UploadSocketProtocolMgr();
             Init();
@@ -299,19 +299,19 @@ namespace FlyingSocket.Server
         /// <param name="userToken">客户端用户对象</param>
         private void BuildingSocketInvokeProtocol(SocketUserToken userToken)
         {
-            var dataFlag = userToken.ReceiveEventArgs.Buffer[userToken.ReceiveEventArgs.Offset];
-            if (!Enum.IsDefined(typeof(FlyingProtocolType), dataFlag))
+            var protocolFlag = userToken.ReceiveEventArgs.Buffer[userToken.ReceiveEventArgs.Offset];
+            if (!Enum.IsDefined(typeof(SocketProtocolType), protocolFlag))
             {
-                throw new InvalidOperationException(string.Format("未定义的通讯协议：{0}", dataFlag.ToString()));
+                throw new InvalidOperationException(string.Format("未定义的通讯协议：{0}", protocolFlag.ToString()));
             }
-            var protocolType = (FlyingProtocolType)Enum.ToObject(typeof(FlyingProtocolType), dataFlag);
+            var protocolType = (SocketProtocolType)Enum.ToObject(typeof(SocketProtocolType), protocolFlag);
             var instanceType = this.GetType().Assembly.GetTypes()
                 .Where(t => t.IsClass)
                 .Where(t => t.IsDefined(typeof(ProtocolNameAttribute)))
                 .Where(t => t.GetCustomAttribute<ProtocolNameAttribute>().ProtocolType == protocolType).FirstOrDefault();
             if (instanceType == null)
             {
-                throw new InvalidOperationException(string.Format("不受支持的通讯协议：{0}", dataFlag.ToString()));
+                throw new InvalidOperationException(string.Format("不受支持的通讯协议：{0}", protocolFlag.ToString()));
             }
             var param = new object[] { this, userToken };
             var element = Activator.CreateInstance(instanceType, param) as SocketInvokeElement;

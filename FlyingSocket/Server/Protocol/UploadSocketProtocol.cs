@@ -4,19 +4,26 @@ using System.Linq;
 using System.Text;
 using System.Net.Sockets;
 using System.IO;
-using FlyingSocket.Core;
+using FlyingSocket.Common;
 using FlyingSocket.Utility;
+using FlyingFive;
 
 namespace FlyingSocket.Server.Protocol
 {
-    [ProtocolName(FlyingProtocolType.Upload)]
+    [ProtocolName(SocketProtocolType.Upload)]
     public class UploadSocketProtocol : BaseSocketProtocol
     {
+        /// <summary>
+        /// 上传文件名
+        /// </summary>
         public string FileName { get; private set; }
+        /// <summary>
+        /// 写入服务端的文件流
+        /// </summary>
         private FileStream _fileStream = null;
 
         public UploadSocketProtocol(FlyingSocketServer socketServer, SocketUserToken userToken)
-            : base("Upload", socketServer, userToken)
+            : base(socketServer, userToken)
         {
             _fileStream = null;
             FileName = "";
@@ -43,59 +50,35 @@ namespace FlyingSocket.Server.Protocol
 
         public override bool ProcessCommand(byte[] buffer, int offset, int count) //处理分完包的数据，子类从这个方法继承
         {
-            UploadSocketCommand command = StrToCommand(IncomingDataParser.Command);
             OutgoingDataAssembler.Clear();
+            if (!Enum.GetNames(typeof(UploadProtocolCommand)).Contains(IncomingDataParser.Command))
+            {
+                OutgoingDataAssembler.AddFailure(ProtocolStatus.UnSupportedCommand, "");
+                return false;
+            }
+            var command = IncomingDataParser.Command.TryConvert<UploadProtocolCommand>();
             OutgoingDataAssembler.AddResponse();
             OutgoingDataAssembler.AddCommand(IncomingDataParser.Command);
             if (!CheckLogined(command)) //检测登录
             {
-                OutgoingDataAssembler.AddFailure(ProtocolCode.UserHasLogined, "");
+                //OutgoingDataAssembler.AddFailure(ProtocolCode.UserHasLogined, "");
                 return SendResult();
             }
-            if (command == UploadSocketCommand.Login)
+            switch (command)
             {
-                return DoLogin();
-            }
-            else if (command == UploadSocketCommand.Active)
-            {
-                return DoActive();
-            }
-            else if (command == UploadSocketCommand.Dir)
-            {
-                return ListDirectories();
-            }
-            else if (command == UploadSocketCommand.CreateDir)
-            {
-                return CreateDirectory();
-            }
-            else if (command == UploadSocketCommand.DeleteDir)
-            {
-                return DeleteDirectory();
-            }
-            else if (command == UploadSocketCommand.FileList)
-            {
-                return ListFiles();
-            }
-            else if (command == UploadSocketCommand.DeleteFile)
-            {
-                return DeleteFile();
-            }
-            else if (command == UploadSocketCommand.Upload)
-            {
-                return Upload();
-            }
-            else if (command == UploadSocketCommand.Data)
-            {
-                return DoData(buffer, offset, count);
-            }
-            else if (command == UploadSocketCommand.Eof)
-            {
-                return Eof();
-            }
-            else
-            {
-                //Program.Logger.Error("Unknow command: " + m_incomingDataParser.Command);
-                return false;
+                case UploadProtocolCommand.Login: return DoLogin();
+                case UploadProtocolCommand.Active: return DoActive();
+                case UploadProtocolCommand.Dir: return ListDirectories();
+                case UploadProtocolCommand.CreateDir:return CreateDirectory();
+                case UploadProtocolCommand.FileList: return ListFiles();
+                case UploadProtocolCommand.Upload: return Upload();
+                case UploadProtocolCommand.DeleteDir:return DeleteDirectory();
+                case UploadProtocolCommand.DeleteFile:return DeleteFile();
+                case UploadProtocolCommand.Data:return DoData(buffer, offset, count);
+                case UploadProtocolCommand.Eof:return Eof();
+                default:
+                    OutgoingDataAssembler.AddFailure(ProtocolStatus.UnSupportedCommand, "");
+                    return false;
             }
         }
 
@@ -104,57 +87,10 @@ namespace FlyingSocket.Server.Protocol
             return Eof();
         }
 
-        public UploadSocketCommand StrToCommand(string command)
-        {
-            if (command.Equals(ProtocolKey.Active, StringComparison.CurrentCultureIgnoreCase))
-            {
-                return UploadSocketCommand.Active;
-            }
-            else if (command.Equals(ProtocolKey.Login, StringComparison.CurrentCultureIgnoreCase))
-            {
-                return UploadSocketCommand.Login;
-            }
-            else if (command.Equals(ProtocolKey.Dir, StringComparison.CurrentCultureIgnoreCase))
-            {
-                return UploadSocketCommand.Dir;
-            }
-            else if (command.Equals(ProtocolKey.CreateDir, StringComparison.CurrentCultureIgnoreCase))
-            {
-                return UploadSocketCommand.CreateDir;
-            }
-            else if (command.Equals(ProtocolKey.DeleteDir, StringComparison.CurrentCultureIgnoreCase))
-            {
-                return UploadSocketCommand.DeleteDir;
-            }
-            else if (command.Equals(ProtocolKey.FileList, StringComparison.CurrentCultureIgnoreCase))
-            {
-                return UploadSocketCommand.FileList;
-            }
-            else if (command.Equals(ProtocolKey.DeleteFile, StringComparison.CurrentCultureIgnoreCase))
-            {
-                return UploadSocketCommand.DeleteFile;
-            }
-            else if (command.Equals(ProtocolKey.Upload, StringComparison.CurrentCultureIgnoreCase))
-            {
-                return UploadSocketCommand.Upload;
-            }
-            else if (command.Equals(ProtocolKey.Data, StringComparison.CurrentCultureIgnoreCase))
-            {
-                return UploadSocketCommand.Data;
-            }
-            else if (command.Equals(ProtocolKey.Eof, StringComparison.CurrentCultureIgnoreCase))
-            {
-                return UploadSocketCommand.Eof;
-            }
-            else
-            {
-                return UploadSocketCommand.None;
-            }
-        }
 
-        public bool CheckLogined(UploadSocketCommand command)
+        public bool CheckLogined(UploadProtocolCommand command)
         {
-            if ((command == UploadSocketCommand.Login) | (command == UploadSocketCommand.Active))
+            if ((command == UploadProtocolCommand.Login) | (command == UploadProtocolCommand.Active))
             {
                 return true;
             }
@@ -191,12 +127,12 @@ namespace FlyingSocket.Server.Protocol
                 }
                 else
                 {
-                    OutgoingDataAssembler.AddFailure(ProtocolCode.DirNotExist, "");
+                    OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, "目录不存在");
                 }
             }
             else
             {
-                OutgoingDataAssembler.AddFailure(ProtocolCode.ParameterError, "");
+                OutgoingDataAssembler.AddFailure(ProtocolStatus.ParameterError);
             }
             return SendResult();
         }
@@ -225,17 +161,17 @@ namespace FlyingSocket.Server.Protocol
                     }
                     catch (Exception E)
                     {
-                        OutgoingDataAssembler.AddFailure(ProtocolCode.CreateDirError, E.Message);
+                        OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, "目录创建错误");
                     }
                 }
                 else
                 {
-                    OutgoingDataAssembler.AddFailure(ProtocolCode.DirNotExist, "");
+                    OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, "目录不存在");
                 }
             }
             else
             {
-                OutgoingDataAssembler.AddFailure(ProtocolCode.ParameterError, "");
+                OutgoingDataAssembler.AddFailure(ProtocolStatus.ParameterError);
             }
             return SendResult();
         }
@@ -264,17 +200,17 @@ namespace FlyingSocket.Server.Protocol
                     }
                     catch (Exception E)
                     {
-                        OutgoingDataAssembler.AddFailure(ProtocolCode.DeleteDirError, E.Message);
+                        OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, E.Message);
                     }
                 }
                 else
                 {
-                    OutgoingDataAssembler.AddFailure(ProtocolCode.DirNotExist, "");
+                    OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, "目录不存在");
                 }
             }
             else
             {
-                OutgoingDataAssembler.AddFailure(ProtocolCode.ParameterError, "");
+                OutgoingDataAssembler.AddFailure(ProtocolStatus.ParameterError);
             }
             return SendResult();
         }
@@ -306,12 +242,12 @@ namespace FlyingSocket.Server.Protocol
                 }
                 else
                 {
-                    OutgoingDataAssembler.AddFailure(ProtocolCode.DirNotExist, "");
+                    OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, "目录不存在");
                 }
             }
             else
             {
-                OutgoingDataAssembler.AddFailure(ProtocolCode.ParameterError, "");
+                OutgoingDataAssembler.AddFailure(ProtocolStatus.ParameterError);
             }
             return SendResult();
         }
@@ -344,17 +280,17 @@ namespace FlyingSocket.Server.Protocol
                     }
                     catch (Exception E)
                     {
-                        OutgoingDataAssembler.AddFailure(ProtocolCode.DeleteFileFailed, E.Message);
+                        OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, E.Message);
                     }
                 }
                 else
                 {
-                    OutgoingDataAssembler.AddFailure(ProtocolCode.DirNotExist, "");
+                    OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, "目录不存在");
                 }
             }
             else
             {
-                OutgoingDataAssembler.AddFailure(ProtocolCode.ParameterError, "");
+                OutgoingDataAssembler.AddFailure(ProtocolStatus.ParameterError);
             }
             return SendResult();
         }
@@ -398,7 +334,7 @@ namespace FlyingSocket.Server.Protocol
                     }
                     else
                     {
-                        OutgoingDataAssembler.AddFailure(ProtocolCode.FileIsInUse, "");
+                        OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, "文件正在使用中");
                         //Program.Logger.Error("Start upload file error, file is in use: " + fileName);
                     }
                 }
@@ -413,7 +349,7 @@ namespace FlyingSocket.Server.Protocol
             }
             else
             {
-                OutgoingDataAssembler.AddFailure(ProtocolCode.ParameterError, "");
+                OutgoingDataAssembler.AddFailure(ProtocolStatus.ParameterError);
             }
             return SendResult();
         }
@@ -459,7 +395,7 @@ namespace FlyingSocket.Server.Protocol
         {
             if (_fileStream == null)
             {
-                OutgoingDataAssembler.AddFailure(ProtocolCode.NotOpenFile, "");
+                OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, "文件未打开");
                 return false;
             }
             else
@@ -481,7 +417,7 @@ namespace FlyingSocket.Server.Protocol
         {
             if (_fileStream == null)
             {
-                OutgoingDataAssembler.AddFailure(ProtocolCode.NotOpenFile, "");
+                OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, "文件未打开");
             }
             else
             {

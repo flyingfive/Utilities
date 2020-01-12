@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using FlyingFive;
 
-namespace FlyingSocket.Core
+namespace FlyingSocket.Common
 {
     /// <summary>
     /// 接收数据解析器
@@ -16,18 +16,13 @@ namespace FlyingSocket.Core
         /// </summary>
         public string Header { get; private set; }
         /// <summary>
-        /// 命令
+        /// 命令文本内容
         /// </summary>
         public string Command { get; private set; }
-        ///// <summary>
-        ///// 名称
-        ///// </summary>
-        //public List<string> Names { get; private set; }
-        ///// <summary>
-        ///// 值
-        ///// </summary>
-        //public List<string> Values { get; private set; }
 
+        /// <summary>
+        /// 数据
+        /// </summary>
         public IDictionary<String, string> Data { get; private set; }
 
         public IncomingDataParser()
@@ -37,6 +32,11 @@ namespace FlyingSocket.Core
             Data = new Dictionary<string, string>();
         }
 
+        /// <summary>
+        /// 解码命令文本中的信息
+        /// </summary>
+        /// <param name="protocolText">命令文本</param>
+        /// <returns></returns>
         public bool DecodeProtocolText(string protocolText)
         {
             Header = "";

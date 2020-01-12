@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace FlyingSocket.Core
+namespace FlyingSocket.Common
 {
     /// <summary>
-    /// 动态数据缓存管理
+    /// 动态缓存数据管理
     /// </summary>
     public class DynamicBufferManager
     {
@@ -17,7 +17,7 @@ namespace FlyingSocket.Core
         /// <summary>
         /// 写入数据大小
         /// </summary>
-        public int DataCount { get; set; }
+        public int DataCount { get; private set; }
 
         public DynamicBufferManager(int bufferSize)
         {
@@ -65,6 +65,7 @@ namespace FlyingSocket.Core
                     Buffer[i] = Buffer[count + i];
                 }
                 DataCount = DataCount - count;
+                //Array.Clear(Buffer,)
             }
         }
 
@@ -76,7 +77,7 @@ namespace FlyingSocket.Core
         {
             if (Buffer.Length < size)
             {
-                byte[] tmpBuffer = new byte[size];
+                var tmpBuffer = new byte[size];
                 Array.Copy(Buffer, 0, tmpBuffer, 0, DataCount); //复制以前的数据
                 Buffer = tmpBuffer; //替换
             }
@@ -91,8 +92,8 @@ namespace FlyingSocket.Core
             }
             else //缓冲区空间不够，需要申请更大的内存，并进行移位
             {
-                int totalSize = Buffer.Length + count - GetReserveCount(); //总大小-空余大小
-                byte[] tmpBuffer = new byte[totalSize];
+                var totalSize = Buffer.Length + count - GetReserveCount(); //总大小-空余大小
+                var tmpBuffer = new byte[totalSize];
                 Array.Copy(Buffer, 0, tmpBuffer, 0, DataCount); //复制以前的数据
                 Array.Copy(buffer, offset, tmpBuffer, DataCount, count); //复制新写入的数据
                 DataCount = DataCount + count;
@@ -111,7 +112,7 @@ namespace FlyingSocket.Core
             {
                 value = System.Net.IPAddress.HostToNetworkOrder(value); //NET是小头结构，网络字节是大头结构，需要客户端和服务器约定好
             }
-            byte[] tmpBuffer = BitConverter.GetBytes(value);
+            var tmpBuffer = BitConverter.GetBytes(value);
             WriteBuffer(tmpBuffer);
         }
 
@@ -131,7 +132,7 @@ namespace FlyingSocket.Core
             {
                 value = System.Net.IPAddress.HostToNetworkOrder(value);
             }
-            byte[] tmpBuffer = BitConverter.GetBytes(value);
+            var tmpBuffer = BitConverter.GetBytes(value);
             WriteBuffer(tmpBuffer);
         }
 

@@ -4,19 +4,19 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FlyingSocket.Core;
+using FlyingSocket.Common;
 
 namespace FlyingSocket.Client
 {
     /// <summary>
-    /// 数据上传Socket客户端
+    /// 数据上传协议的Socket客户端
     /// </summary>
-    public class UploadSocketClient : SocketClientBase
+    public class UploadSocketClient : BaseSocketClient
     {
         public UploadSocketClient()
             : base()
         {
-            _protocolFlag = FlyingProtocolType.Upload;
+            _protocolFlag = SocketProtocolType.Upload;
         }
 
         public bool Upload(string dirName, string fileName, ref long fileSize)

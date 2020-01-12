@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Net.Sockets;
 using System.Threading;
-using FlyingSocket.Core;
+using FlyingSocket.Common;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Diagnostics;

@@ -50,27 +50,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Client\FlyingSocketClient.cs" />
-    <Compile Include="Client\SocketClientBase.cs" />
-    <Compile Include="Client\ClientSocketInvokeElement.cs" />
+    <Compile Include="Client\DefaultSocketClient.cs" />
+    <Compile Include="Client\BaseSocketClient.cs" />
+    <Compile Include="Client\SocketInvokeElement.cs" />
     <Compile Include="Client\UploadSocketClient.cs" />
     <Compile Include="FlyingSocketException.cs" />
     <Compile Include="Server\BaseSocketProtocol.cs" />
     <Compile Include="Server\DaemonThread.cs" />
     <Compile Include="Server\FlyingSocketFactory.cs" />
-    <Compile Include="Server\Protocol\ControlSocketProtocol.cs" />
     <Compile Include="Server\Protocol\DefaultDataProtocol.cs" />
     <Compile Include="Server\Protocol\DownloadSocketProtocol.cs" />
-    <Compile Include="Server\Protocol\LogSocketProtocol.cs" />
-    <Compile Include="Server\Protocol\ThroughputSocketProtocol.cs" />
     <Compile Include="Server\Protocol\UploadSocketProtocol.cs" />
     <Compile Include="Server\SendBufferManager.cs" />
     <Compile Include="Server\FlyingSocketConfig.cs" />
     <Compile Include="Server\SocketInvokeElement.cs" />
-    <Compile Include="Core\DynamicBufferManager.cs" />
-    <Compile Include="Core\IncomingDataParser.cs" />
-    <Compile Include="Core\OutgoingDataAssembler.cs" />
-    <Compile Include="Core\ProtocolKey.cs" />
+    <Compile Include="Common\DynamicBufferManager.cs" />
+    <Compile Include="Common\IncomingDataParser.cs" />
+    <Compile Include="Common\OutgoingDataAssembler.cs" />
+    <Compile Include="Common\ProtocolKey.cs" />
     <Compile Include="Server\FlyingSocketServer.cs" />
     <Compile Include="Server\SocketUserToken.cs" />
     <Compile Include="Server\SocketUserTokenPool.cs" />

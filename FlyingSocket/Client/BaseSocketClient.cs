@@ -4,32 +4,36 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FlyingFive;
-using FlyingSocket.Core;
+using FlyingSocket.Common;
 
 namespace FlyingSocket.Client
 {
-    public class SocketClientBase : ClientSocketInvokeElement
+    /// <summary>
+    /// 遵守指定通讯协议的Socket客户端
+    /// </summary>
+    public abstract class BaseSocketClient : SocketInvokeElement
     {
         public string ErrorString { get; protected set; }
         protected string _userName = null;
         protected string _password = null;
 
-        public SocketClientBase()
+        public BaseSocketClient()
             : base()
         {
         }
 
         public bool CheckErrorCode()
         {
-            int errorCode = 0;
-            IncomingDataParser.GetValue(ProtocolKey.Code, ref errorCode);
-            if (errorCode == ProtocolCode.Success)
+            int code = 0;
+            IncomingDataParser.GetValue(ProtocolKey.Code, ref code);
+            var status = code.TryConvert<ProtocolStatus>();
+            if (status == ProtocolStatus.Success)
             {
                 return true;
             }
             else
             {
-                ErrorString = ProtocolCode.GetErrorCodeString(errorCode);
+                ErrorString = ProtocolCode.GetErrorString(status);
                 return false;
             }
         }

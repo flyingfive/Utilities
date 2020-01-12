@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Net.Sockets;
 using System.IO;
-using FlyingSocket.Core;
+using FlyingSocket.Common;
 using FlyingSocket.Utility;
+using FlyingFive;
 
 namespace FlyingSocket.Server.Protocol
 {
@@ -24,7 +25,7 @@ namespace FlyingSocket.Server.Protocol
         private byte[] _readBuffer = null;
 
         public DownloadSocketProtocol(FlyingSocketServer socketServer, SocketUserToken userToken)
-            : base("Download",socketServer, userToken)
+            : base(socketServer, userToken)
         {
             FileName = "";
             _fileStream = null;
@@ -54,73 +55,37 @@ namespace FlyingSocket.Server.Protocol
 
         public override bool ProcessCommand(byte[] buffer, int offset, int count) //处理分完包的数据，子类从这个方法继承
         {
-            DownloadSocketCommand command = ParseCommand(IncomingDataParser.Command);
             OutgoingDataAssembler.Clear();
-            OutgoingDataAssembler.AddResponse();
-            OutgoingDataAssembler.AddCommand(IncomingDataParser.Command);
-            if (!CheckLogined(command)) //检测登录
+            if (!Enum.GetNames(typeof(DownloadProtocolCommand)).Contains(IncomingDataParser.Command))
             {
-                OutgoingDataAssembler.AddFailure(ProtocolCode.UserHasLogined, "");
-                return SendResult();
-            }
-            if (command == DownloadSocketCommand.Login)
-            {
-                return DoLogin();
-            }
-            else if (command == DownloadSocketCommand.Active)
-            {
-                return DoActive();
-            }
-            else if (command == DownloadSocketCommand.Dir)
-            {
-                return DoDir();
-            }
-            else if (command == DownloadSocketCommand.FileList)
-            {
-                return DoFileList();
-            }
-            else if (command == DownloadSocketCommand.Download)
-            {
-                return DoDownload();
-            }
-            else
-            {
-                //Program.Logger.Error("Unknow command: " + m_incomingDataParser.Command);
+                OutgoingDataAssembler.AddFailure(ProtocolStatus.UnSupportedCommand, "");
                 return false;
             }
-        }
-
-        public DownloadSocketCommand ParseCommand(string command)
-        {
-            if (command.Equals(ProtocolKey.Active, StringComparison.CurrentCultureIgnoreCase))
+            var command = IncomingDataParser.Command.TryConvert<DownloadProtocolCommand>();
+            OutgoingDataAssembler.AddResponse();
+            OutgoingDataAssembler.AddCommand(IncomingDataParser.Command);
+            //if (!CheckLogined(command)) //检测登录
+            //{
+            //    OutgoingDataAssembler.AddFailure(ProtocolCode.UserHasLogined, "");
+            //    return SendResult();
+            //}
+            switch (command)
             {
-                return DownloadSocketCommand.Active;
-            }
-            else if (command.Equals(ProtocolKey.Login, StringComparison.CurrentCultureIgnoreCase))
-            {
-                return DownloadSocketCommand.Login;
-            }
-            else if (command.Equals(ProtocolKey.Dir, StringComparison.CurrentCultureIgnoreCase))
-            {
-                return DownloadSocketCommand.Dir;
-            }
-            else if (command.Equals(ProtocolKey.FileList, StringComparison.CurrentCultureIgnoreCase))
-            {
-                return DownloadSocketCommand.FileList;
-            }
-            else if (command.Equals(ProtocolKey.Download, StringComparison.CurrentCultureIgnoreCase))
-            {
-                return DownloadSocketCommand.Download;
-            }
-            else
-            {
-                return DownloadSocketCommand.None;
+                case DownloadProtocolCommand.Login:return DoLogin();
+                case DownloadProtocolCommand.Active:return DoActive();
+                case DownloadProtocolCommand.Dir:return DoDir();
+                case DownloadProtocolCommand.FileList:return DoFileList();
+                case DownloadProtocolCommand.Download:return DoDownload();
+                default:
+                    OutgoingDataAssembler.AddFailure(ProtocolStatus.UnSupportedCommand, "");
+                    return false;
             }
         }
 
-        public bool CheckLogined(DownloadSocketCommand command)
+
+        public bool CheckLogined(DownloadProtocolCommand command)
         {
-            if ((command == DownloadSocketCommand.Login) | (command == DownloadSocketCommand.Active))
+            if ((command == DownloadProtocolCommand.Login) | (command == DownloadProtocolCommand.Active))
             {
                 return true;
             }
@@ -157,12 +122,12 @@ namespace FlyingSocket.Server.Protocol
                 }
                 else
                 {
-                    OutgoingDataAssembler.AddFailure(ProtocolCode.DirNotExist, "");
+                    OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, "目录不存在");
                 }
             }
             else
             {
-                OutgoingDataAssembler.AddFailure(ProtocolCode.ParameterError, "");
+                OutgoingDataAssembler.AddFailure(ProtocolStatus.ParameterError, "");
             }
             return SendResult();
         }
@@ -194,12 +159,12 @@ namespace FlyingSocket.Server.Protocol
                 }
                 else
                 {
-                    OutgoingDataAssembler.AddFailure(ProtocolCode.DirNotExist, "");
+                    OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, "");
                 }
             }
             else
             {
-                OutgoingDataAssembler.AddFailure(ProtocolCode.ParameterError, "");
+                OutgoingDataAssembler.AddFailure(ProtocolStatus.ParameterError, "");
             }
             return SendResult();
         }
@@ -243,18 +208,18 @@ namespace FlyingSocket.Server.Protocol
                     }
                     else
                     {
-                        OutgoingDataAssembler.AddFailure(ProtocolCode.FileIsInUse, "");
+                        OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, "文件正在使用中");
                         //Program.Logger.Error("Start download file error, file is in use: " + fileName);
                     }
                 }
                 else
                 {
-                    OutgoingDataAssembler.AddFailure(ProtocolCode.FileNotExist, "");
+                    OutgoingDataAssembler.AddFailure(ProtocolStatus.Error, "文件不存在");
                 }
             }
             else
             {
-                OutgoingDataAssembler.AddFailure(ProtocolCode.ParameterError, "");
+                OutgoingDataAssembler.AddFailure(ProtocolStatus.ParameterError);
             }
             return SendResult();
         }
