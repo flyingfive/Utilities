@@ -25,7 +25,11 @@ namespace FlyingSocket.Server
             }
             lock (_dataPool)
             {
-                item.TokenId = string.Empty;
+                item.SessionId = string.Empty;
+                item.ClientId = string.Empty;
+                item.Token = string.Empty;
+                item.ConnectedTime = DateTime.MinValue;
+                item.ActiveTime = DateTime.MinValue;
                 _dataPool.Push(item);
             }
         }
@@ -36,7 +40,7 @@ namespace FlyingSocket.Server
             {
                 if (_dataPool.Count == 0) { return null; }
                 var item = _dataPool.Pop();
-                item.TokenId = Guid.NewGuid().ToString("N");
+                item.SessionId = Guid.NewGuid().ToString("N");
                 return item;
             }
         }

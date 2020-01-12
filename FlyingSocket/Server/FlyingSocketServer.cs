@@ -8,6 +8,7 @@ using FlyingSocket.Server.Protocol;
 using FlyingSocket.Common;
 using System.Diagnostics;
 using System.Reflection;
+using FlyingFive;
 
 namespace FlyingSocket.Server
 {
@@ -242,10 +243,21 @@ namespace FlyingSocket.Server
                     BuildingSocketInvokeProtocol(userToken);
                     offset = offset + 1;
                     receiveCount = receiveCount - 1;
+                    if (userToken.SocketInvokeProtocol == null)
+                    {
+                        CloseClientConnection(userToken);       //如果没有解析出协议对象，提示非法连接并关闭连接
+                    }
+
+                    bool willRaiseEvent = userToken.ConnectSocket.ReceiveAsync(userToken.ReceiveEventArgs); //投递接收请求
+                    if (!willRaiseEvent)
+                    {
+                        ProcessReceive(userToken.ReceiveEventArgs);
+                    }
+                    return;
                 }
                 if (userToken.SocketInvokeProtocol == null)
                 {
-                    CloseClientConnection(userToken);       //如果没有解析对象，提示非法连接并关闭连接
+                    CloseClientConnection(userToken);       //如果没有解析出协议对象，提示非法连接并关闭连接
                     return;
                 }
                 else
@@ -285,25 +297,58 @@ namespace FlyingSocket.Server
             }
         }
 
+        public event EventHandler<ClientVerificationEventArgs> ClientAuthorization;
+
         /// <summary>
         /// 建立Socket连接后马上解析此客户端的通讯协议
         /// </summary>
         /// <param name="userToken">客户端用户对象</param>
         private void BuildingSocketInvokeProtocol(SocketUserToken userToken)
         {
-            var protocolFlag = userToken.ReceiveEventArgs.Buffer[userToken.ReceiveEventArgs.Offset];
-            if (!Enum.IsDefined(typeof(SocketProtocolType), protocolFlag))
+            if (userToken.ReceiveEventArgs.BytesTransferred <= ProtocolCode.IntegerSize)
             {
-                throw new InvalidOperationException(string.Format("未定义的通讯协议：{0}", protocolFlag.ToString()));
+                return;
             }
-            var protocolType = (SocketProtocolType)Enum.ToObject(typeof(SocketProtocolType), protocolFlag);
+            if (ClientAuthorization == null)
+            {
+                throw new NotImplementedException("没有定义客户端认证实现。");
+            }
+            //var protocolFlag = userToken.ReceiveEventArgs.Buffer[userToken.ReceiveEventArgs.Offset];
+            var fixedHeadCount = ProtocolCode.IntegerSize + ProtocolCode.IntegerSize;
+            var commandText = Encoding.UTF8.GetString(userToken.ReceiveEventArgs.Buffer
+                , userToken.ReceiveEventArgs.Offset + fixedHeadCount
+                , userToken.ReceiveEventArgs.BytesTransferred - fixedHeadCount);
+            var parser = new IncomingDataParser();
+            var success = parser.DecodeProtocolText(commandText);
+            if (!success) { return; }
+            //在没有识别客户端通讯协议前不接受除Identify信息外的其它命令
+            if (!string.Equals(parser.Command, CommandKeys.Identify))
+            {
+                return;
+            }
+            var usrName = "";
+            var password = "";
+            var typeValue = 0;
+            if (!parser.GetValue(CommandKeys.Protocol, ref typeValue)) { return; }
+            if (!parser.GetValue(CommandKeys.UserName, ref usrName)) { return; }
+            if (!parser.GetValue(CommandKeys.Password, ref password)) { return; }
+
+            if (!Enum.IsDefined(typeof(SocketProtocolType), typeValue))
+            {
+                throw new InvalidOperationException(string.Format("未定义的通讯协议：{0}", typeValue.ToString()));
+            }
+            var protocolType = (SocketProtocolType)Enum.ToObject(typeof(SocketProtocolType), typeValue);
+            if (protocolType == SocketProtocolType.Undefine)
+            {
+                return;
+            }
             var instanceType = this.GetType().Assembly.GetTypes()
                 .Where(t => t.IsClass)
                 .Where(t => t.IsDefined(typeof(ProtocolNameAttribute)))
                 .Where(t => t.GetCustomAttribute<ProtocolNameAttribute>().ProtocolType == protocolType).FirstOrDefault();
             if (instanceType == null)
             {
-                throw new InvalidOperationException(string.Format("不受支持的通讯协议：{0}", protocolFlag.ToString()));
+                throw new InvalidOperationException(string.Format("不受支持的通讯协议：{0}", typeValue.ToString()));
             }
             var param = new object[] { this, userToken };
             var element = Activator.CreateInstance(instanceType, param) as SocketInvokeElement;
@@ -311,7 +356,32 @@ namespace FlyingSocket.Server
             {
                 throw new InvalidCastException(string.Format("协议类型{0}不是正确的Socket调用", instanceType.Name));
             }
+            var args = new ClientVerificationEventArgs() { ClientId = usrName, MAC = password };
+            ClientAuthorization(this, args);
+            if (!args.Success)
+            {
+                Debug.WriteLine(string.Format("客户端：{0}认证失败，远程地址：{1}", usrName, userToken.ConnectSocket.RemoteEndPoint.ToString()));
+                return;
+            }
+            userToken.Token = userToken.SessionId.MD5();
+            userToken.ClientId = usrName;
+            var assembler = new OutgoingDataAssembler();
+            assembler.AddResponse();
+            assembler.AddSuccess();
+            assembler.AddValue(CommandKeys.SessionID, userToken.SessionId);
+            assembler.AddValue(CommandKeys.Token, userToken.Token);
+            var responseCommand = assembler.GetProtocolText();
+            var responseData = Encoding.UTF8.GetBytes(responseCommand);
+
+            var bufferManager = new DynamicBufferManager(SocketConfig.BufferSize);
+            var totalLength = ProtocolCode.IntegerSize + responseData.Length; //获取总大小
+            bufferManager.Clear();
+            bufferManager.WriteInt(totalLength, false); //写入总大小
+            bufferManager.WriteInt(responseData.Length, false); //写入命令大小
+            bufferManager.WriteBuffer(responseData); //写入命令内容
+            this.SendAsyncEvent(userToken.ConnectSocket, userToken.SendEventArgs, bufferManager.Buffer, 0, bufferManager.DataCount);
             userToken.SocketInvokeProtocol = element;
+
         }
 
         private bool ProcessSend(SocketAsyncEventArgs sendEventArgs)
@@ -369,8 +439,6 @@ namespace FlyingSocket.Server
             }
             userToken.ConnectSocket.Dispose();
             userToken.ConnectSocket = null; //释放引用，并清理缓存，包括释放协议对象等资源
-            userToken.ConnectedTime = DateTime.MinValue;
-            userToken.ActiveTime = DateTime.MinValue;
             _maxNumberAcceptedClients.Release();
             //重新放入池中以便下次复用
             _socketUserTokenPool.Push(userToken);
@@ -389,5 +457,26 @@ namespace FlyingSocket.Server
         public SocketUserToken UserToken { get; private set; }
 
         public UserTokenEventArgs(SocketUserToken userToken) { this.UserToken = userToken; }
+    }
+
+    public class ClientVerificationEventArgs : EventArgs
+    {
+        /// <summary>
+        /// 客户端ID
+        /// </summary>
+        public string ClientId { get; set; }
+        /// <summary>
+        /// 认证码（密码）
+        /// </summary>
+        public string MAC { get; set; }
+        /// <summary>
+        /// 是否认证通过
+        /// </summary>
+        public bool Success { get; set; }
+        ///// <summary>
+        ///// 通过后的临时token值
+        ///// </summary>
+        //public string Token { get; set; }
+
     }
 }

@@ -22,7 +22,6 @@ namespace FlyingSocket.Client
 
         public bool Upload(string dirName, string fileName, ref long fileSize)
         {
-            //bool bConnect = ReconnectAndLogin(); //检测连接是否还在，如果断开则重连并登录
             if (!_tcpClient.Connected)
             {
                 return false;

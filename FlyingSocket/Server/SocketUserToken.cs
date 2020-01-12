@@ -13,9 +13,17 @@ namespace FlyingSocket.Server
     public class SocketUserToken
     {
         /// <summary>
-        /// 客户端标识ID
+        /// 业务身份ID
         /// </summary>
-        public string TokenId { get; set; }
+        public string ClientId { get; set; }
+        /// <summary>
+        /// 连接会话的临时令牌
+        /// </summary>
+        public string Token { get; set; }
+        /// <summary>
+        /// 客户端连接会话ID
+        /// </summary>
+        public string SessionId { get; set; }
         /// <summary>
         /// 此Socket上的接收事件参数
         /// </summary>

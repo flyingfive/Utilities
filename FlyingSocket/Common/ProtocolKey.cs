@@ -10,7 +10,7 @@ namespace FlyingSocket.Common
     /// <summary>
     /// 支持的协议类型
     /// </summary>
-    public enum SocketProtocolType : byte
+    public enum SocketProtocolType : int
     {
         /// <summary>
         /// 未定义协议
@@ -77,8 +77,8 @@ namespace FlyingSocket.Common
         public static readonly string Message = "Message";
 
 
-        //public static string UserName = "UserName";
-        //public static string Password = "Password";
+        public static string UserName = "UserName";
+        public static string Password = "Password";
         public static string FileName = "FileName";
         public static string Item = "Item";
         public static string ParentDir = "ParentDir";
@@ -88,14 +88,18 @@ namespace FlyingSocket.Common
         public static string PacketSize = "PacketSize";
 
 
-        public static string Login = "Login";
-        public static string Active = "Active";
+        //public static string Login = "Login";
+        //public static string Active = "Active";
 
         //public static string Dir = "Dir";
         //public static string CreateDir = "CreateDir";
         //public static string DeleteDir = "DeleteDir";
         //public static string FileList = "FileList";
         //public static string DeleteFile = "DeleteFile";
+        public static readonly string Identify = "Identify";
+        public static readonly string Protocol = "Protocol";
+        public static readonly string SessionID = "SessionID";
+        public static readonly string Token = "TokenId";
 
         /// <summary>
         /// 指定命令数据的字符
@@ -142,6 +146,10 @@ namespace FlyingSocket.Common
 
     public class ProtocolCode
     {
+        /// <summary>
+        /// 整形值占用字节数
+        /// </summary>
+        public static readonly int IntegerSize = sizeof(int);
         public static string GetErrorString(CommandResult status)
         {
             var desc = status.GetCustomAttribute<DescriptionAttribute>();
@@ -155,7 +163,6 @@ namespace FlyingSocket.Common
     /// </summary>
     public enum UploadProtocolCommand
     {
-        Login = 0,
         Active = 2,
         Dir = 3,
         CreateDir = 4,
@@ -172,7 +179,6 @@ namespace FlyingSocket.Common
     /// </summary>
     public enum DownloadProtocolCommand
     {
-        Login = 0,
         Active = 2,
         Dir = 3,
         FileList = 4,

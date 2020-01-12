@@ -71,7 +71,6 @@ namespace FlyingSocket.Server.Protocol
             }
             switch (command)
             {
-                //case DownloadProtocolCommand.Login:return DoLogin();
                 case DownloadProtocolCommand.Active:return DoActive();
                 case DownloadProtocolCommand.Dir:return DoDir();
                 case DownloadProtocolCommand.FileList:return DoFileList();

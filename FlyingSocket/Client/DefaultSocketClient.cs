@@ -233,7 +233,7 @@ namespace FlyingSocket.Client
             }
             var commandText = OutgoingDataAssembler.GetProtocolText();
             var data = Encoding.UTF8.GetBytes(commandText);
-            int totalLength = sizeof(int) + data.Length + count; //获取总大小
+            int totalLength = ProtocolCode.IntegerSize + data.Length + count; //获取总大小
             SendBuffer.Clear();
             SendBuffer.WriteInt(totalLength, false); //写入总大小
             SendBuffer.WriteInt(data.Length, false); //写入命令大小
@@ -267,7 +267,7 @@ namespace FlyingSocket.Client
             }
             var commandText = OutgoingDataAssembler.GetProtocolText();
             var data = Encoding.UTF8.GetBytes(commandText);
-            int totalLength = sizeof(int) + data.Length; //获取总大小
+            int totalLength = ProtocolCode.IntegerSize + data.Length; //获取总大小
             SendBuffer.Clear();
             SendBuffer.WriteInt(totalLength, false); //写入总大小
             SendBuffer.WriteInt(data.Length, false); //写入命令大小

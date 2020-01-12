@@ -66,7 +66,6 @@ namespace FlyingSocket.Server.Protocol
             }
             switch (command)
             {
-                //case UploadProtocolCommand.Login: return DoLogin();
                 case UploadProtocolCommand.Active: return DoActive();
                 case UploadProtocolCommand.Dir: return ListDirectories();
                 case UploadProtocolCommand.CreateDir: return CreateDirectory();

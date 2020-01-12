@@ -8,6 +8,7 @@ using FlyingSocket.Common;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using FlyingFive;
 
 namespace FlyingSocket.Server
 {
@@ -71,7 +72,7 @@ namespace FlyingSocket.Server
 
             receiveBuffer.WriteBuffer(buffer, offset, count);
             var result = true;
-            while (receiveBuffer.DataCount > _integer_size)
+            while (receiveBuffer.DataCount > ProtocolCode.IntegerSize)
             {
                 //按照长度分包
                 var packetLength = BitConverter.ToInt32(receiveBuffer.Buffer, 0); //获取包长度
@@ -84,12 +85,12 @@ namespace FlyingSocket.Server
                 {
                     return false;
                 }
-                if ((receiveBuffer.DataCount - _integer_size) >= packetLength) //收到的数据达到包长度
+                if ((receiveBuffer.DataCount - ProtocolCode.IntegerSize) >= packetLength) //收到的数据达到包长度
                 {
-                    result = ProcessPacket(receiveBuffer.Buffer, _integer_size, packetLength);
+                    result = ProcessPacket(receiveBuffer.Buffer, ProtocolCode.IntegerSize, packetLength);
                     if (result)
                     {
-                        receiveBuffer.Clear(packetLength + _integer_size); //从缓存中清理
+                        receiveBuffer.Clear(packetLength + ProtocolCode.IntegerSize); //从缓存中清理
                     }
                     else
                     {
@@ -104,10 +105,6 @@ namespace FlyingSocket.Server
             return true;
         }
 
-        /// <summary>
-        /// 整形值占用字节数
-        /// </summary>
-        protected readonly int _integer_size = sizeof(int);
 
         /// <summary>
         /// 处理分完包后的数据，把命令和数据分开，并对命令进行解析
@@ -118,19 +115,19 @@ namespace FlyingSocket.Server
         /// <returns></returns>
         public virtual bool ProcessPacket(byte[] buffer, int offset, int count)
         {
-            if (count < _integer_size)
+            if (count < ProtocolCode.IntegerSize)
             {
                 return false;
             }
             var commandLength = BitConverter.ToInt32(buffer, offset); //取出命令长度
-            var protocolText = Encoding.UTF8.GetString(buffer, offset + _integer_size, commandLength);
+            var protocolText = Encoding.UTF8.GetString(buffer, offset + ProtocolCode.IntegerSize, commandLength);
             if (!IncomingDataParser.DecodeProtocolText(protocolText)) //解析命令
             {
                 return false;
             }
             //实际数据体在buffer中的起止位置
-            var dataOffset = offset + _integer_size + commandLength;
-            var dataLength = count - _integer_size - commandLength;
+            var dataOffset = offset + ProtocolCode.IntegerSize + commandLength;
+            var dataLength = count - ProtocolCode.IntegerSize - commandLength;
             return ProcessCommand(buffer, dataOffset, dataLength); //处理其它命令
         }
 
@@ -177,7 +174,7 @@ namespace FlyingSocket.Server
         {
             var commandText = OutgoingDataAssembler.GetProtocolText();
             var buffer = Encoding.UTF8.GetBytes(commandText);
-            int totalLength = _integer_size + buffer.Length; //获取总大小
+            int totalLength = ProtocolCode.IntegerSize + buffer.Length; //获取总大小
             var sendBufferManager = SocketUserToken.SendBuffer;
             sendBufferManager.StartPacket();
             sendBufferManager.DynamicBufferManager.WriteInt(totalLength, false); //写入总大小
@@ -203,7 +200,7 @@ namespace FlyingSocket.Server
         {
             string commandText = OutgoingDataAssembler.GetProtocolText();
             byte[] bufferUTF8 = Encoding.UTF8.GetBytes(commandText);
-            int totalLength = _integer_size + bufferUTF8.Length + count; //获取总大小
+            int totalLength = ProtocolCode.IntegerSize + bufferUTF8.Length + count; //获取总大小
             var sendBufferManager = SocketUserToken.SendBuffer;
             sendBufferManager.StartPacket();
             sendBufferManager.DynamicBufferManager.WriteInt(totalLength, false); //写入总大小

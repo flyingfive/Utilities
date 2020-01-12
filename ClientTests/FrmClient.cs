@@ -23,7 +23,7 @@ namespace ClientTests
             InitializeComponent();
             _flyingSocketClient = new DefaultSocketClient();
             _socketClient = new UploadSocketClient();
-            _socketClient.OnConnected += (s, e) => { DisplayMsg("客户端已连接。"); };
+            _socketClient.OnConnected += (s, e) => { DisplayMsg(string.Format("客户端已连接，会话ID:{0}。",_socketClient.SessionId)); };
             _flyingSocketClient.OnConnected += (s, e) => { DisplayMsg("客户端已连接。"); };
             _flyingSocketClient.OnDisconnected += (s, e) => { DisplayMsg("客户端已断开。"); };
         }
@@ -61,13 +61,12 @@ namespace ClientTests
             else
             {
                 _socketClient.Connect(host.First(), host.Last().TryConvert<int>(52520));
-                _flyingSocketClient.ConnectAsync(host.First(), host.Last().TryConvert<int>(52520));
+                //_flyingSocketClient.ConnectAsync(host.First(), host.Last().TryConvert<int>(52520));
             }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            //_flyingSocketClient.SendAsync("你好，我是刘碧清。");
             var flag = true;//_socketClient.DoLogin("admin", "admin");
             if (flag)
             {
