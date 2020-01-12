@@ -27,25 +27,25 @@ namespace FlyingSocket.Server.Protocol
         {
             _fileStream = null;
             FileName = "";
-            lock (FlyingSocketServer.UploadSocketProtocolMgr)
+            lock (FlyingSocketServer.UploadInstances)
             {
-                FlyingSocketServer.UploadSocketProtocolMgr.Add(this);
+                FlyingSocketServer.UploadInstances.Add(this);
             }
         }
 
         public override void Close()
         {
-            base.Close();
             FileName = "";
             if (_fileStream != null)
             {
                 _fileStream.Close();
                 _fileStream = null;
             }
-            lock (FlyingSocketServer.UploadSocketProtocolMgr)
+            lock (FlyingSocketServer.UploadInstances)
             {
-                FlyingSocketServer.UploadSocketProtocolMgr.Remove(this);
+                FlyingSocketServer.UploadInstances.Remove(this);
             }
+            base.Close();
         }
 
         public override bool ProcessCommand(byte[] buffer, int offset, int count) //处理分完包的数据，子类从这个方法继承
@@ -69,13 +69,13 @@ namespace FlyingSocket.Server.Protocol
                 case UploadProtocolCommand.Login: return DoLogin();
                 case UploadProtocolCommand.Active: return DoActive();
                 case UploadProtocolCommand.Dir: return ListDirectories();
-                case UploadProtocolCommand.CreateDir:return CreateDirectory();
+                case UploadProtocolCommand.CreateDir: return CreateDirectory();
                 case UploadProtocolCommand.FileList: return ListFiles();
                 case UploadProtocolCommand.Upload: return Upload();
-                case UploadProtocolCommand.DeleteDir:return DeleteDirectory();
-                case UploadProtocolCommand.DeleteFile:return DeleteFile();
-                case UploadProtocolCommand.Data:return DoData(buffer, offset, count);
-                case UploadProtocolCommand.Eof:return Eof();
+                case UploadProtocolCommand.DeleteDir: return DeleteDirectory();
+                case UploadProtocolCommand.DeleteFile: return DeleteFile();
+                case UploadProtocolCommand.Data: return DoData(buffer, offset, count);
+                case UploadProtocolCommand.Eof: return Eof();
                 default:
                     OutgoingDataAssembler.AddFailure(ProtocolStatus.UnSupportedCommand, "");
                     return false;
@@ -357,18 +357,18 @@ namespace FlyingSocket.Server.Protocol
         //检测文件是否正在使用中，如果正在使用中则检测是否被上传协议占用，如果占用则关闭,真表示正在使用中，并没有关闭
         private bool CheckFileInUse(string fileName)
         {
-            if (FileUtility.IsFileInUse(fileName))
+            if (FileUtility.CheckFileInUse(fileName))
             {
                 bool result = true;
-                lock (FlyingSocketServer.UploadSocketProtocolMgr)
+                lock (FlyingSocketServer.UploadInstances)
                 {
                     UploadSocketProtocol uploadSocketProtocol = null;
-                    for (int i = 0; i < FlyingSocketServer.UploadSocketProtocolMgr.Count(); i++)
+                    for (int i = 0; i < FlyingSocketServer.UploadInstances.Count(); i++)
                     {
-                        uploadSocketProtocol = FlyingSocketServer.UploadSocketProtocolMgr.ElementAt(i);
+                        uploadSocketProtocol = FlyingSocketServer.UploadInstances.ElementAt(i);
                         if (fileName.Equals(uploadSocketProtocol.FileName, StringComparison.CurrentCultureIgnoreCase))
                         {
-                            lock (uploadSocketProtocol.SocketUserToken) //AsyncSocketUserToken有多个
+                            lock (uploadSocketProtocol.SocketUserToken) //SocketUserToken有多个线程访问
                             {
                                 FlyingSocketServer.CloseClientConnection(uploadSocketProtocol.SocketUserToken);
                             }
@@ -431,33 +431,4 @@ namespace FlyingSocket.Server.Protocol
         }
     }
 
-    public class UploadSocketProtocolMgr
-    {
-        private List<UploadSocketProtocol> _innerList = null;
-
-        public UploadSocketProtocolMgr()
-        {
-            _innerList = new List<UploadSocketProtocol>();
-        }
-
-        public int Count()
-        {
-            return _innerList.Count;
-        }
-
-        public UploadSocketProtocol ElementAt(int index)
-        {
-            return _innerList.ElementAt(index);
-        }
-
-        public void Add(UploadSocketProtocol value)
-        {
-            _innerList.Add(value);
-        }
-
-        public void Remove(UploadSocketProtocol value)
-        {
-            _innerList.Remove(value);
-        }
-    }
 }

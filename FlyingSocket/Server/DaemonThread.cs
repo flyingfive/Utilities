@@ -34,7 +34,7 @@ namespace FlyingSocket.Server
                         break;
                     try
                     {
-                        if ((DateTime.Now - userTokenArray[i].ActiveDateTime).Milliseconds > _socketServer.SocketConfig.Timeout) //超时Socket断开
+                        if ((DateTime.Now - userTokenArray[i].ActiveTime).Milliseconds > _socketServer.SocketConfig.Timeout) //超时Socket断开
                         {
                             lock (userTokenArray[i])
                             {

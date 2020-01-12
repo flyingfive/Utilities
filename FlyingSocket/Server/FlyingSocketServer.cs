@@ -35,9 +35,18 @@ namespace FlyingSocket.Server
         /// 在线客户端列表
         /// </summary>
         public SocketUserTokenList ConnectedClients { get; private set; }
-        //public LogOutputSocketProtocolMgr LogOutputSocketProtocolMgr { get; private set; }
-        public UploadSocketProtocolMgr UploadSocketProtocolMgr { get; private set; }
-        public DownloadSocketProtocolMgr DownloadSocketProtocolMgr { get; private set; }
+        /// <summary>
+        /// 此服务器上的默认数据通讯协议实例集合
+        /// </summary>
+        public ProtocolCollection<DefaultDataProtocol> DefaultInstances { get; private set; }
+        /// <summary>
+        /// 此服务器上的上传协议实例集合
+        /// </summary>
+        public ProtocolCollection<UploadSocketProtocol> UploadInstances { get; private set; }
+        /// <summary>
+        /// 此服务器上的下载协议实例集合
+        /// </summary>
+        public ProtocolCollection<DownloadSocketProtocol> DownloadInstances { get; private set; }
 
         private DaemonThread _daemonThread = null;
         /// <summary>
@@ -66,10 +75,9 @@ namespace FlyingSocket.Server
             _socketUserTokenPool = new SocketUserTokenPool(SocketConfig.MaxConnections);
             ConnectedClients = new SocketUserTokenList();
             _maxNumberAcceptedClients = new Semaphore(SocketConfig.MaxConnections, SocketConfig.MaxConnections);
-
-            //LogOutputSocketProtocolMgr = new LogOutputSocketProtocolMgr();
-            DownloadSocketProtocolMgr = new DownloadSocketProtocolMgr();
-            UploadSocketProtocolMgr = new UploadSocketProtocolMgr();
+            DefaultInstances = new ProtocolCollection<DefaultDataProtocol>();
+            DownloadInstances = new ProtocolCollection<DownloadSocketProtocol>();
+            UploadInstances = new ProtocolCollection<UploadSocketProtocol>();
             Init();
         }
 
@@ -85,7 +93,9 @@ namespace FlyingSocket.Server
         }
 
         public event EventHandler<EventArgs> ServerStarted;
-
+        /// <summary>
+        /// Socket监听工作地址
+        /// </summary>
         public IPEndPoint WorkingAddress { get; private set; }
 
         /// <summary>
@@ -98,7 +108,6 @@ namespace FlyingSocket.Server
             _listenSocket.Bind(WorkingAddress);
             _listenSocket.Listen(SocketConfig.MaxConnections);
 
-            //Program.Logger.InfoFormat("Start listen socket {0} success", localEndPoint.ToString());
             StartAccept(null);
             _daemonThread = new DaemonThread(this);
             Debug.WriteLine(string.Format("开始监听端口：{0}", WorkingAddress.ToString()));
@@ -110,7 +119,6 @@ namespace FlyingSocket.Server
 
         public void Stop()
         {
-            //_listenSocket.Shutdown(SocketShutdown.Both);
             _listenSocket.Close();
         }
 
@@ -168,7 +176,7 @@ namespace FlyingSocket.Server
             userToken.ConnectSocket.Blocking = false;                                   //同样使用异步非阻塞方式与客户端通讯
             userToken.ConnectSocket.SendBufferSize = SocketConfig.BufferSize;
             userToken.ConnectSocket.ReceiveBufferSize = SocketConfig.BufferSize;
-            userToken.ConnectDateTime = DateTime.Now;
+            userToken.ConnectedTime = DateTime.Now;
             ClientConnected?.Invoke(this, new UserTokenEventArgs(userToken));
             try
             {
@@ -198,7 +206,7 @@ namespace FlyingSocket.Server
         {
             var userToken = asyncEventArgs.UserToken as SocketUserToken;
             if (userToken == null) { return; }
-            userToken.ActiveDateTime = DateTime.Now;
+            userToken.ActiveTime = DateTime.Now;
             lock (userToken)
             {
                 if (asyncEventArgs.LastOperation == SocketAsyncOperation.Receive)
@@ -218,51 +226,34 @@ namespace FlyingSocket.Server
                     throw new ArgumentException("The last operation completed on the socket was not a receive or send");
                 }
             }
-            try
-            {
-            }
-            catch (Exception E)
-            {
-                throw E;
-                //Program.Logger.ErrorFormat("IO_Completed {0} error, message: {1}", userToken.ConnectSocket, E.Message);
-                //Program.Logger.Error(E.StackTrace);
-            }
         }
 
         private void ProcessReceive(SocketAsyncEventArgs receiveEventArgs)
         {
             var userToken = receiveEventArgs.UserToken as SocketUserToken;
             if (userToken.ConnectSocket == null) { return; }
-            userToken.ActiveDateTime = DateTime.Now;
+            userToken.ActiveTime = DateTime.Now;
             if (userToken.ReceiveEventArgs.BytesTransferred > 0 && userToken.ReceiveEventArgs.SocketError == SocketError.Success)
             {
-                int offset = userToken.ReceiveEventArgs.Offset;
-                int count = userToken.ReceiveEventArgs.BytesTransferred;
+                var offset = userToken.ReceiveEventArgs.Offset;
+                var receiveCount = userToken.ReceiveEventArgs.BytesTransferred;
                 if (userToken.SocketInvokeProtocol == null && userToken.ConnectSocket != null) //存在Socket对象，并且没有绑定协议对象，则进行协议对象绑定
                 {
                     BuildingSocketInvokeProtocol(userToken);
                     offset = offset + 1;
-                    count = count - 1;
+                    receiveCount = receiveCount - 1;
                 }
-                if (userToken.SocketInvokeProtocol == null) //如果没有解析对象，提示非法连接并关闭连接
+                if (userToken.SocketInvokeProtocol == null)
                 {
-                    //Program.Logger.WarnFormat("Illegal client connection. Local Address: {0}, Remote Address: {1}", userToken.ConnectSocket.LocalEndPoint, 
-                    //    userToken.ConnectSocket.RemoteEndPoint);
-
-                    //userToken.AsyncSocketInvokeElement = new UploadSocketProtocol(this, userToken);
-                    //bool willRaiseEvent = userToken.ConnectSocket.ReceiveAsync(userToken.ReceiveEventArgs); //投递接收请求
-                    //if (!willRaiseEvent)
-                    //{
-                    //    ProcessReceive(userToken.ReceiveEventArgs);
-                    //}
-                    CloseClientConnection(userToken);
+                    CloseClientConnection(userToken);       //如果没有解析对象，提示非法连接并关闭连接
+                    return;
                 }
                 else
                 {
-                    if (count > 0) //处理接收数据
+                    if (receiveCount > 0) //处理接收数据
                     {
                         //如果处理数据返回失败，则断开连接
-                        var success = userToken.SocketInvokeProtocol.ProcessReceive(userToken.ReceiveEventArgs.Buffer, offset, count);
+                        var success = userToken.SocketInvokeProtocol.ProcessReceive(userToken.ReceiveEventArgs.Buffer, offset, receiveCount);
                         if (!success)
                         {
                             CloseClientConnection(userToken);
@@ -289,6 +280,7 @@ namespace FlyingSocket.Server
             }
             else
             {
+                //没有接收到数据或接收错误时关闭连接。
                 CloseClientConnection(userToken);
             }
         }
@@ -326,7 +318,7 @@ namespace FlyingSocket.Server
         {
             SocketUserToken userToken = sendEventArgs.UserToken as SocketUserToken;
             if (userToken.SocketInvokeProtocol == null) { return false; }
-            userToken.ActiveDateTime = DateTime.Now;
+            userToken.ActiveTime = DateTime.Now;
             if (sendEventArgs.SocketError == SocketError.Success)
             {
                 return userToken.SocketInvokeProtocol.SendCompleted(); //调用子类回调函数
@@ -369,16 +361,16 @@ namespace FlyingSocket.Server
             {
                 //Shutdown方法客户端会接收到0字节的消息
                 userToken.ConnectSocket.Shutdown(SocketShutdown.Both);
+                userToken.ConnectSocket.Close();
             }
-            catch (Exception E)
+            catch (Exception e)
             {
-                throw E;
-                //Program.Logger.ErrorFormat("CloseClientSocket Disconnect client {0} error, message: {1}", socketInfo, E.Message);
+                throw e;
             }
-            userToken.ConnectSocket.Close();
             userToken.ConnectSocket.Dispose();
             userToken.ConnectSocket = null; //释放引用，并清理缓存，包括释放协议对象等资源
-
+            userToken.ConnectedTime = DateTime.MinValue;
+            userToken.ActiveTime = DateTime.MinValue;
             _maxNumberAcceptedClients.Release();
             //重新放入池中以便下次复用
             _socketUserTokenPool.Push(userToken);

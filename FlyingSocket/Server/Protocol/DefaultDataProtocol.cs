@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FlyingSocket.Common;
+using FlyingSocket.Utility;
 
 namespace FlyingSocket.Server.Protocol
 {
@@ -14,7 +15,13 @@ namespace FlyingSocket.Server.Protocol
     [ProtocolName(SocketProtocolType.Default)]
     public class DefaultDataProtocol : BaseSocketProtocol
     {
-        public DefaultDataProtocol(FlyingSocketServer socketServer, SocketUserToken userToken) : base(socketServer, userToken) { }
+        public DefaultDataProtocol(FlyingSocketServer socketServer, SocketUserToken userToken) : base(socketServer, userToken)
+        {
+            lock (FlyingSocketServer.DefaultInstances)
+            {
+                FlyingSocketServer.DefaultInstances.Add(this);
+            }
+        }
         /// <summary>
         /// 临时数据流
         /// </summary>
@@ -50,7 +57,6 @@ namespace FlyingSocket.Server.Protocol
                 length = InputStream.Length;
             }
             InputStream = null;
-            ClearMemory();
 
             //return true;
             OutgoingDataAssembler.AddSuccess();
@@ -68,6 +74,21 @@ namespace FlyingSocket.Server.Protocol
             OutgoingDataAssembler.AddSuccess();
             OutgoingDataAssembler.AddValue(ProtocolKey.FileSize, InputStream.Length);
             return SendResult();
+        }
+
+        public override void Close()
+        {
+            if (InputStream != null)
+            {
+                InputStream.Close();
+                InputStream = null;
+            }
+            lock (FlyingSocketServer.UploadInstances)
+            {
+                FlyingSocketServer.DefaultInstances.Remove(this);
+            }
+            base.Close();
+            MemoryUtility.FreeMemory();
         }
 
     }

@@ -60,6 +60,7 @@
     <Compile Include="Server\FlyingSocketFactory.cs" />
     <Compile Include="Server\Protocol\DefaultDataProtocol.cs" />
     <Compile Include="Server\Protocol\DownloadSocketProtocol.cs" />
+    <Compile Include="Server\Protocol\ProtocolCollection.cs" />
     <Compile Include="Server\Protocol\UploadSocketProtocol.cs" />
     <Compile Include="Server\SendBufferManager.cs" />
     <Compile Include="Server\FlyingSocketConfig.cs" />

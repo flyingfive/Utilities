@@ -31,15 +31,14 @@ namespace FlyingSocket.Server.Protocol
             _fileStream = null;
             _sendFile = false;
             _packetSize = 64 * 1024;
-            lock (FlyingSocketServer.DownloadSocketProtocolMgr)
+            lock (FlyingSocketServer.DownloadInstances)
             {
-                FlyingSocketServer.DownloadSocketProtocolMgr.Add(this);
+                FlyingSocketServer.DownloadInstances.Add(this);
             }
         }
 
         public override void Close()
         {
-            base.Close();
             FileName = "";
             _sendFile = false;
             if (_fileStream != null)
@@ -49,8 +48,9 @@ namespace FlyingSocket.Server.Protocol
             }
             lock (FlyingSocketServer)
             {
-                FlyingSocketServer.DownloadSocketProtocolMgr.Remove(this);
+                FlyingSocketServer.DownloadInstances.Remove(this);
             }
+            base.Close();
         }
 
         public override bool ProcessCommand(byte[] buffer, int offset, int count) //处理分完包的数据，子类从这个方法继承
@@ -227,18 +227,18 @@ namespace FlyingSocket.Server.Protocol
         //检测文件是否正在使用中，如果正在使用中则检测是否被上传协议占用，如果占用则关闭,真表示正在使用中，并没有关闭
         public bool CheckFileInUse(string fileName)
         {
-            if (FileUtility.IsFileInUse(fileName))
+            if (FileUtility.CheckFileInUse(fileName))
             {
                 bool result = true;
-                lock (FlyingSocketServer.DownloadSocketProtocolMgr)
+                lock (FlyingSocketServer.DownloadInstances)
                 {
-                    DownloadSocketProtocol downloadSocketProtocol = null;
-                    for (int i = 0; i < FlyingSocketServer.DownloadSocketProtocolMgr.Count(); i++)
+                    //DownloadSocketProtocol downloadSocketProtocol = null;
+                    for (int i = 0; i < FlyingSocketServer.DownloadInstances.Count(); i++)
                     {
-                        downloadSocketProtocol = FlyingSocketServer.DownloadSocketProtocolMgr.ElementAt(i);
+                        var downloadSocketProtocol = FlyingSocketServer.DownloadInstances.ElementAt(i);
                         if (fileName.Equals(downloadSocketProtocol.FileName, StringComparison.CurrentCultureIgnoreCase))
                         {
-                            lock (downloadSocketProtocol.SocketUserToken) //AsyncSocketUserToken有多个线程访问
+                            lock (downloadSocketProtocol.SocketUserToken) //SocketUserToken有多个线程访问
                             {
                                 FlyingSocketServer.CloseClientConnection(downloadSocketProtocol.SocketUserToken);
                             }
@@ -303,33 +303,4 @@ namespace FlyingSocket.Server.Protocol
         }
     }
 
-    public class DownloadSocketProtocolMgr
-    {
-        private List<DownloadSocketProtocol> _innerList = null;
-
-        public DownloadSocketProtocolMgr()
-        {
-            _innerList = new List<DownloadSocketProtocol>();
-        }
-
-        public int Count()
-        {
-            return _innerList.Count;
-        }
-
-        public DownloadSocketProtocol ElementAt(int index)
-        {
-            return _innerList.ElementAt(index);
-        }
-
-        public void Add(DownloadSocketProtocol value)
-        {
-            _innerList.Add(value);
-        }
-
-        public void Remove(DownloadSocketProtocol value)
-        {
-            _innerList.Remove(value);
-        }
-    }
 }

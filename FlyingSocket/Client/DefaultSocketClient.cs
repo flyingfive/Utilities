@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FlyingFive;
 using FlyingSocket.Common;
+using FlyingSocket.Utility;
 
 namespace FlyingSocket.Client
 {
@@ -57,7 +58,6 @@ namespace FlyingSocket.Client
         protected int SocketBufferSize { get; private set; } = 32 * 1024;         //分包大小：32KB
 
         public Socket _clientSocket = null;
-        protected SocketProtocolType _protocolFlag = SocketProtocolType.Upload;
 
         private IPEndPoint _remoteAddress = null;
         /// <summary>
@@ -71,7 +71,6 @@ namespace FlyingSocket.Client
         public DefaultSocketClient()
         {
             _clientSocket = new Socket(SocketType.Stream, System.Net.Sockets.ProtocolType.Tcp);
-            _clientSocket.Blocking = false;
 
             OutgoingDataAssembler = new OutgoingDataAssembler();
             //SocketBufferSize = 4096;
@@ -216,7 +215,7 @@ namespace FlyingSocket.Client
                 this.DoEof(stream.Length);
             }
             Array.Clear(buffer, 0, buffer.Length);
-            ClearMemory();
+            MemoryUtility.FreeMemory();
         }
 
         private int _socketTimeout = 1000;
@@ -292,28 +291,6 @@ namespace FlyingSocket.Client
                 {
                     this.ReceiveEventArgs.SetBuffer(_receivedData, 0, _receivedData.Length);
                     _clientSocket.ReceiveAsync(this.ReceiveEventArgs);
-                }
-            }
-        }
-
-
-        [DllImport("kernel32.dll", EntryPoint = "SetProcessWorkingSetSize")]
-        public static extern int SetProcessWorkingSetSize(IntPtr process, int minSize, int maxSize);
-
-        /// <summary>
-        /// 释放内存
-        /// </summary>
-        public static void ClearMemory()
-        {
-            var proc = Process.GetCurrentProcess();
-            long usedMemory = proc.PrivateMemorySize64;
-            if (usedMemory > 1024 * 1024 * 50)          //控制一下内存
-            {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                {
-                    SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle, -1, -1);
                 }
             }
         }

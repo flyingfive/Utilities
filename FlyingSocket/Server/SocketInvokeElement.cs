@@ -12,7 +12,7 @@ using System.Diagnostics;
 namespace FlyingSocket.Server
 {
     /// <summary>
-    /// 异步Socket调用节点
+    /// 服务端异步Socket调用节点
     /// </summary>
     public abstract class SocketInvokeElement
     {
@@ -42,9 +42,6 @@ namespace FlyingSocket.Server
         /// </summary>
         protected bool IsAsyncSending { get; private set; }
 
-        public DateTime ConnectTime { get; protected set; }
-        public DateTime ActiveTime { get; protected set; }
-
         public SocketInvokeElement(FlyingSocketServer socketServer, SocketUserToken userToken)
         {
             FlyingSocketServer = socketServer;
@@ -53,13 +50,12 @@ namespace FlyingSocket.Server
             IsAsyncSending = false;
             IncomingDataParser = new IncomingDataParser();
             OutgoingDataAssembler = new OutgoingDataAssembler();
-            ConnectTime = DateTime.UtcNow;
-            ActiveTime = DateTime.UtcNow;
         }
 
-        public virtual void Close()
-        {
-        }
+        /// <summary>
+        /// 关闭此远程Socket调用节点时应处理的任务
+        /// </summary>
+        public virtual void Close() { this.SocketUserToken = null;this.FlyingSocketServer = null; }
 
         /// <summary>
         /// 接收异步事件返回的数据，用于对数据进行缓存和分包
@@ -70,7 +66,7 @@ namespace FlyingSocket.Server
         /// <returns></returns>
         public virtual bool ProcessReceive(byte[] buffer, int offset, int count)
         {
-            ActiveTime = DateTime.UtcNow;
+            this.SocketUserToken.ActiveTime = DateTime.Now;
             var receiveBuffer = SocketUserToken.ReceiveBuffer;
 
             receiveBuffer.WriteBuffer(buffer, offset, count);
@@ -168,7 +164,7 @@ namespace FlyingSocket.Server
 
         public virtual bool SendCompleted()
         {
-            ActiveTime = DateTime.UtcNow;
+            this.SocketUserToken.ActiveTime = DateTime.Now;
             IsAsyncSending = false;
             var sendBufferManager = SocketUserToken.SendBuffer;
             sendBufferManager.ClearFirstPacket(); //
@@ -277,25 +273,5 @@ namespace FlyingSocket.Server
         }
 
 
-        [DllImport("kernel32.dll", EntryPoint = "SetProcessWorkingSetSize")]
-        public static extern int SetProcessWorkingSetSize(IntPtr process, int minSize, int maxSize);
-
-        /// <summary>
-        /// 释放内存
-        /// </summary>
-        public void ClearMemory()
-        {
-            var proc = Process.GetCurrentProcess();
-            long usedMemory = proc.PrivateMemorySize64;
-            if (usedMemory > 1024 * 1024 * 50)          //控制一下内存
-            {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                {
-                    SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle, -1, -1);
-                }
-            }
-        }
     }
 }
