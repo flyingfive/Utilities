@@ -21,10 +21,18 @@ namespace ClientTests
         public FrmClient()
         {
             InitializeComponent();
-            _flyingSocketClient = new DefaultSocketClient();
+            _flyingSocketClient = new DefaultSocketClient("01010001", "AB23522F7A734D39B984FC1F0B52E465");
             _socketClient = new UploadSocketClient();
-            _socketClient.OnConnected += (s, e) => { DisplayMsg(string.Format("客户端已连接，会话ID:{0}。",_socketClient.SessionId)); };
-            _flyingSocketClient.OnConnected += (s, e) => { DisplayMsg("客户端已连接。"); };
+            _socketClient.OnConnected += (s, e) => { DisplayMsg(string.Format("客户端已连接，会话ID:{0}。", _socketClient.SessionID)); };
+            _flyingSocketClient.OnConnected += (s, e) =>
+            {
+                DisplayMsg(string.Format("客户端已连接，会话ID:{0}。", _flyingSocketClient.SessionID));
+                //var text = "客户端已连接".PadLeft(1000000, '你');
+                //for (int i = 0; i < 20; i++)
+                //{
+                //    _flyingSocketClient.SendAsync(text);
+                //} 
+            };
             _flyingSocketClient.OnDisconnected += (s, e) => { DisplayMsg("客户端已断开。"); };
         }
 
@@ -46,7 +54,7 @@ namespace ClientTests
 
         private void FrmClient_Load(object sender, EventArgs e)
         {
-
+            btnConnect_Click(btnConnect, EventArgs.Empty);
         }
 
         private void btnConnect_Click(object sender, EventArgs e)
@@ -61,13 +69,13 @@ namespace ClientTests
             else
             {
                 _socketClient.Connect(host.First(), host.Last().TryConvert<int>(52520));
-                //_flyingSocketClient.ConnectAsync(host.First(), host.Last().TryConvert<int>(52520));
+                _flyingSocketClient.ConnectAsync(host.First(), host.Last().TryConvert<int>(52520));
             }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            var flag = true;//_socketClient.DoLogin("admin", "admin");
+            var flag = true;
             if (flag)
             {
                 var fileName = "";
@@ -81,7 +89,8 @@ namespace ClientTests
                 }
                 var dir = new DirectoryInfo(Path.GetDirectoryName(fileName)).Name;
                 var size = 0L;
-                var time = CodeTimer.Time("aa", 1, () => {
+                var time = CodeTimer.Time("aa", 1, () =>
+                {
                     flag = _socketClient.Upload("", fileName, ref size);
                     if (flag)
                     {
@@ -96,7 +105,10 @@ namespace ClientTests
         {
             var msg = txtContent.Text;
             if (string.IsNullOrWhiteSpace(msg)) { return; }
-           var time = CodeTimer.Time("aaa", 1, () => {
+            var time = CodeTimer.Time("aaa", 1, () =>
+            {
+                //多线程下会服务端接收处理异常。
+                //Parallel.For(1, 10, (i) => { _flyingSocketClient.SendAsync(msg); });
                 _flyingSocketClient.SendAsync(msg);
             });
             DisplayMsg("发送耗时：" + time.ElapsedMillisecondsOnce);

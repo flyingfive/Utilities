@@ -51,9 +51,9 @@ namespace FlyingSocket.Client
         /// <summary>
         /// 此Socket上的接收事件参数
         /// </summary>
-        public SocketAsyncEventArgs ReceiveEventArgs { get; private set; }
+        protected SocketAsyncEventArgs ReceiveEventArgs { get; private set; }
         //此Socket上的发送事件参数
-        public SocketAsyncEventArgs SendEventArgs { get; private set; }
+        protected SocketAsyncEventArgs SendEventArgs { get; private set; }
         /// <summary>
         /// 缓冲区大小
         /// </summary>
@@ -91,7 +91,7 @@ namespace FlyingSocket.Client
 
         }
 
-        public string SessionId { get; private set; }
+        public string SessionID { get; private set; }
         public string TokenId { get; private set; }
 
         public bool Connect(string host, int port)
@@ -118,7 +118,7 @@ namespace FlyingSocket.Client
                 var token = "";
                 if (!IncomingDataParser.GetValue(CommandKeys.SessionID, ref sessionId)) { _tcpClient.Close(); return false; }
                 if (!IncomingDataParser.GetValue(CommandKeys.Token, ref token)) { _tcpClient.Close(); return false; }
-                SessionId = sessionId;
+                SessionID = sessionId;
                 TokenId = token;
                 _hostAddress = host;
                 _port = port;
