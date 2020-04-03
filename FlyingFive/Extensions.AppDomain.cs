@@ -19,9 +19,12 @@ namespace FlyingFive
             var entryAssembly = Assembly.GetEntryAssembly();
             if (entryAssembly == null && System.Web.Hosting.HostingEnvironment.IsHosted)
             {
-                var typeFinder = new AppDomainTypeFinder();
-                var entryType = typeFinder.FindClassesOfType<System.Web.HttpApplication>().Where(t => t.BaseType == typeof(System.Web.HttpApplication)).FirstOrDefault();
-                if (entryType != null) { return entryType.Assembly; }
+                var asaxType = System.Web.Compilation.BuildManager.GetGlobalAsaxType();
+                while (asaxType.BaseType != null && asaxType.BaseType != typeof(System.Web.HttpApplication))
+                {
+                    asaxType = asaxType.BaseType;
+                }
+                return asaxType.Assembly;
             }
             return entryAssembly;
         }
