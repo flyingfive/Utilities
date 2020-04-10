@@ -12,16 +12,31 @@ namespace FlyingFive
         /// <summary>
         /// 获取应用程序域的入口起始程序集
         /// </summary>
-        /// <param name="appDomain"></param>
+        /// <param name="appDomain">应用程序域</param>
+        /// <param name="useExecuting">找不到时是否使用当前执行程序集</param>
         /// <returns></returns>
-        public static Assembly GetEntryAssembly(this AppDomain appDomain)
+        public static Assembly GetEntryAssembly(this AppDomain appDomain, bool useExecuting = false)
         {
             var entryAssembly = Assembly.GetEntryAssembly();
             if (entryAssembly == null && System.Web.Hosting.HostingEnvironment.IsHosted)
             {
-                var typeFinder = new AppDomainTypeFinder();
-                var entryType = typeFinder.FindClassesOfType<System.Web.HttpApplication>().Where(t => t.BaseType == typeof(System.Web.HttpApplication)).FirstOrDefault();
-                if (entryType != null) { return entryType.Assembly; }
+                var asaxType = System.Web.Compilation.BuildManager.GetGlobalAsaxType();
+                while (asaxType.BaseType != null && asaxType.BaseType != typeof(System.Web.HttpApplication))
+                {
+                    asaxType = asaxType.BaseType;
+                }
+                return asaxType.Assembly;
+            }
+            if (entryAssembly == null)
+            {
+                if (useExecuting)
+                {
+                    entryAssembly = Assembly.GetCallingAssembly();
+                }
+            }
+            if (entryAssembly == null)
+            {
+                throw new NotSupportedException("应用程序域入口查找失败。");
             }
             return entryAssembly;
         }
