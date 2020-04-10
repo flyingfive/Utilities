@@ -103,7 +103,7 @@ namespace FlyingSocket.Client
 
                 OutgoingDataAssembler.Clear();
                 OutgoingDataAssembler.AddRequest();
-                OutgoingDataAssembler.AddCommand(CommandKeys.Identify);
+                OutgoingDataAssembler.AddCommand(CommandKeys.Login);
                 OutgoingDataAssembler.AddValue(CommandKeys.Protocol, Convert.ToInt32(SocketProtocolType));
                 OutgoingDataAssembler.AddValue(CommandKeys.UserName, "admin");
                 OutgoingDataAssembler.AddValue(CommandKeys.Password, "admin".MD5());

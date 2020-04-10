@@ -113,7 +113,7 @@ namespace FlyingSocket.Server
         /// <param name="offset"></param>
         /// <param name="count"></param>
         /// <returns></returns>
-        public virtual bool ProcessPacket(byte[] buffer, int offset, int count)
+        protected virtual bool ProcessPacket(byte[] buffer, int offset, int count)
         {
             if (count < ProtocolCode.IntegerSize)
             {

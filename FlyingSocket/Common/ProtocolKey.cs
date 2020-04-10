@@ -96,7 +96,11 @@ namespace FlyingSocket.Common
         //public static string DeleteDir = "DeleteDir";
         //public static string FileList = "FileList";
         //public static string DeleteFile = "DeleteFile";
-        public static readonly string Identify = "Identify";
+
+        /// <summary>
+        /// 客户端登录认证命令
+        /// </summary>
+        public static readonly string Login = "Login";
         public static readonly string Protocol = "Protocol";
         public static readonly string SessionID = "SessionID";
         public static readonly string Token = "TokenId";
