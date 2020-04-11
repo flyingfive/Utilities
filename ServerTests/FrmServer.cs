@@ -31,10 +31,10 @@ namespace ServerTests
         {
             if (e.ClientId == "01010001")
             {
-                e.Success = e.MAC == "AB23522F7A734D39B984FC1F0B52E465";
+                e.Success = e.AuthCode == "AB23522F7A734D39B984FC1F0B52E465";
                 return;
             }
-            e.Success = e.ClientId.Equals("admin", StringComparison.CurrentCultureIgnoreCase) && "admin".MD5().Equals(e.MAC);
+            e.Success = e.ClientId.Equals("admin", StringComparison.CurrentCultureIgnoreCase) && "admin".MD5().Equals(e.AuthCode);
         }
 
         private void FrmServer_FormClosing(object sender, FormClosingEventArgs e)

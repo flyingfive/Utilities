@@ -212,6 +212,7 @@ namespace FlyingSocket.Server
             {
                 if (asyncEventArgs.LastOperation == SocketAsyncOperation.Receive)
                 {
+                    Console.WriteLine("server received...");
                     ProcessReceive(asyncEventArgs);
                 }
                 else if (asyncEventArgs.LastOperation == SocketAsyncOperation.Send)
@@ -238,7 +239,8 @@ namespace FlyingSocket.Server
             {
                 var offset = userToken.ReceiveEventArgs.Offset;
                 var receiveCount = userToken.ReceiveEventArgs.BytesTransferred;
-                if (userToken.SocketInvokeProtocol == null && userToken.ConnectSocket != null) //存在Socket对象，并且没有绑定协议对象，则进行协议对象绑定
+                //存在Socket对象，并且没有绑定协议对象，则进行协议对象绑定
+                if (userToken.SocketInvokeProtocol == null && userToken.ConnectSocket != null) 
                 {
                     BuildingSocketInvokeProtocol(userToken);
                     offset = offset + 1;
@@ -313,7 +315,6 @@ namespace FlyingSocket.Server
             {
                 throw new NotImplementedException("没有定义客户端认证实现。");
             }
-            //var protocolFlag = userToken.ReceiveEventArgs.Buffer[userToken.ReceiveEventArgs.Offset];
             var fixedHeadCount = ProtocolCode.IntegerSize + ProtocolCode.IntegerSize;
             var commandText = Encoding.UTF8.GetString(userToken.ReceiveEventArgs.Buffer
                 , userToken.ReceiveEventArgs.Offset + fixedHeadCount
@@ -322,17 +323,12 @@ namespace FlyingSocket.Server
             var success = parser.DecodeProtocolText(commandText);
             if (!success) { return; }
             //在没有识别客户端通讯协议前不接受除Identify信息外的其它命令
-            if (!string.Equals(parser.Command, CommandKeys.Identify))
+            if (!string.Equals(parser.Command, CommandKeys.Login))
             {
-                return;
+                throw new NotSupportedException("在没有识别客户端前不能接受非身份认证外的其它指令数据。");
             }
-            var usrName = "";
-            var password = "";
             var typeValue = 0;
             if (!parser.GetValue(CommandKeys.Protocol, ref typeValue)) { return; }
-            if (!parser.GetValue(CommandKeys.UserName, ref usrName)) { return; }
-            if (!parser.GetValue(CommandKeys.Password, ref password)) { return; }
-
             if (!Enum.IsDefined(typeof(SocketProtocolType), typeValue))
             {
                 throw new InvalidOperationException(string.Format("未定义的通讯协议：{0}", typeValue.ToString()));
@@ -356,17 +352,23 @@ namespace FlyingSocket.Server
             {
                 throw new InvalidCastException(string.Format("协议类型{0}不是正确的Socket调用", instanceType.Name));
             }
-            var args = new ClientVerificationEventArgs() { ClientId = usrName, MAC = password };
+            var usrName = "";
+            var password = "";
+            if (!parser.GetValue(CommandKeys.UserName, ref usrName)) { return; }
+            if (!parser.GetValue(CommandKeys.Password, ref password)) { return; }
+            var args = new ClientVerificationEventArgs() { ClientId = usrName, AuthCode = password };
             ClientAuthorization(this, args);
             if (!args.Success)
             {
-                Debug.WriteLine(string.Format("客户端：{0}认证失败，远程地址：{1}", usrName, userToken.ConnectSocket.RemoteEndPoint.ToString()));
+                Debug.WriteLine(string.Format("客户端：{0}认证失败，将关闭此连接。远程地址：{1}", usrName, userToken.ConnectSocket.RemoteEndPoint.ToString()));
+                CloseClientConnection(userToken);
                 return;
             }
             userToken.Token = userToken.SessionId.MD5();
             userToken.ClientId = usrName;
             var assembler = new OutgoingDataAssembler();
             assembler.AddResponse();
+            assembler.AddCommand(CommandKeys.Login);
             assembler.AddSuccess();
             assembler.AddValue(CommandKeys.SessionID, userToken.SessionId);
             assembler.AddValue(CommandKeys.Token, userToken.Token);
@@ -381,7 +383,6 @@ namespace FlyingSocket.Server
             bufferManager.WriteBuffer(responseData); //写入命令内容
             this.SendAsyncEvent(userToken.ConnectSocket, userToken.SendEventArgs, bufferManager.Buffer, 0, bufferManager.DataCount);
             userToken.SocketInvokeProtocol = element;
-
         }
 
         private bool ProcessSend(SocketAsyncEventArgs sendEventArgs)
@@ -426,7 +427,6 @@ namespace FlyingSocket.Server
         {
             if (userToken.ConnectSocket == null) { return; }
             var socketInfo = string.Format("Local Address: {0} Remote Address: {1}", userToken.ConnectSocket.LocalEndPoint, userToken.ConnectSocket.RemoteEndPoint);
-            //Program.Logger.InfoFormat("Client connection disconnected. {0}", socketInfo);
             try
             {
                 //Shutdown方法客户端会接收到0字节的消息
@@ -468,7 +468,7 @@ namespace FlyingSocket.Server
         /// <summary>
         /// 认证码（密码）
         /// </summary>
-        public string MAC { get; set; }
+        public string AuthCode { get; set; }
         /// <summary>
         /// 是否认证通过
         /// </summary>

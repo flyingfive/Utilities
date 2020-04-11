@@ -52,9 +52,16 @@
     <Compile Include="FrmClient.Designer.cs">
       <DependentUpon>FrmClient.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmItemDownload.cs" />
+    <Compile Include="FrmItemDownload.Designer.cs">
+      <DependentUpon>FrmItemDownload.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <EmbeddedResource Include="FrmClient.resx">
       <DependentUpon>FrmClient.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmItemDownload.resx">
+      <DependentUpon>FrmItemDownload.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

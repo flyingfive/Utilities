@@ -52,6 +52,8 @@
   <ItemGroup>
     <Compile Include="Client\DefaultSocketClient.cs" />
     <Compile Include="Client\BaseSocketClient.cs" />
+    <Compile Include="Client\DefaultSocketClient.Receive.cs" />
+    <Compile Include="Client\DefaultSocketClient.Send.cs" />
     <Compile Include="Client\SocketInvokeElement.cs" />
     <Compile Include="Client\UploadSocketClient.cs" />
     <Compile Include="FlyingSocketException.cs" />
