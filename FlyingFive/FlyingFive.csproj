@@ -113,7 +113,7 @@
     <Compile Include="Utils\ITypeFinder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Singleton.cs" />
-    <Compile Include="Utils\RegistryUtility.cs" />
+    <Compile Include="Win\RegistryUtility.cs" />
     <Compile Include="Utils\SerializationHelper.cs" />
     <Compile Include="Utils\SnowflakeId.cs" />
     <Compile Include="Web\Utility\WebAppTypeFinder.cs" />
@@ -123,6 +123,7 @@
     <Compile Include="Win\ServiceInstaller\WindowsServiceAccountType.cs" />
     <Compile Include="Win\ServiceInstaller\WindowsServiceInstallInfo.cs" />
     <Compile Include="Win\ServiceInstaller\WindowsServiceInstallUtil.cs" />
+    <Compile Include="Win\SqlServerInstallationChecker.cs" />
     <Compile Include="Win\Win32Api.cs" />
     <Compile Include="Win\WindowsUtility.cs" />
     <Compile Include="Win\WinServiceUtility.cs" />

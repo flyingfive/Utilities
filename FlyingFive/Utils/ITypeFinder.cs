@@ -11,6 +11,17 @@ namespace FlyingFive.Utils
     /// </summary>
     public interface ITypeFinder
     {
+        /// <summary>
+        /// 获取应用程序域的bin目录
+        /// </summary>
+        /// <returns></returns>
+        string GetBinDirectory();
+        /// <summary>
+        /// 查找具体类型
+        /// </summary>
+        /// <param name="fullName">类型完全限定名</param>
+        /// <param name="stringComparison">大小写匹配模式</param>
+        /// <returns></returns>
         Type FindClassOfType(string fullName, StringComparison stringComparison);
         /// <summary>
         /// 获取程序集集合

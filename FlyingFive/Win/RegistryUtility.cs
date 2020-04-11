@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Win32;
 
-namespace FlyingFive.Utils
+namespace FlyingFive.Win
 {
     /// <summary>
     /// 注册表处理工具

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
+using System.Web.Hosting;
 
 namespace FlyingFive.Utils
 {
@@ -58,6 +60,22 @@ namespace FlyingFive.Utils
         {
             get { return _assemblyNames; }
             set { _assemblyNames = value; }
+        }
+
+        /// <summary>
+        /// 获取应用程序域的bin目录
+        /// </summary>
+        /// <returns></returns>
+        public string GetBinDirectory()
+        {
+            if (HostingEnvironment.IsHosted)
+            {
+                return HttpRuntime.BinDirectory;
+            }
+            else
+            {
+                return App.BaseDirectory;
+            }
         }
 
         #region ITypeFinder 成员

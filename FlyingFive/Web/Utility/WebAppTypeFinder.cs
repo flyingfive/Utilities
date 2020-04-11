@@ -20,21 +20,7 @@ namespace FlyingFive.Web.Utility
             this.EnsureBinFolderAssembliesLoaded = true;
         }
         
-        public bool EnsureBinFolderAssembliesLoaded { get; set; }
-        
-
-        public virtual string GetBinDirectory()
-        {
-            if (HostingEnvironment.IsHosted)
-            {
-                return HttpRuntime.BinDirectory;
-            }
-            else
-            {
-                return AppDomain.CurrentDomain.BaseDirectory;
-            }
-        }
-
+        public bool EnsureBinFolderAssembliesLoaded { get; set; }        
 
         public override IList<Assembly> GetAssemblies()
         {

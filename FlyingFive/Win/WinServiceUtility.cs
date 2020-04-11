@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.ServiceProcess;
@@ -24,23 +24,42 @@ namespace FlyingFive.Win
             var existsService = ServiceController.GetServices().Where(s => s.ServiceName.Equals(serviceName)).SingleOrDefault();
             return existsService != null;
         }
-
         /// <summary>
         /// 安装Windows服务
         /// </summary>
-        /// <param name="svcName"></param>
-        /// <param name="displayName"></param>
-        /// <param name="description"></param>
+        /// <param name="exeFile">exe文件名全路径</param>
+        /// <param name="svcName">服务名</param>
+        /// <param name="displayName">显示名</param>
+        /// <param name="description">描述</param>
         /// <param name="dependencies">服务依赖项名称，如果存在(多个用,符号分隔)</param>
         /// <returns></returns>
-        public static bool InstallService(string svcName, string displayName, string description, string dependencies)
+        public static bool InstallService(string exeFile, string svcName, string displayName, string description, string dependencies)
         {
-            string fileName = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, AppDomain.CurrentDomain.SetupInformation.ApplicationName);
-            var fileInfo = new FileInfo(fileName);
-            var wsInstallInfo = new WindowsServiceInstallInfo(svcName, displayName, description, fileInfo.DirectoryName, fileInfo.Name, "Automatic");
-            var wsInstallUtil = new WindowsServiceInstallUtil(wsInstallInfo);
-            var isSucceed = wsInstallUtil.Install(dependencies);
-            return isSucceed;
+            if (string.IsNullOrWhiteSpace(exeFile) || string.IsNullOrWhiteSpace(svcName)) { return false; }
+            if (!File.Exists(exeFile)) { return false; }
+            if (string.IsNullOrWhiteSpace(displayName)) { displayName = svcName; }
+            var fileInfo = new FileInfo(exeFile);
+            var serviceInstallInfo = new WindowsServiceInstallInfo(svcName, displayName, description, fileInfo.DirectoryName, fileInfo.Name, "Automatic");
+            var installUtil = new WindowsServiceInstallUtil(serviceInstallInfo);
+            var succeed = installUtil.Install(dependencies);
+            return succeed;
+        }
+
+        /// <summary>
+        /// 卸载Windows服务
+        /// </summary>
+        /// <param name="exeFile">exe文件名全路径</param>
+        /// <param name="svcName">服务名称</param>
+        /// <returns></returns>
+        public static bool UninstallService(string exeFile, string svcName)
+        {
+            if (string.IsNullOrWhiteSpace(exeFile) || string.IsNullOrWhiteSpace(svcName)) { return false; }
+            if (!File.Exists(exeFile)) { return false; }
+            var fileInfo = new FileInfo(exeFile);
+            var serviceInstallInfo = new WindowsServiceInstallInfo(svcName, svcName, "", fileInfo.DirectoryName, fileInfo.Name, "Automatic");
+            var installUtil = new WindowsServiceInstallUtil(serviceInstallInfo);
+            var succeed = installUtil.Uninstall();
+            return succeed;
         }
 
         /// <summary>
@@ -52,6 +71,7 @@ namespace FlyingFive.Win
         /// <param name="timeout">尝试启动超时时间，单位：秒</param>
         public static void StartupService(string serviceName, bool pauseOnRetry = true, int retries = 3, int timeout = 30)
         {
+            if (string.IsNullOrWhiteSpace(serviceName)) { return; }
             if (retries < 0) { retries = 1; }
             var existsService = ServiceController.GetServices().Where(s => s.ServiceName.Equals(serviceName)).SingleOrDefault();
             if (existsService == null) { return; }
@@ -89,6 +109,7 @@ namespace FlyingFive.Win
         /// <param name="timeout"></param>
         public static void StopService(string serviceName, bool pauseOnRetry = true, int retries = 3, int timeout = 30)
         {
+            if (string.IsNullOrWhiteSpace(serviceName)) { return; }
             if (retries < 0) { retries = 1; }
             var existsService = ServiceController.GetServices().Where(s => s.ServiceName.Equals(serviceName)).SingleOrDefault();
             if (existsService == null) { return; }
@@ -114,6 +135,62 @@ namespace FlyingFive.Win
                 if (existsService.Status == ServiceControllerStatus.Stopped) { return; }
                 retries--;
             }
+        }
+
+        /// <summary>
+        /// 强制关闭Windows服务，失败时杀死进程
+        /// </summary>
+        /// <param name="serviceName"></param>
+        public static bool StopServiceMandatory(string serviceName)
+        {
+            if (string.IsNullOrWhiteSpace(serviceName)) { return false; }
+            var existsService = ServiceController.GetServices().Where(s => s.ServiceName.Equals(serviceName)).SingleOrDefault();
+            if (existsService == null) { return false; }
+            var exeFile = RegistryUtility.ReadRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, string.Format(@"SYSTEM\CurrentControlSet\Services\{0}", serviceName), "ImagePath", "");
+            var kill = new Func<bool>(() =>
+            {
+                if (string.IsNullOrWhiteSpace(exeFile)) { return false; }
+                var processName = Path.GetFileNameWithoutExtension(exeFile);
+                var processes = Process.GetProcessesByName(processName).Where(p => p.Id != Process.GetCurrentProcess().Id);
+                foreach (var p in processes)
+                {
+                    try { p.Kill(); } catch (Exception e) { return false; }
+                }
+                return true;
+            });
+            if (existsService.Status == ServiceControllerStatus.Stopped) { return true; }
+            if (existsService.Status == ServiceControllerStatus.Running)
+            {
+                try
+                {
+                    existsService.Stop();
+                    existsService.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(30));
+                    if (existsService.Status == ServiceControllerStatus.Stopped)
+                    {
+                        return true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return kill();
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 向Windows服务发送自定义命令
+        /// </summary>
+        /// <param name="command">命令标志。范围：128~256</param>
+        /// <param name="serviceName">服务名称</param>
+        /// <returns></returns>
+        public static bool SendCustomCommand(int command, string serviceName)
+        {
+            if (string.IsNullOrWhiteSpace(serviceName)) { return false; }
+            var existsService = ServiceController.GetServices().Where(s => s.ServiceName.Equals(serviceName)).SingleOrDefault();
+            if (existsService == null) { return false; }
+            if (command < 128 || command > 256) { throw new ArgumentException("命令值越界。"); }
+            try { existsService.ExecuteCommand(command); return true; } catch (Exception e) { return false; }
         }
     }
 }
