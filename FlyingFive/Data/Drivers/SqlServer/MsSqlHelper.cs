@@ -201,12 +201,12 @@ namespace FlyingFive.Data.Drivers.SqlServer
         /// <returns></returns>
         public static SqlServerVersion ConvertToSqlVersion(string productVersion, bool throwOverflow = false)
         {
-            /// SQL Server 2008 的10。0
-            /// 10.50 2008 R2 SQL Server
-            /// 2012 SQL Server 11.0. xx
-            /// 12.0 SQL Server 2014
-            /// SQL Server 2016 的13。0
-            /// SQL Server 2017 的 14.0. xx
+            // SQL Server 2008 的10。0
+            // 10.50 2008 R2 SQL Server
+            // 2012 SQL Server 11.0. xx
+            // 12.0 SQL Server 2014
+            // SQL Server 2016 的13。0
+            // SQL Server 2017 的 14.0. xx
             switch (productVersion.Substring(0, 4))
             {
                 case "14.0": return SqlServerVersion.SQL2017;

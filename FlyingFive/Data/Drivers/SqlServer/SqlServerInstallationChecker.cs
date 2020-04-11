@@ -8,8 +8,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using FlyingFive.Data;
+using FlyingFive.Win;
 
-namespace FlyingFive.Win
+namespace FlyingFive.Data.Drivers.SqlServer
 {
     /// <summary>
     /// SqlServer安装环境检测
@@ -62,7 +63,7 @@ namespace FlyingFive.Win
                     server.BinPath = binnPath;
                     var fileInfo = FileVersionInfo.GetVersionInfo(exeFile);
                     server.ProductVersion = fileInfo.ProductVersion;
-                    server.SqlVersion = TranslateToSqlVersion(server.ProductVersion);
+                    server.SqlVersion = MsSqlHelper.ConvertToSqlVersion(server.ProductVersion);
                 }
                 else
                 {
@@ -89,35 +90,6 @@ namespace FlyingFive.Win
             if (list.Count == 0) { return null; }
             var server = list.OrderByDescending(s => Version.Parse(s.Version)).FirstOrDefault();
             return server;
-        }
-
-
-        public static SqlVersion TranslateToSqlVersion(string productVersion, bool throwEx = false)
-        {
-            /// SQL Server 2008 的10。0
-            /// 10.50 2008 R2 SQL Server
-            /// 2012 SQL Server 11.0. xx
-            /// 12.0 SQL Server 2014
-            /// SQL Server 2016 的13。0
-            /// SQL Server 2017 的 14.0. xx
-            switch (productVersion.Substring(0, 4))
-            {
-                case "14.0": return SqlVersion.SQL2017;
-                case "13.0": return SqlVersion.SQL2016;
-                case "12.0": return SqlVersion.SQL2014;
-                case "11.0": return SqlVersion.SQL2012;
-                case "10.5": return SqlVersion.SQL2008R2;
-                case "10.0": return SqlVersion.SQL2008;
-                default:
-                    if (throwEx)
-                    {
-                        throw new ArgumentException(string.Format("无法识别的SQL版本：{0}", productVersion));
-                    }
-                    else
-                    {
-                        return SqlVersion.Unknown;
-                    }
-            }
         }
 
         public static bool CheckPathIsSqlRoot(string path)
@@ -169,7 +141,7 @@ namespace FlyingFive.Win
         /// </summary>
         public string SaPassword { get; set; }
 
-        public SqlVersion SqlVersion { get; set; }
+        public SqlServerVersion SqlVersion { get; set; }
         /// <summary>
         /// 是否64位版本，True:64位实例，False:32位实例
         /// </summary>
@@ -201,7 +173,7 @@ namespace FlyingFive.Win
 
         public override string ToString()
         {
-            if (this.SqlVersion == SqlVersion.Unknown) { return "未知"; }
+            if (this.SqlVersion == SqlServerVersion.Unknown) { return "未知"; }
             var name = string.Format("Microsoft SQL Server {0}{1}", this.SqlVersion.ToString().Substring(3, 4), this.SqlVersion.ToString().EndsWith("R2") ? " R2" : string.Empty);
             return string.Format("{0} {1}", name, Edition);
         }
@@ -234,7 +206,7 @@ namespace FlyingFive.Win
                         this.BinPath = binnPath;
                         var fileInfo = FileVersionInfo.GetVersionInfo(exeFile);
                         this.ProductVersion = fileInfo.ProductVersion;
-                        this.SqlVersion = SqlServerInstallationChecker.TranslateToSqlVersion(this.ProductVersion);
+                        this.SqlVersion = MsSqlHelper.ConvertToSqlVersion(this.ProductVersion);
                     }
                 }
                 //注册表没取到DB配置的默认文件存放路径，则取master相同位置
@@ -253,7 +225,7 @@ namespace FlyingFive.Win
                     command.CommandText = "SELECT SERVERPROPERTY('ProductVersion')";
                     command.Parameters.Clear();
                     this.ProductVersion = command.ExecuteScalar().ToString();
-                    this.SqlVersion = SqlServerInstallationChecker.TranslateToSqlVersion(this.ProductVersion);
+                    this.SqlVersion = MsSqlHelper.ConvertToSqlVersion(this.ProductVersion);
                 }
 
                 command.CommandText = "SELECT SERVERPROPERTY('Edition')";
@@ -301,18 +273,5 @@ namespace FlyingFive.Win
                 connection.Close();
             }
         }
-    }
-    /// <summary>
-    /// Sql版本
-    /// </summary>
-    public enum SqlVersion
-    {
-        Unknown = 0,
-        SQL2017 = 1,
-        SQL2016 = 2,
-        SQL2014 = 3,
-        SQL2012 = 4,
-        SQL2008R2 = 5,
-        SQL2008 = 6,
     }
 }
