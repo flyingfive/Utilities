@@ -123,7 +123,7 @@
     <Compile Include="Win\ServiceInstaller\WindowsServiceAccountType.cs" />
     <Compile Include="Win\ServiceInstaller\WindowsServiceInstallInfo.cs" />
     <Compile Include="Win\ServiceInstaller\WindowsServiceInstallUtil.cs" />
-    <Compile Include="Win\SqlServerInstallationChecker.cs" />
+    <Compile Include="Data\Drivers\SqlServer\SqlServerInstallationChecker.cs" />
     <Compile Include="Win\Win32Api.cs" />
     <Compile Include="Win\WindowsUtility.cs" />
     <Compile Include="Win\WinServiceUtility.cs" />
