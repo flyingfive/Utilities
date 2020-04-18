@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace FlyingFive.Utils
+namespace FlyingFive
 {
     /// <summary>
     /// 提供类型查找器能力

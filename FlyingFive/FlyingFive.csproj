@@ -95,6 +95,8 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Data\Extensions.DataReader.cs" />
     <Compile Include="Extensions.DateTime.cs" />
+    <Compile Include="Extensions.Enum.cs" />
+    <Compile Include="Extensions.IO.cs" />
     <Compile Include="Extensions.String.cs" />
     <Compile Include="Extensions.Type.cs" />
     <Compile Include="Extensions.Uri.cs" />
@@ -102,15 +104,15 @@
     <Compile Include="IStartupTask.cs" />
     <Compile Include="ITask.cs" />
     <Compile Include="Utils\AppDomainTypeFinder.cs" />
-    <Compile Include="Utils\ChineseCalendar.cs" />
-    <Compile Include="Utils\ChinesePinYinHelper.cs" />
+    <Compile Include="Utils\ChineseCalendarInfo.cs" />
+    <Compile Include="Utils\ChineseSpellingHelper.cs" />
     <Compile Include="Utils\CodeTimer.cs" />
     <Compile Include="Utils\Computer.cs" />
     <Compile Include="Utils\DES3CryptographicProvider.cs" />
     <Compile Include="Utils\FileHelper.cs" />
     <Compile Include="Utils\ICryptographicProvider.cs" />
     <Compile Include="Utils\IniFileHelper.cs" />
-    <Compile Include="Utils\ITypeFinder.cs" />
+    <Compile Include="ITypeFinder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Singleton.cs" />
     <Compile Include="Win\RegistryUtility.cs" />

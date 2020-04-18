@@ -8,7 +8,7 @@ namespace FlyingFive.Utils
     /// <summary>
     /// 汉字拼音工具
     /// </summary>
-    public class ChinesePinYinHelper
+    public class ChineseSpellingHelper
     {
         #region 数组信息
 

@@ -15,7 +15,7 @@ namespace FlyingFive.Utils
         public DES3CryptographicProvider()
         {
             _serviceProvider = new TripleDESCryptoServiceProvider();
-            _serviceProvider.Mode = CipherMode.CBC;
+            _serviceProvider.Mode = CipherMode.ECB;
             _serviceProvider.Padding = PaddingMode.PKCS7;
         }
 

@@ -8,7 +8,7 @@ namespace FlyingFive.Utils
     /// <summary>
     /// 中国农历类 版本V1.0 支持 1900.1.31日起至 2049.12.31日止的数据
     /// </summary>
-    public class ChineseCalendar
+    public class ChineseCalendarInfo
     {
         #region 内部结构
         private struct SolarHolidayStruct
@@ -253,7 +253,7 @@ namespace FlyingFive.Utils
         /// 用一个标准的公历日期来初使化
         /// </summary>
         /// <param name="dt"></param>
-        public ChineseCalendar(DateTime dt)
+        public ChineseCalendarInfo(DateTime dt)
         {
             int i;
             int leap;
@@ -268,7 +268,7 @@ namespace FlyingFive.Utils
             leap = 0;
             temp = 0;
 
-            TimeSpan ts = _date - ChineseCalendar.MinDay;//计算两天的基本差距
+            TimeSpan ts = _date - ChineseCalendarInfo.MinDay;//计算两天的基本差距
 
             offset = ts.Days;
 
@@ -331,7 +331,7 @@ namespace FlyingFive.Utils
         /// <param name="cm">农历月</param>
         /// <param name="cd">农历日</param>
         /// <param name="LeapFlag">闰月标志</param>
-        public ChineseCalendar(int cy, int cm, int cd, bool leapMonthFlag)
+        public ChineseCalendarInfo(int cy, int cm, int cd, bool leapMonthFlag)
         {
             int i, leap, Temp, offset;
 
@@ -1263,10 +1263,10 @@ namespace FlyingFive.Utils
 
         /// </summary>
         /// <returns></returns>
-        public ChineseCalendar NextDay()
+        public ChineseCalendarInfo NextDay()
         {
             DateTime nextDay = _date.AddDays(1);
-            return new ChineseCalendar(nextDay);
+            return new ChineseCalendarInfo(nextDay);
         }
         #endregion
 
@@ -1276,10 +1276,10 @@ namespace FlyingFive.Utils
 
         /// </summary>
         /// <returns></returns>
-        public ChineseCalendar PervDay()
+        public ChineseCalendarInfo PervDay()
         {
             DateTime pervDay = _date.AddDays(-1);
-            return new ChineseCalendar(pervDay);
+            return new ChineseCalendarInfo(pervDay);
         }
         #endregion
         #endregion
