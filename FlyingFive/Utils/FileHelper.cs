@@ -30,5 +30,25 @@ namespace FlyingFive.Utils
                 System.IO.File.Copy(srcFile, destFile, true);
             }
         }
+
+        /// <summary>
+        /// 获取文件大小（带一位字母后缀：B、K、M、G）
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        public static string GetFileLength(string file)
+        {
+            return new FileInfo(file).GetFileLength();
+        }
+
+        /// <summary>
+        /// 计算文件MD5值
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        public static string GetFileMD5(string file)
+        {
+            return new FileInfo(file).MD5File();
+        }
     }
 }

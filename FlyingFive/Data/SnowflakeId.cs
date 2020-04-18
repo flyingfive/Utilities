@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace FlyingFive.Utils
+namespace FlyingFive.Data
 {
     /// <summary>
     /// 动态生产有规律的ID

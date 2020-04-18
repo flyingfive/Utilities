@@ -39,7 +39,7 @@ namespace FlyingFive.Data
                     }
                     fields.Add(dc.ColumnName, dataType);
                 }
-                var sourceCodeCreater = new SourceCodeCreater(className, fields);
+                var sourceCodeCreater = new CSharpSourceCodeCreater(className, fields);
                 var type = sourceCodeCreater.BuildCSharpType();
                 return type;
             });

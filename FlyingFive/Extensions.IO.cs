@@ -9,16 +9,37 @@ namespace FlyingFive
 {
     public static partial class Extensions
     {
+        /// <summary>
+        /// 获取文件大小（带一位字母后缀：B、K、M、G）
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        public static string GetFileLength(this FileInfo file)
+        {
+            if (!file.Exists)
+            {
+                if (!file.Exists) { throw new ArgumentException(string.Format("文件<{0}>, 不存在.", file.FullName)); }
+            }
+            var lengthOfDocument = file.Length;
+            if (lengthOfDocument < 1024)
+                return string.Format(lengthOfDocument.ToString() + 'B');
+            else if (lengthOfDocument > 1024 && lengthOfDocument <= Math.Pow(1024, 2))
+                return string.Format((lengthOfDocument / 1024.0).ToString() + "K");
+            else if (lengthOfDocument > Math.Pow(1024, 2) && lengthOfDocument <= Math.Pow(1024, 3))
+                return string.Format((lengthOfDocument / 1024.0 / 1024.0).ToString() + "M");
+            else
+                return string.Format((lengthOfDocument / 1024.0 / 1024.0 / 1024.0).ToString() + "G");
+        }
 
         /// <summary>  
         /// 计算文件MD5值（大文件请合理调整bufferSize参数）
         /// </summary>  
         /// <param name="fileInfo">文件地址</param>  
-        /// <param name="bufferSize">自定义缓冲区大小,单位：K，默认1M</param>  
+        /// <param name="bufferSize">自定义缓冲区大小,单位：K，默认1K</param>  
         /// <returns>MD5Hash</returns>  
         public static string MD5File(this FileInfo fileInfo, int bufferSize = 1024)
         {
-            if (!fileInfo.Exists) { throw new ArgumentException(string.Format("文件<{0}>, 不存在", fileInfo)); }
+            if (!fileInfo.Exists) { throw new ArgumentException(string.Format("文件<{0}>, 不存在.", fileInfo.FullName)); }
             if (bufferSize <= 0) { bufferSize = 1024; }
             bufferSize = 1024 * bufferSize;             //自定义缓冲区大小
             byte[] buffer = new byte[bufferSize];

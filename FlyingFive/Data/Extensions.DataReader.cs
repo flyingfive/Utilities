@@ -101,7 +101,7 @@ namespace FlyingFive.Data
             var modelType = _dynamicTypeCache.GetOrAdd(key, (str) =>
             {
                 var className = string.Format("DynamicDataModel_{0}", Guid.NewGuid().ToString("D").Split(new char[] { '-' }).Last());
-                var sourceCodeCreater = new SourceCodeCreater(className, fields);
+                var sourceCodeCreater = new CSharpSourceCodeCreater(className, fields);
                 var type = sourceCodeCreater.BuildCSharpType();
                 return type;
             });

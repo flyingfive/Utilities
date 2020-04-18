@@ -28,6 +28,25 @@ namespace FlyingFive
         }
 
         /// <summary>
+        /// 计算Hash值
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="name">Hash算法名称</param>
+        /// <returns></returns>
+        public static string ComputeHash(this string text, string name = "SHA512")
+        {
+            if (string.IsNullOrWhiteSpace(name)) { throw new ArgumentException("参数：name错误"); }
+            var supportedHashName = new string[] { "SHA256", "SHA512", "SHA384", "MD5", "HMACMD5", "HMACSHA256", "HMACSHA384", "HMACSHA512", "MACTripleDES", "RIPEMD160" };
+            name = name.ToUpper();
+            if (!supportedHashName.Contains(name)) { throw new NotSupportedException(string.Format("不支持的Hash算法：{0}", name)); }
+            var computer = System.Security.Cryptography.HashAlgorithm.Create(name);
+            if (computer == null) { throw new NotSupportedException(string.Format("不支持的Hash算法：{0}", name)); }
+            var buffer = computer.ComputeHash(Encoding.UTF8.GetBytes(text));
+             var hash = BitConverter.ToString(buffer).Replace("-", string.Empty);
+            return hash;
+        }
+
+        /// <summary>
         /// 字符串转全角的函数(SBC case)
         /// </summary>
         /// <param name="input">字符串</param>

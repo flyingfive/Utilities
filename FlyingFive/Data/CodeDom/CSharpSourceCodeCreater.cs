@@ -13,7 +13,7 @@ namespace FlyingFive.Data.CodeDom
     /// <summary>
     /// C#模型源码（类型）生成器
     /// </summary>
-    public class SourceCodeCreater
+    public class CSharpSourceCodeCreater
     {
         private string _sourceCode = null;
         private CodeCompileUnit _targetUnit = null;
@@ -33,7 +33,7 @@ namespace FlyingFive.Data.CodeDom
         /// </summary>
         /// <param name="className">类型名称</param>
         /// <param name="propertyData">类型上的属性列表</param>
-        public SourceCodeCreater(string className, Dictionary<string, Type> propertyData)
+        public CSharpSourceCodeCreater(string className, Dictionary<string, Type> propertyData)
         {
             _propertyData = propertyData;
             _className = className;
