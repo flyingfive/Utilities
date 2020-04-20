@@ -32,11 +32,7 @@ namespace FlyingFive
         /// <returns></returns>
         public static SqlDbType ToSqlDbType(this Type csharpType)
         {
-            if (csharpType.IsNullableType())
-            {
-                var type = csharpType.GetGenericArguments().FirstOrDefault();
-                return type.ToSqlDbType();
-            }
+            csharpType = csharpType.GetUnderlyingType();
             switch (csharpType.Name.ToLowerInvariant())
             {
                 case "int":
@@ -61,11 +57,7 @@ namespace FlyingFive
         /// <returns></returns>
         public static DbType ToDbType(this Type csharpType)
         {
-            if (csharpType.IsNullableType())
-            {
-                var type = csharpType.GetGenericArguments().FirstOrDefault();
-                return type.ToDbType();
-            }
+            csharpType = csharpType.GetUnderlyingType();
             switch (csharpType.Name.ToLowerInvariant())
             {
                 case "int":

@@ -291,5 +291,27 @@ namespace FlyingFive.Utils
             return System.Environment.MachineName;
             //return System.Net.Dns.GetHostName();//System.Environment.GetEnvironmentVariable("ComputerName");
         }
+
+        /// <summary>
+        /// 检测电脑是否有ineternet连接
+        /// </summary>
+        /// <param name="timeout">检查超时毫秒</param>
+        /// <returns></returns>
+        public static bool CheckInternetConnection(int timeout = 3000)
+        {
+            try
+            {
+                if (timeout <= 0) { timeout = 3000; }
+                using (var ping = new Ping())
+                {
+                    var reply = ping.Send("www.baidu.com", timeout);
+                    return reply.Status == IPStatus.Success;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

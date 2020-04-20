@@ -33,7 +33,7 @@ namespace FlyingFive
             get { return _year; }
             set
             {
-                this.GetBirthYear();
+                this.GetEntryAssemblyCreationYear();
                 if (value < 1 || value == this.BirthYear) { value = 1; }
                 if (value > this.BirthYear) { value = value - this.BirthYear; }
                 _year = value;
@@ -59,18 +59,17 @@ namespace FlyingFive
         {
             get
             {
-                this.GetBirthYear();
+                this.GetEntryAssemblyCreationYear();
                 var year = _year == 1 ? 0 : _year - 1;
                 year += this.BirthYear;
                 return new DateTime(year, Month < 1 ? 1 : Month, Day < 1 ? 1 : Day);
             }
         }
 
-
         /// <summary>
         /// 最小版本,不应小于此版本
         /// </summary>
-        public static readonly AppVersion MinimalVersion = new AppVersion() { Year = 1, Month = 1, Day = 1, No = 0, BirthYear = 2014 };
+        public static readonly AppVersion MinimalVersion = new AppVersion() { Year = 1, Month = 1, Day = 1, No = 0, BirthYear = AppVersion.BASE_YEAR };
 
         /// <summary>
         /// 获取版本对象的Hash值
@@ -280,13 +279,13 @@ namespace FlyingFive
         private AppVersion()
         {
             BirthYear = 0;
-            GetBirthYear();
+            GetEntryAssemblyCreationYear();
         }
 
         private static object _locker = new object();
 
         /// <summary>
-        /// 应用程序的当前版本
+        /// 应用程序入口程序集的当前版本
         /// </summary>
         public static AppVersion CurrentVersion
         {
@@ -309,26 +308,32 @@ namespace FlyingFive
         }
 
         /// <summary>
-        /// 从应用程序入口程序集的AssemblyCopyrightAttribute特性中获取产品发布的起始年份
+        /// 获取应用程序入口程序集的生成年份值
         /// </summary>
         /// <returns></returns>
-        public int GetBirthYear()
+        public int GetEntryAssemblyCreationYear()
         {
             if (BirthYear != 0) { return BirthYear; }
             var entryAssembly = AppDomain.CurrentDomain.GetEntryAssembly();
-            var copyright = entryAssembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false).FirstOrDefault() as AssemblyCopyrightAttribute;
-            if (copyright != null)
+            var creation = entryAssembly.GetCustomAttributes(typeof(AssemblyCreationYearAttribute), false).FirstOrDefault() as AssemblyCreationYearAttribute;
+            if (creation != null)
             {
-                var year = Regex.Match(copyright.Copyright, "(20[0-9]{2})").Value;
-                if (year.IsInt(false))
-                {
-                    this.BirthYear = Convert.ToInt32(year);
-                    return this.BirthYear;
-                }
+                this.BirthYear = creation.Year;
+                return this.BirthYear;
             }
             this.BirthYear = BASE_YEAR;
             return this.BirthYear;
         }
+    }
+
+    /// <summary>
+    /// 应用程序集的生成起始年份
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false, Inherited = false)]
+    public class AssemblyCreationYearAttribute : System.Attribute
+    {
+        public int Year { get; private set; }
+        public AssemblyCreationYearAttribute(int year) { if (year < AppVersion.BASE_YEAR) { throw new OverflowException(string.Format("生成年不能小于{0}", AppVersion.BASE_YEAR)); } this.Year = year; }
     }
 
 

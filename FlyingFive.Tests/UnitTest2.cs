@@ -12,6 +12,7 @@ using System.Data;
 using FlyingFive.Data.Interception;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace FlyingFive.Tests
 {
@@ -54,13 +55,8 @@ namespace FlyingFive.Tests
         [TestMethod]
         public void TestSBCMethod()
         {
-            Debug.WriteLine( CodePerformanceTester.Test(() =>
-            {
-                for (int i = 0; i < 10; i++)
-                {
-                    Thread.Sleep(10);
-                }
-            }).ToString());
+            var tt1 = typeof(byte[]).ToSqlDbType();
+            var tt2 = typeof(Int32?).GetUnderlyingType();
             var m = 7.125698520546M.TruncateDec(4);
             var list = new List<a>();
             var d = typeof(IList<>).IsAssignableFrom(list.GetType());

@@ -42,7 +42,7 @@ namespace FlyingFive
             var computer = System.Security.Cryptography.HashAlgorithm.Create(name);
             if (computer == null) { throw new NotSupportedException(string.Format("不支持的Hash算法：{0}", name)); }
             var buffer = computer.ComputeHash(Encoding.UTF8.GetBytes(text));
-             var hash = BitConverter.ToString(buffer).Replace("-", string.Empty);
+            var hash = BitConverter.ToString(buffer).Replace("-", string.Empty);
             return hash;
         }
 
@@ -244,5 +244,17 @@ namespace FlyingFive
             return new Uri(url).GetUrlArguments();
         }
 
+        /// <summary>
+        /// 截取字符串左边指定长度
+        /// </summary>
+        /// <param name="text">字符串文本</param>
+        /// <param name="length">截取长度</param>
+        /// <returns></returns>
+        public static string Left(this string text, int length)
+        {
+            if (string.IsNullOrEmpty(text) || length < 1) { return string.Empty; }
+            if (text.Length < length) { return text; }
+            return text.Substring(0, length);
+        }
     }
 }
