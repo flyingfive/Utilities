@@ -11,6 +11,7 @@ using FlyingFive.Data.Drivers.SqlServer;
 using System.Data;
 using FlyingFive.Data.Interception;
 using System.Diagnostics;
+using System.Threading;
 
 namespace FlyingFive.Tests
 {
@@ -53,6 +54,13 @@ namespace FlyingFive.Tests
         [TestMethod]
         public void TestSBCMethod()
         {
+            Debug.WriteLine( CodePerformanceTester.Test(() =>
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    Thread.Sleep(10);
+                }
+            }).ToString());
             var m = 7.125698520546M.TruncateDec(4);
             var list = new List<a>();
             var d = typeof(IList<>).IsAssignableFrom(list.GetType());
@@ -74,7 +82,7 @@ namespace FlyingFive.Tests
             {
                 var connectionString = "Data Source=173.31.15.53,2012;Initial Catalog=Northwind;User Id=sa;Password=sa;";
                 var dbHelper = new MsSqlHelper(connectionString);
-                var result = CodeTimer.Time("test", 1, (() =>
+                var result = CodePerformanceTester.Test((() =>
                 {
                     using (var connection = new SqlConnection(connectionString))
                     {

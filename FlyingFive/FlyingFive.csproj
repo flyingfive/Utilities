@@ -105,7 +105,7 @@
     <Compile Include="Utils\AppDomainTypeFinder.cs" />
     <Compile Include="Utils\ChineseCalendarInfo.cs" />
     <Compile Include="Utils\ChineseSpellingHelper.cs" />
-    <Compile Include="Utils\CodeTimer.cs" />
+    <Compile Include="Utils\CodePerformanceTester.cs" />
     <Compile Include="Utils\Computer.cs" />
     <Compile Include="Security\DES3CryptographicProvider.cs" />
     <Compile Include="Utils\FileHelper.cs" />

@@ -12,17 +12,26 @@ namespace FlyingFive.Win
     public class RegistryUtility
     {
         /// <summary>
+        /// 根据操作系统获取注册表视图选项
+        /// </summary>
+        /// <returns></returns>
+        public static RegistryView GetSystemRegistryView()
+        {
+            return Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32;
+        }
+
+        /// <summary>
         /// 读取注册表的值(32或64位OS)
         /// </summary>
         /// <param name="root">分类根</param>
         /// <param name="registryRath">注册表路径</param>
         /// <param name="settingName">配置键名</param>
+        /// <param name="registryView">视图选项</param>
         /// <param name="defaultValue">默认值</param>
         /// <returns></returns>
-        public static string ReadRegistryValue(Microsoft.Win32.RegistryHive root, string registryRath, string settingName, string defaultValue = "")
+        public static string ReadRegistryValue(Microsoft.Win32.RegistryHive root, string registryRath, string settingName, RegistryView registryView = RegistryView.Default, string defaultValue = "")
         {
-            var view = Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32;
-            var node = Microsoft.Win32.RegistryKey.OpenBaseKey(root, view).OpenSubKey(registryRath);
+            var node = Microsoft.Win32.RegistryKey.OpenBaseKey(root, registryView).OpenSubKey(registryRath);
             var value = node.GetValue(settingName, defaultValue).ToString();
             return value;
         }
@@ -34,10 +43,10 @@ namespace FlyingFive.Win
         /// <param name="registryRath">注册表路径</param>
         /// <param name="settingName">配置键</param>
         /// <param name="value">配置值</param>
-        public static void WriteRegistryValue(Microsoft.Win32.RegistryHive root, string registryRath, string settingName, string value)
+        /// <param name="registryView">视图选项</param>
+        public static void WriteRegistryValue(Microsoft.Win32.RegistryHive root, string registryRath, string settingName, string value, RegistryView registryView = RegistryView.Default)
         {
-            var view = Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32;
-            var node = Microsoft.Win32.RegistryKey.OpenBaseKey(root, view).OpenSubKey(registryRath, true);
+            var node = Microsoft.Win32.RegistryKey.OpenBaseKey(root, registryView).OpenSubKey(registryRath, true);
             if (node.GetValueNames().Contains(settingName))
             {
                 node.DeleteValue(settingName);
@@ -51,11 +60,11 @@ namespace FlyingFive.Win
         /// <param name="root">顶级节点</param>
         /// <param name="registryRath">注册表路径</param>
         /// <param name="subKeyName">配置键名</param>
+        /// <param name="registryView">视图选项</param>
         /// <returns></returns>
-        public static bool ExistsRegistrySubKeys(Microsoft.Win32.RegistryHive root, string registryRath, string subKeyName)
+        public static bool ExistsRegistrySubKeys(Microsoft.Win32.RegistryHive root, string registryRath, string subKeyName, RegistryView registryView = RegistryView.Default)
         {
-            var view = Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32;
-            var node = Microsoft.Win32.RegistryKey.OpenBaseKey(root, view).OpenSubKey(registryRath);
+            var node = Microsoft.Win32.RegistryKey.OpenBaseKey(root, registryView).OpenSubKey(registryRath);
             var exists = node.GetSubKeyNames().Contains(subKeyName);
             return exists;
         }
@@ -66,12 +75,12 @@ namespace FlyingFive.Win
         /// <param name="root">顶级节点</param>
         /// <param name="parentPath">注册表路径</param>
         /// <param name="subKey">配置键名</param>
+        /// <param name="registryView">视图选项</param>
         /// <param name="readOnly">是否只读模式</param>
         /// <returns></returns>
-        public static RegistryKey CreateSubRegistryKey(Microsoft.Win32.RegistryHive root, string parentPath, string subKey, bool readOnly = false)
+        public static RegistryKey CreateSubRegistryKey(Microsoft.Win32.RegistryHive root, string parentPath, string subKey, RegistryView registryView = RegistryView.Default, bool readOnly = false)
         {
-            var view = Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32;
-            var node = Microsoft.Win32.RegistryKey.OpenBaseKey(root, view).OpenSubKey(parentPath, true);
+            var node = Microsoft.Win32.RegistryKey.OpenBaseKey(root, registryView).OpenSubKey(parentPath, true);
             if (node.GetSubKeyNames().Contains(subKey))
             {
                 var currentRegistryKey = node.OpenSubKey(subKey, !readOnly);
@@ -87,11 +96,12 @@ namespace FlyingFive.Win
         /// <param name="root">顶级节点</param>
         /// <param name="parentPath">注册表路径</param>
         /// <param name="subKey">配置键名</param>
+        /// <param name="registryView">视图选项</param>
         /// <param name="readOnly"></param>
         /// <returns></returns>
-        public static RegistryKey CreateWin32SubRegistryKey(Microsoft.Win32.RegistryHive root, string parentPath, string subKey, bool readOnly = false)
+        public static RegistryKey CreateWin32SubRegistryKey(Microsoft.Win32.RegistryHive root, string parentPath, string subKey, RegistryView registryView = RegistryView.Default, bool readOnly = false)
         {
-            var node = Microsoft.Win32.RegistryKey.OpenBaseKey(root, RegistryView.Registry32).OpenSubKey(parentPath, true);
+            var node = Microsoft.Win32.RegistryKey.OpenBaseKey(root, registryView).OpenSubKey(parentPath, true);
             if (node.GetSubKeyNames().Contains(subKey))
             {
                 var currentRegistryKey = node.OpenSubKey(subKey, !readOnly);
@@ -106,11 +116,12 @@ namespace FlyingFive.Win
         /// </summary>
         /// <param name="root">顶级节点</param>
         /// <param name="registryPath">注册表路径</param>
+        /// <param name="registryView">视图选项</param>
         /// <param name="readOnly">是否只读模式</param>
         /// <returns></returns>
-        public static RegistryKey OpenWin32RegistryKey(Microsoft.Win32.RegistryHive root, string registryPath, bool readOnly = false)
+        public static RegistryKey OpenWin32RegistryKey(Microsoft.Win32.RegistryHive root, string registryPath, RegistryView registryView = RegistryView.Default, bool readOnly = false)
         {
-            var node = Microsoft.Win32.RegistryKey.OpenBaseKey(root, RegistryView.Registry32).OpenSubKey(registryPath, !readOnly);
+            var node = Microsoft.Win32.RegistryKey.OpenBaseKey(root, registryView).OpenSubKey(registryPath, !readOnly);
             return node;
         }
 
@@ -119,12 +130,12 @@ namespace FlyingFive.Win
         /// </summary>
         /// <param name="root">顶级节点</param>
         /// <param name="registryPath">注册表路径</param>
+        /// <param name="registryView">视图选项</param>
         /// <param name="readOnly">是否只读模式</param>
         /// <returns></returns>
-        public static RegistryKey OpenRegistryKey(Microsoft.Win32.RegistryHive root, string registryPath, bool readOnly = false)
+        public static RegistryKey OpenRegistryKey(Microsoft.Win32.RegistryHive root, string registryPath, RegistryView registryView = RegistryView.Default, bool readOnly = false)
         {
-            var view = Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32;
-            var node = Microsoft.Win32.RegistryKey.OpenBaseKey(root, view).OpenSubKey(registryPath, !readOnly);
+            var node = Microsoft.Win32.RegistryKey.OpenBaseKey(root, registryView).OpenSubKey(registryPath, !readOnly);
             return node;
         }
 
@@ -146,13 +157,13 @@ namespace FlyingFive.Win
         /// <summary>
         /// 读取注册表指定路径下的所有配置键名
         /// </summary>
-        /// <param name="root"></param>
-        /// <param name="registryRath"></param>
+        /// <param name="root">注册表顶级节点</param>
+        /// <param name="registryPath">注册表访问路径</param>
+        /// <param name="registryView">视图选项</param>
         /// <returns></returns>
-        public static string[] ReadRegistryNames(Microsoft.Win32.RegistryHive root, string registryRath)
+        public static string[] ReadRegistryNames(Microsoft.Win32.RegistryHive root, string registryPath, RegistryView registryView = RegistryView.Default)
         {
-            var view = Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32;
-            var node = Microsoft.Win32.RegistryKey.OpenBaseKey(root, view).OpenSubKey(registryRath);
+            var node = Microsoft.Win32.RegistryKey.OpenBaseKey(root, registryView).OpenSubKey(registryPath);
             var names = node.GetValueNames();
             return names;
         }

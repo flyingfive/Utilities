@@ -53,10 +53,10 @@ namespace FlyingFive.Data.Drivers.SqlServer
             foreach (var instanceName in names)
             {
                 var server = new SqlServerInfo() { ServerName = Environment.MachineName, InstanceName = instanceName };
-                var regName = RegistryUtility.ReadRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, installationPath, instanceName, def);
+                var regName = RegistryUtility.ReadRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, installationPath, instanceName, RegistryUtility.GetSystemRegistryView(), def);
                 server.IsDefaultInstance = string.Equals(instanceName, "MSSQLSERVER", StringComparison.CurrentCultureIgnoreCase);
                 server.SqlSetupRegistryPath = string.Format(@"{0}\{1}\Setup", basePath, regName);
-                var binnPath = RegistryUtility.ReadRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, server.SqlSetupRegistryPath, "SQLBinRoot", def);
+                var binnPath = RegistryUtility.ReadRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, server.SqlSetupRegistryPath, "SQLBinRoot", RegistryUtility.GetSystemRegistryView(), def);
                 var exeFile = Path.Combine(binnPath, SqlExeFileName);
                 if (Directory.Exists(binnPath) && File.Exists(exeFile))
                 {
@@ -70,10 +70,10 @@ namespace FlyingFive.Data.Drivers.SqlServer
                     continue;
                 }
                 server.SqlGroup = RegistryUtility.ReadRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, server.SqlSetupRegistryPath, "SQLGroup");
-                server.Edition = RegistryUtility.ReadRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, server.SqlSetupRegistryPath, "Edition", def);
-                server.Version = RegistryUtility.ReadRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, server.SqlSetupRegistryPath, "Version", def);
+                server.Edition = RegistryUtility.ReadRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, server.SqlSetupRegistryPath, "Edition", RegistryUtility.GetSystemRegistryView(), def);
+                server.Version = RegistryUtility.ReadRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, server.SqlSetupRegistryPath, "Version", RegistryUtility.GetSystemRegistryView(), def);
                 server.SqlInstanceRegistryPath = string.Format("{0}\\{1}\\MSSQLServer", basePath, regName);
-                var defaultDataPath = RegistryUtility.ReadRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, server.SqlInstanceRegistryPath, "DefaultData", def);
+                var defaultDataPath = RegistryUtility.ReadRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, server.SqlInstanceRegistryPath, "DefaultData", RegistryUtility.GetSystemRegistryView(), def);
                 if (Directory.Exists(defaultDataPath)) { server.DefaultDataPath = defaultDataPath; }
                 list.Add(server);
             }
@@ -238,7 +238,7 @@ namespace FlyingFive.Data.Drivers.SqlServer
                 var serviceName = command.ExecuteScalar().ToString();
                 serviceName = this.IsDefaultInstance ? serviceName : string.Format("MSSQL${0}", serviceName);
                 var registryPath = string.Format(@"SYSTEM\CurrentControlSet\Services\{0}", serviceName);
-                var imagePath = RegistryUtility.ReadRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, registryPath, "ImagePath", "");
+                var imagePath = RegistryUtility.ReadRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, registryPath, "ImagePath", RegistryUtility.GetSystemRegistryView(), "");
                 if (!string.IsNullOrEmpty(imagePath) && imagePath.IndexOf("\"") >= 0 && imagePath.IndexOf("\"") != imagePath.LastIndexOf("\""))
                 {
                     imagePath = imagePath.Substring(imagePath.IndexOf("\"") + 1, imagePath.LastIndexOf("\"") - 1);

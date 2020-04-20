@@ -146,7 +146,7 @@ namespace FlyingFive.Win
             if (string.IsNullOrWhiteSpace(serviceName)) { return false; }
             var existsService = ServiceController.GetServices().Where(s => s.ServiceName.Equals(serviceName)).SingleOrDefault();
             if (existsService == null) { return false; }
-            var exeFile = RegistryUtility.ReadRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, string.Format(@"SYSTEM\CurrentControlSet\Services\{0}", serviceName), "ImagePath", "");
+            var exeFile = RegistryUtility.ReadRegistryValue(Microsoft.Win32.RegistryHive.LocalMachine, string.Format(@"SYSTEM\CurrentControlSet\Services\{0}", serviceName), "ImagePath", Microsoft.Win32.RegistryView.Default, "");
             var kill = new Func<bool>(() =>
             {
                 if (string.IsNullOrWhiteSpace(exeFile)) { return false; }

@@ -68,8 +68,8 @@ namespace ClientTests
             }
             else
             {
-                _socketClient.Connect(host.First(), host.Last().TryConvert<int>(52520));
-                _flyingSocketClient.ConnectAsync(host.First(), host.Last().TryConvert<int>(52520));
+                _socketClient.Connect(host.First(), host.Last().TryConvertSafety<int>(52520));
+                _flyingSocketClient.ConnectAsync(host.First(), host.Last().TryConvertSafety<int>(52520));
             }
         }
 
@@ -89,7 +89,7 @@ namespace ClientTests
                 }
                 var dir = new DirectoryInfo(Path.GetDirectoryName(fileName)).Name;
                 var size = 0L;
-                var time = CodeTimer.Time("aa", 1, () =>
+                var time = CodePerformanceTester.Test(() =>
                 {
                     flag = _socketClient.Upload("", fileName, ref size);
                     if (flag)
@@ -105,7 +105,7 @@ namespace ClientTests
         {
             var msg = txtContent.Text;
             if (string.IsNullOrWhiteSpace(msg)) { return; }
-            var time = CodeTimer.Time("aaa", 1, () =>
+            var time = CodePerformanceTester.Test( () =>
             {
                 //多线程下会服务端接收处理异常。
                 //Parallel.For(1, 10, (i) => { _flyingSocketClient.SendAsync(msg); });

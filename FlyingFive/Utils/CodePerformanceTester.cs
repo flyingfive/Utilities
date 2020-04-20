@@ -11,7 +11,7 @@ namespace FlyingFive.Utils
     /// <summary>
     /// 性能检测工具
     /// </summary>
-    public static class CodeTimer
+    public static class CodePerformanceTester
     {
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern bool GetThreadTimes(IntPtr hThread, out long lpCreationTime, out long lpExitTime, out long lpKernelTime, out long lpUserTime);
@@ -27,24 +27,28 @@ namespace FlyingFive.Utils
             return kernelTime + userTimer;
         }
 
-        static CodeTimer()
+        static CodePerformanceTester()
         {
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
             Thread.CurrentThread.Priority = ThreadPriority.Highest;
         }
 
-        public static TimerResult Time(string name, int iteration, Action action)
+        /// <summary>
+        /// 测试指定action方法代码执行性能
+        /// </summary>
+        /// <param name="action">action方法委托</param>
+        /// <param name="iteration">迭代执行次数</param>
+        /// <param name="name">名称</param>
+        /// <returns></returns>
+        public static PerformanceTestResult Test(Action action, int iteration = 1, string name = "")
         {
-            if (String.IsNullOrEmpty(name))
-            {
-                return null;
-            }
             if (action == null)
             {
                 return null;
             }
+            if (string.IsNullOrWhiteSpace(name)) { name = action.Method.Name; }
             //1. Print name
-            var result = new TimerResult() { ActionName = name, Iteration = iteration };
+            var result = new PerformanceTestResult() { ActionName = name, Iteration = iteration };
 
             // 2. Record the latest GC counts
             //GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
@@ -82,7 +86,7 @@ namespace FlyingFive.Utils
     /// <summary>
     /// 性能测试结果
     /// </summary>
-    public class TimerResult
+    public class PerformanceTestResult
     {
         /// <summary>
         /// 方法名称
@@ -113,23 +117,24 @@ namespace FlyingFive.Utils
         /// </summary>
         public IDictionary<int, int> GC { get; set; }
 
-        public TimerResult()
+        public PerformanceTestResult()
         {
             GC = new Dictionary<int, int>();
         }
 
         public override string ToString()
         {
-            var result = new StringBuilder(string.Format("Action Name:\t\t{0}\r\nIteration:\t\t{1}\r\nTime Elapsed:\t\t{2}ms\r\nTime Elapsed(one time):\t{3}ms\r\nCPU time:\t\t{4}ns\r\nCPU time(one time):\t{5}ns\r\n"
+            var result = new StringBuilder(string.Format("[Action Name]{7}{0}{6}[Iteration]{7}{1}{6}[Time Elapsed Total]{7}{2}ms{6}[Time Elapsed Once]{7}{3}ms{6}[CPU Total Time]{7}{4}ns{6}[CPU Once Time]{7}{5}ns{6}"
                 , ActionName
                 , Iteration.ToString()
                 , ElapsedMillisecondsTotal.ToString("N2")
                 , ElapsedMillisecondsOnce.ToString("N2")
                 , CpuTimeTotal.ToString("N0")
-                , CpuTimeOnce.ToString("N0")));
+                , CpuTimeOnce.ToString("N0")
+                , "  ", "="));
             foreach (var item in GC.Keys)
             {
-                result.AppendFormat("Gen{0}:\t\t\t{1}{2}", item.ToString(), GC[item].ToString(), Environment.NewLine);
+                result.AppendFormat("[Gen{0}]={1}{2}", item.ToString(), GC[item].ToString(), "");
             }
             return result.ToString();
         }
