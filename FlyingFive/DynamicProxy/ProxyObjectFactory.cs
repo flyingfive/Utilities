@@ -7,11 +7,12 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using System.Globalization;
+using System.Threading;
 
 namespace FlyingFive.DynamicProxy
 {
     /// <summary>
-    /// 动态代理工厂
+    /// 接口动态代理工厂
     /// </summary>
     public class ProxyObjectFactory
     {
@@ -43,39 +44,95 @@ namespace FlyingFive.DynamicProxy
             _opCodeTypeMapper.Add(typeof(System.UInt32), OpCodes.Ldind_U4);
         }
 
-        private static ProxyObjectFactory _instance = null;
         private static Object _locker = new Object();
 
         private ProxyObjectFactory() { }
 
         /// <summary>
-        /// 获取代理工厂实例
+        /// 默认的代理工厂实例
         /// </summary>
         /// <returns></returns>
-        public static ProxyObjectFactory GetInstance()
+        public static ProxyObjectFactory Default
         {
-            if (_instance == null)
+            get
             {
-                lock (_locker)
+                if (Singleton<ProxyObjectFactory>.Instance == null)
                 {
-                    if (_instance == null)
+                    lock (_locker)
                     {
-                        _instance = new ProxyObjectFactory();
+                        if (Singleton<ProxyObjectFactory>.Instance == null)
+                        {
+                            Singleton<ProxyObjectFactory>.Instance = new ProxyObjectFactory();
+                        }
                     }
                 }
+                return Singleton<ProxyObjectFactory>.Instance;
             }
-            return _instance;
         }
 
         private static readonly Dictionary<Assembly, ModuleBuilder> _moduleBuilders = new Dictionary<Assembly, ModuleBuilder>();
         private const string DYNAMIC_ASSEMBLY_NAME = "__FlyingFive.LocalDynamicProxies";
+
+        private Type _invocationHandlerType = null;
+
+        public bool HasInitiated { get { return _invocationHandlerType != null; } }
+
+        /// <summary>
+        /// 配置IProxyInvocationHandler实现
+        /// </summary>
+        /// <param name="type"></param>
+        public void SetupHandlerType(Type type)
+        {
+            if (type == null) { throw new ArgumentException("参数type不能为null。"); }
+            if (HasInitiated) { throw new InvalidOperationException("已经完成初始化。"); }
+            if (type.IsAssignableFrom(typeof(IProxyInvocationHandler)))
+            {
+                throw new NotImplementedException(string.Format("类型没有实现：{0}接口", typeof(IProxyInvocationHandler).FullName));
+            }
+            if (type.BaseType != typeof(DefaultInvocationHandler))
+            {
+                throw new ArgumentNullException(string.Format("代理调用类型必需继承父类：{0}", typeof(DefaultInvocationHandler).FullName));
+            }
+            if (type.GetConstructor(Type.EmptyTypes) == null)
+            {
+                throw new InvalidOperationException("代理调用类型IProxyInvocationHandler的实现必需具备默认的空参构造。");
+            }
+            var orginalType = Interlocked.CompareExchange<Type>(ref _invocationHandlerType, type, null);
+            if (orginalType != null)
+            {
+                //todo:是否要抛出异常。
+            }
+        }
+
+        /// <summary>
+        /// 创建一个接口的本地代理实例
+        /// </summary>
+        /// <typeparam name="T">创建代理的接口类型</typeparam>
+        /// <returns></returns>
+        public T CreateInterfaceProxyWithoutTarget<T>(params Type[] interceptorTypes) where T : class
+        {
+            var interfaceType = typeof(T);
+            if (!interfaceType.IsInterface)
+            {
+                throw new ApplicationException("只能创建接口类型的代理!");
+            }
+            if (!HasInitiated) { throw new InvalidOperationException("还没有初始化IProxyInvocationHandler代理调用类型，请先使用SetupHandlerType方法进行初始化。"); }
+            var handler = Activator.CreateInstance(_invocationHandlerType) as IProxyInvocationHandler;
+            var implementationClassName = string.Format("{0}.{1}{2}", DYNAMIC_ASSEMBLY_NAME, interfaceType.FullName, PROXY_SUFFIX);
+            var proxyType = ResolveLocalProxyType(implementationClassName, interfaceType);
+
+            //创建接口的代理实例（使用代理类型上有一个IProxyInvocationHandler类型参数的构造方法进行创建）
+            T proxyObj = Activator.CreateInstance(proxyType, new object[] { handler }) as T;
+            return proxyObj;
+        }
+
         /// <summary>
         /// 构造接口的本地代理实现类
         /// </summary>
         /// <param name="implementationClassName">实现类名称</param>
         /// <param name="interfaceType">接口类型</param>
         /// <returns></returns>
-        internal static Type BuildImplementationClass(string implementationClassName, Type interfaceType)
+        internal static Type BuildImplementationProxyType(string implementationClassName, Type interfaceType)
         {
             ModuleBuilder dynamicModuleBuilder = null;
             var assembly = typeof(IProxyInvocationHandler).Assembly;
@@ -266,28 +323,6 @@ namespace FlyingFive.DynamicProxy
         }
 
         /// <summary>
-        /// 创建一个接口的本地代理实例
-        /// </summary>
-        /// <typeparam name="T">创建代理的接口类型</typeparam>
-        /// <param name="clientId">需要调用的客户端业务标识</param>
-        /// <returns></returns>
-        public T CreateInterfaceProxyWithoutTarget<T>() where T : class
-        {
-            var interfaceType = typeof(T);
-            if (!interfaceType.IsInterface)
-            {
-                throw new ApplicationException("只能创建接口类型的代理!");
-            }
-            var handler = new DefaultInvocationHandler();
-            var implementationClassName = string.Format("{0}.{1}{2}", DYNAMIC_ASSEMBLY_NAME, interfaceType.FullName, PROXY_SUFFIX);
-            var proxyType = ResolveLocalProxyType(implementationClassName, interfaceType);
-
-            //创建接口的代理实例（使用代理类型上有一个IProxyInvocationHandler类型参数的构造方法进行创建）
-            T proxyObj = Activator.CreateInstance(proxyType, new object[] { handler }) as T;
-            return proxyObj;
-        }
-
-        /// <summary>
         /// 解析获取接口的本地代理类型
         /// </summary>
         /// <param name="typeName">代理类型名称</param>
@@ -302,7 +337,7 @@ namespace FlyingFive.DynamicProxy
                 {
                     if (!_cachedProxyType.TryGetValue(typeName, out proxyType))
                     {
-                        proxyType = BuildImplementationClass(typeName, interfaceType);
+                        proxyType = BuildImplementationProxyType(typeName, interfaceType);
                         _cachedProxyType.GetOrAdd(typeName, proxyType);
                         return proxyType;
                     }

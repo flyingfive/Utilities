@@ -20,4 +20,13 @@ namespace FlyingFive.DynamicProxy
         /// <returns></returns>
         Object Invoke(Object proxy, MethodInfo method, Object[] parameters);
     }
+
+    /// <summary>
+    /// 代理创建的拦截器
+    /// </summary>
+    public interface IProxyCreationInterceptor
+    {
+        void BeforeExecution();
+        void AfterExecution();
+    }
 }

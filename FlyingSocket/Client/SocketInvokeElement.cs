@@ -75,7 +75,7 @@ namespace FlyingSocket.Client
             var size = ConfigurationManager.AppSettings["SocketBufferSize"];
             if (!string.IsNullOrEmpty(size))
             {
-                SocketBufferSize = size.TryConvert<int>(4096);
+                SocketBufferSize = size.TryConvertSafety<int>(4096);
             }
             ReceiveBuffer = new DynamicBufferManager(SocketBufferSize);
             SendBuffer = new DynamicBufferManager(SocketBufferSize);

@@ -3,16 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 
 namespace FlyingFive.DynamicProxy
 {
     /// <summary>
     /// 默认接口代理实现点
     /// </summary>
-    public class DefaultInvocationHandler : IProxyInvocationHandler
+    public abstract class DefaultInvocationHandler : IProxyInvocationHandler
     {
+        private Type[] _interceptorTypes = Type.EmptyTypes;
         public DefaultInvocationHandler()
         {
+        }
+
+        internal void SetInterceptoryType(Type[] types)
+        {
+            _interceptorTypes = types;
+            //todo:设置_interceptorTypes字段
         }
 
         /// <summary>
@@ -22,15 +30,42 @@ namespace FlyingFive.DynamicProxy
         /// <param name="method">代理的方法</param>
         /// <param name="parameters">调用方法的参数信息</param>
         /// <returns></returns>
-        public Object Invoke(Object proxy, MethodInfo method, Object[] parameters)
+        public virtual object Invoke(Object proxy, MethodInfo method, Object[] parameters)
         {
             var interfaceType = method.DeclaringType;
-            var implementType = Type.EmptyTypes.FirstOrDefault();
-            //todo:查找接口上定义的拦截器:interfaceType.GetCustomAttribute<T>
+            var executionContext = new ProxyExecutionContext() { Proxy = proxy, Method = method, Arguments = parameters };
             //在自定义IOC容器中查找接口实现并调用返回。
-            //todo:begin invoke...
-            throw new NotImplementedException("未实现。");
-            //todo:after invoke...
+            PreProceed(executionContext);
+            PerformProceed(executionContext);
+            PostProceed(executionContext);
+            return executionContext.ReturnValue;
         }
+
+        /// <summary>
+        /// 调用前
+        /// </summary>
+        /// <param name="context"></param>
+        public virtual void PreProceed(ProxyExecutionContext context) { }
+        /// <summary>
+        /// 调用后
+        /// </summary>
+        /// <param name="context"></param>
+        public virtual void PostProceed(ProxyExecutionContext context) { }
+        /// <summary>
+        /// 执行调用
+        /// </summary>
+        /// <param name="context"></param>
+        public abstract void PerformProceed(ProxyExecutionContext context);
+    }
+
+    /// <summary>
+    /// 代理执行上下文环境
+    /// </summary>
+    public class ProxyExecutionContext
+    {
+        public object Proxy { get; internal set; }
+        public MethodInfo Method { get; internal set; }
+        public Object[] Arguments { get; internal set; }
+        public object ReturnValue { get; set; }
     }
 }

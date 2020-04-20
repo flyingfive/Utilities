@@ -52,6 +52,10 @@ namespace FlyingFive.DynamicProxy
             Type type = null;
             lock (typeMap.SyncRoot)
             {
+                if (!typeMap.ContainsKey(interfaceName))
+                {
+                    throw new NotSupportedException(string.Format("不支持的接口：{0}", interfaceName));
+                }
                 type = (Type)typeMap[interfaceName];
             }
 

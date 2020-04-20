@@ -26,9 +26,11 @@ namespace FlyingFive.Tests
     [TestClass]
     public class UnitTest2
     {
+        private static Type _invocationHandlerType = null;
         [TestMethod]
         public void TestSnowflakeId()
         {
+            var t1 = Interlocked.CompareExchange<Type>(ref _invocationHandlerType, typeof(Int32), null);
             var idCreator = SnowflakeId.Default;
             var batchSize = 100000;
             var count = 40;
