@@ -13,6 +13,8 @@ using FlyingFive.Data.Interception;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq.Expressions;
+using FlyingFive.DynamicProxy;
 
 namespace FlyingFive.Tests
 {
@@ -111,14 +113,58 @@ namespace FlyingFive.Tests
         [TestMethod]
         public void TestFlying()
         {
+            var connectionString = @"Data Source=173.31.15.53,2012;Initial Catalog=sxposflag10;User Id=sa;Password=sa;Connect Timeout=5;";
+
             FlyingFive.Data.Interception.GlobalDbInterception.Add(new a());
 
-            var connectionString = @"Data Source=10.0.0.18;Initial Catalog=AIS20121019142414;User Id=sa;Password=sa.;Connect Timeout=5;";
             var session = new MsSqlHelper(connectionString);
             var obj = session.ExecuteScalar("SELECT count(*) FROM t_Item");
             var list = session.SqlQuery<Model>("select * from t_Item where FNumber like @number", new { number = "1.1%" }).ToList();
         }
+
+        [TestMethod]
+        public void TestDynamicProxy()
+        {
+            ProxyObjectFactory.Default.SetupProxyHandlerType(typeof(TestHandler));
+            var id = Guid.NewGuid();
+            var types = new Type[] { typeof(TestProxyInterceptor) };
+            var test = ProxyObjectFactory.Default.CreateInterfaceProxyWithoutTarget<ITestData>(new object[] { "test", id, new Model() { FItemID = 2351, FName = "Password", FNumber = "2.3.5.1" } }, types);
+            Debug.WriteLine("返回结果：" + test.test());
+        }
     }
+
+    public class TestProxyInterceptor : IProxyExecutionInterceptor
+    {
+        public void PostProceed(ProxyExecutionContext executionContext)
+        {
+            Debug.WriteLine("PostProceed");
+            Debug.WriteLine(executionContext.Proxy.GetType().FullName);
+            Debug.WriteLine((executionContext.Addition["aaa"] as Model).FName);
+            Debug.WriteLine("ReturnValue=" + executionContext.ReturnValue.ToString());
+        }
+
+        public void PreProceed(ProxyExecutionContext executionContext)
+        {
+            Debug.WriteLine("PreProceed");
+            Debug.WriteLine(executionContext.Method.Name);
+            Debug.WriteLine(executionContext.Proxy.GetType().FullName);
+            executionContext.Addition.Add("aaa", new Model() { FName = "Model", UUID = Guid.NewGuid() });
+        }
+    }
+
+    public class TestHandler : BaseInvocationHandler
+    {
+        public TestHandler(string name, Guid guid, Model model)
+        {
+        }
+
+        public override void PerformProceed(ProxyExecutionContext context)
+        {
+            context.ReturnValue = "测试结果";
+        }
+    }
+
+    public interface ITestData { string test(); }
 
     public class Model
     {

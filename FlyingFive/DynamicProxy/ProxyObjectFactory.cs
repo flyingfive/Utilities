@@ -8,6 +8,7 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Globalization;
 using System.Threading;
+using System.Linq.Expressions;
 
 namespace FlyingFive.DynamicProxy
 {
@@ -81,43 +82,131 @@ namespace FlyingFive.DynamicProxy
         /// 配置IProxyInvocationHandler实现
         /// </summary>
         /// <param name="type"></param>
-        public void SetupHandlerType(Type type)
+        public void SetupProxyHandlerType(Type type)
         {
             if (type == null) { throw new ArgumentException("参数type不能为null。"); }
             if (HasInitiated) { throw new InvalidOperationException("已经完成初始化。"); }
-            if (type.IsAssignableFrom(typeof(IProxyInvocationHandler)))
+            if (!typeof(IProxyInvocationHandler).IsAssignableFrom(type))
             {
                 throw new NotImplementedException(string.Format("类型没有实现：{0}接口", typeof(IProxyInvocationHandler).FullName));
             }
-            if (type.BaseType != typeof(DefaultInvocationHandler))
+            if (type.BaseType != typeof(BaseInvocationHandler))
             {
-                throw new ArgumentNullException(string.Format("代理调用类型必需继承父类：{0}", typeof(DefaultInvocationHandler).FullName));
+                throw new ArgumentNullException(string.Format("代理调用类型必需继承父类：{0}", typeof(BaseInvocationHandler).FullName));
             }
-            if (type.GetConstructor(Type.EmptyTypes) == null)
-            {
-                throw new InvalidOperationException("代理调用类型IProxyInvocationHandler的实现必需具备默认的空参构造。");
-            }
+            //if (!type.HasDefaultEmptyConstructor())
+            //{
+            //    throw new InvalidOperationException("代理调用类型IProxyInvocationHandler的实现必需具备默认的空参构造。");
+            //}
             var orginalType = Interlocked.CompareExchange<Type>(ref _invocationHandlerType, type, null);
             if (orginalType != null)
             {
-                //todo:是否要抛出异常。
+                throw new InvalidOperationException(string.Format("重复执行了SetupProxyHandlerType，原类型：{0}，当前类型：{1}", orginalType.FullName, type.FullName));
             }
         }
 
         /// <summary>
-        /// 创建一个接口的本地代理实例
+        /// 使用指定参数和拦截器创建接口的本地代理对象
         /// </summary>
-        /// <typeparam name="T">创建代理的接口类型</typeparam>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="arguments">IProxyInvocationHandler实现类上的构造参数</param>
+        /// <param name="interceptorTypes">拦截器类型</param>
         /// <returns></returns>
-        public T CreateInterfaceProxyWithoutTarget<T>(params Type[] interceptorTypes) where T : class
+        public T CreateInterfaceProxyWithoutTarget<T>(object[] arguments, params Type[] interceptorTypes) where T : class
         {
             var interfaceType = typeof(T);
+            EnsureInitilized(interfaceType);
+            var constructor = _invocationHandlerType.GetConstructors().FirstOrDefault(c => c.GetParameters().Length == arguments.Length);
+            if (constructor == null) { throw new InvalidOperationException("IProxyInvocationHandler代理调用类型上没有匹配的构造。"); }
+            CheckArguments(constructor, arguments);
+            var handler = CreateHandler(constructor, arguments) as BaseInvocationHandler;
+            if (interceptorTypes != null)
+            {
+                handler.SetInterceptoryType(interceptorTypes);
+            }
+            var implementationClassName = string.Format("{0}.{1}{2}", DYNAMIC_ASSEMBLY_NAME, interfaceType.FullName, PROXY_SUFFIX);
+            var proxyType = ResolveLocalProxyType(implementationClassName, interfaceType);
+
+            //创建接口的代理实例（使用代理类型上有一个IProxyInvocationHandler类型参数的构造方法进行创建）
+            T proxyObj = Activator.CreateInstance(proxyType, new object[] { handler }) as T;
+            return proxyObj;
+        }
+
+        private void CheckArguments(ConstructorInfo constructor, Object[] arguments)
+        {
+            var i = 0;
+            var parameters = constructor.GetParameters();
+            foreach (var p in parameters)
+            {
+                if (p.ParameterType.IsValueType && arguments[i] == null)
+                {
+                    throw new InvalidOperationException(string.Format("构建代理调用对象上第{0}个参数类型不能为null", (i + 1).ToString()));
+                }
+                else
+                {
+                    if (arguments[i] != null && p.ParameterType != arguments[i].GetType())
+                    {
+                        throw new InvalidOperationException(string.Format("构建代理调用对象上第{0}个参数类型不正确的，需要的类型为：{1}", (i + 1).ToString(), p.ParameterType.FullName));
+                    }
+                }
+                i++;
+            }
+        }
+
+        private ConcurrentDictionary<ConstructorInfo, Func<object[], IProxyInvocationHandler>> _proxyHandlerInitilizers = new ConcurrentDictionary<ConstructorInfo, Func<object[], IProxyInvocationHandler>>();
+
+        private IProxyInvocationHandler CreateHandler(ConstructorInfo constructor, object[] arguments)
+        {
+            var initilizer = _proxyHandlerInitilizers.GetOrAdd(constructor, (con) =>
+            {
+                var conParameters = constructor.GetParameters();
+                var parameter = Expression.Parameter(typeof(object[]));
+                var list = new List<Expression>();
+                var idx = 0;
+                foreach (var arg in arguments)
+                {
+                    list.Add(Expression.Convert(Expression.ArrayAccess(parameter, Expression.Constant(idx)), conParameters[idx].ParameterType));
+                    idx++;
+                }
+                var localVar = Expression.Variable(typeof(IProxyInvocationHandler), "handler");
+                var labelTarget = Expression.Label(typeof(IProxyInvocationHandler));
+                var assign = Expression.Assign(localVar, Expression.New(constructor, list));
+                var gt = Expression.Return(labelTarget, localVar);
+                var lbl = Expression.Label(labelTarget, Expression.Constant(null, typeof(IProxyInvocationHandler)));
+                var blocks = Expression.Block(new ParameterExpression[] { localVar }, assign, gt, lbl);
+                var lambda = Expression.Lambda<Func<object[], IProxyInvocationHandler>>(blocks, parameter);
+                var func = lambda.Compile();
+                return func;
+            });
+            var handler = initilizer(arguments);
+            return handler;
+        }
+
+
+        private void EnsureInitilized(Type interfaceType)
+        {
             if (!interfaceType.IsInterface)
             {
                 throw new ApplicationException("只能创建接口类型的代理!");
             }
-            if (!HasInitiated) { throw new InvalidOperationException("还没有初始化IProxyInvocationHandler代理调用类型，请先使用SetupHandlerType方法进行初始化。"); }
-            var handler = Activator.CreateInstance(_invocationHandlerType) as IProxyInvocationHandler;
+            if (!HasInitiated) { throw new InvalidOperationException("还没有初始化IProxyInvocationHandler代理调用类型，请先使用SetupProxyHandlerType方法进行初始化。"); }
+        }
+
+        /// <summary>
+        /// 使用默认方式创建一个接口的本地代理实例
+        /// </summary>
+        /// <typeparam name="T">创建代理的接口类型</typeparam>
+        /// <param name="interceptorTypes">拦截器类型</param>
+        /// <returns></returns>
+        public T CreateInterfaceProxyWithoutTarget<T>(params Type[] interceptorTypes) where T : class
+        {
+            var interfaceType = typeof(T);
+            EnsureInitilized(interfaceType);
+            var handler = Activator.CreateInstance(_invocationHandlerType) as BaseInvocationHandler;
+            if (interceptorTypes != null)
+            {
+                handler.SetInterceptoryType(interceptorTypes);
+            }
             var implementationClassName = string.Format("{0}.{1}{2}", DYNAMIC_ASSEMBLY_NAME, interfaceType.FullName, PROXY_SUFFIX);
             var proxyType = ResolveLocalProxyType(implementationClassName, interfaceType);
 
@@ -177,7 +266,7 @@ namespace FlyingFive.DynamicProxy
         {
             MetaDataFactory.Add(interfaceType);
             var interfaceMethods = interfaceType.GetMethods();
-            var i = 0;
+            var i = 0;          //方法位置索引（按接口中定义的接口顺序进行代理调用实现）
             foreach (var methodInfo in interfaceMethods)
             {
                 var methodArguments = methodInfo.GetParameters();
@@ -242,7 +331,7 @@ namespace FlyingFive.DynamicProxy
                 iLGenerator.Emit(OpCodes.Ldarg_0);
                 //准备调用MetaDataFactory.GetMethod方法的第一个参数
                 iLGenerator.Emit(OpCodes.Ldstr, interfaceType.FullName);
-                //准备调用MetaDataFactory.GetMethod方法的第二个参数
+                //准备调用MetaDataFactory.GetMethod方法的第二个参数（要调用的是接口中第几个方法）
                 iLGenerator.Emit(OpCodes.Ldc_I4, i);
                 //调用方法获取到要被代理调用的接口方法信息
                 iLGenerator.Emit(OpCodes.Call, MetaDataFactory.GetInterfaceMethod);

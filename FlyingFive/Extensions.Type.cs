@@ -138,5 +138,17 @@ namespace FlyingFive
             }
             return underlyingType;
         }
+
+        /// <summary>
+        /// 判断一个类型是否存在默认的空参构造
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool HasDefaultEmptyConstructor(this Type type)
+        {
+            if (type == null) { throw new ArgumentNullException("参数：type不能为null"); }
+            var defaultConstructor = type.GetConstructor(Type.EmptyTypes);
+            return defaultConstructor != null;
+        }
     }
 }

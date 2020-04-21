@@ -22,11 +22,19 @@ namespace FlyingFive.DynamicProxy
     }
 
     /// <summary>
-    /// 代理创建的拦截器
+    /// 代理执行的拦截器
     /// </summary>
-    public interface IProxyCreationInterceptor
+    public interface IProxyExecutionInterceptor
     {
-        void BeforeExecution();
-        void AfterExecution();
+        /// <summary>
+        /// 执行处理前
+        /// </summary>
+        /// <param name="executionContext">执行上下文</param>
+        void PreProceed(ProxyExecutionContext executionContext);
+        /// <summary>
+        /// 执行处理后
+        /// </summary>
+        /// <param name="executionContext">执行上下文</param>
+        void PostProceed(ProxyExecutionContext executionContext);
     }
 }
