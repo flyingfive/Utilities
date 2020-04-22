@@ -9,22 +9,27 @@ namespace FlyingFive.Security
     /// <summary>
     /// 3DES加密器
     /// </summary>
-    public class DES3CryptographicProvider : ICryptographicProvider
+    public class TripleDesCryptographicProvider : ICryptographicProvider, IDisposable
     {
         private TripleDESCryptoServiceProvider _serviceProvider = null;
-        private string _password = string.Empty;
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="password"></param>
-        public DES3CryptographicProvider(string password)
+        /// <param name="key">密钥，长度为16或24</param>
+        /// <param name="iv">加密向量</param>
+        public TripleDesCryptographicProvider(string key, string iv = "")
         {
-            if (password.Length > 24) { throw new ArgumentException("密码长度不能超过24位。必需为：字母、数字、特殊符号三种内容组合。"); }
-            this._password = password;
+            if (key.Length != 16 && key.Length != 24) { throw new ArgumentException("密码长度不正确。必需为：字母、数字、特殊符号三种内容组合。"); }
+            if (!string.IsNullOrEmpty(iv) && iv.Length < 8)
+            {
+                throw new ArgumentException("指定的向量长度不能少于8位。");
+            }
             _serviceProvider = new TripleDESCryptoServiceProvider();
-            _serviceProvider.Mode = CipherMode.ECB;
+            _serviceProvider.Mode = CipherMode.CBC;
             _serviceProvider.Padding = PaddingMode.PKCS7;
+            _serviceProvider.Key = Encoding.UTF8.GetBytes(key);
+            _serviceProvider.IV = Encoding.UTF8.GetBytes(string.IsNullOrWhiteSpace(iv) ? key.Substring(0, 8) : iv);
         }
 
         /// <summary>
@@ -34,10 +39,6 @@ namespace FlyingFive.Security
         /// <returns>加密后的字符串</returns>
         public string Encrypt(string plainText)
         {
-            var key = new byte[24];
-            var pwdData = System.Text.Encoding.UTF8.GetBytes(_password);
-            Array.Copy(pwdData, key, pwdData.Length);
-            _serviceProvider.Key = key;
             var encryptor = _serviceProvider.CreateEncryptor();
             byte[] buffer = System.Text.Encoding.UTF8.GetBytes(plainText);
             var cipherText = Convert.ToBase64String(encryptor.TransformFinalBlock(buffer, 0, buffer.Length));
@@ -51,14 +52,9 @@ namespace FlyingFive.Security
         /// <returns>解密后的字符串</returns>
         public string Decrypt(string cipherText)
         {
-            var key = new byte[24];
-            var pwdData = System.Text.Encoding.UTF8.GetBytes(_password);
-            Array.Copy(pwdData, key, pwdData.Length);
-            _serviceProvider.Key = key;
-            //_serviceProvider.Key = System.Text.Encoding.UTF8.GetBytes(password);
             ICryptoTransform decryptor = _serviceProvider.CreateDecryptor();
-            byte[] Buffer = Convert.FromBase64String(cipherText);
-            var plainText = System.Text.Encoding.UTF8.GetString(decryptor.TransformFinalBlock(Buffer, 0, Buffer.Length));
+            byte[] buffer = Convert.FromBase64String(cipherText);
+            var plainText = System.Text.Encoding.UTF8.GetString(decryptor.TransformFinalBlock(buffer, 0, buffer.Length));
             return plainText;
         }
 
@@ -69,10 +65,6 @@ namespace FlyingFive.Security
         /// <returns>加密后的字节数据</returns>
         public byte[] Encrypt(byte[] plainData)
         {
-            var key = new byte[24];
-            var pwdData = System.Text.Encoding.UTF8.GetBytes(_password);
-            Array.Copy(pwdData, key, pwdData.Length);
-            _serviceProvider.Key = key;
             var encryptor = _serviceProvider.CreateEncryptor();
             var cipherData = encryptor.TransformFinalBlock(plainData, 0, plainData.Length);
             return cipherData;
@@ -85,13 +77,18 @@ namespace FlyingFive.Security
         /// <returns>解密后的字节数据</returns>
         public byte[] Decrypt(byte[] cipherData)
         {
-            var key = new byte[24];
-            var pwdData = System.Text.Encoding.UTF8.GetBytes(_password);
-            Array.Copy(pwdData, key, pwdData.Length);
-            _serviceProvider.Key = key;
             ICryptoTransform decryptor = _serviceProvider.CreateDecryptor();
             var plainData = decryptor.TransformFinalBlock(cipherData, 0, cipherData.Length);
             return plainData;
+        }
+
+        public void Dispose()
+        {
+            if (_serviceProvider != null)
+            {
+                _serviceProvider.Clear();
+                _serviceProvider.Dispose();
+            }
         }
     }
 }

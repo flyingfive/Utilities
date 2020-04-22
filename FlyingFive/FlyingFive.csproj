@@ -63,7 +63,7 @@
     <Compile Include="Comparing\ValueEquality.cs" />
     <Compile Include="Data\CodeDom\CSharpSourceCodeCreater.cs" />
     <Compile Include="Data\DataAccessException.cs" />
-    <Compile Include="Data\Drivers\SqlServer\DefaultDbConnectionFactory.cs" />
+    <Compile Include="Data\Drivers\SqlServer\SqlServerConnectionFactory.cs" />
     <Compile Include="Data\Drivers\SqlServer\MsSqlHelper.cs" />
     <Compile Include="Data\Schema\ColumnInfo.cs" />
     <Compile Include="Data\Schema\TableInfo.cs" />
@@ -102,12 +102,13 @@
     <Compile Include="IInitialization.cs" />
     <Compile Include="IStartupTask.cs" />
     <Compile Include="ITask.cs" />
+    <Compile Include="Security\AesCryptographicProvider.cs" />
     <Compile Include="Utils\AppDomainTypeFinder.cs" />
     <Compile Include="Utils\ChineseCalendarInfo.cs" />
     <Compile Include="Utils\ChineseSpellingHelper.cs" />
     <Compile Include="Utils\CodePerformanceTester.cs" />
     <Compile Include="Utils\Computer.cs" />
-    <Compile Include="Security\DES3CryptographicProvider.cs" />
+    <Compile Include="Security\TripleDesCryptographicProvider.cs" />
     <Compile Include="Utils\FileHelper.cs" />
     <Compile Include="Security\ICryptographicProvider.cs" />
     <Compile Include="Utils\IniFileHelper.cs" />

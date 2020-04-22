@@ -131,6 +131,22 @@ namespace FlyingFive.Tests
             var test = ProxyObjectFactory.Default.CreateInterfaceProxyWithoutTarget<ITestData>(new object[] { "test", id, new Model() { FItemID = 2351, FName = "Password", FNumber = "2.3.5.1" } }, types);
             Debug.WriteLine("返回结果：" + test.test());
         }
+
+        [TestMethod]
+        public void TestEncription()
+        {
+            var pwd = "Sixun#20adsfFaeQ";
+            var pwd2 = "adsfFaeQidl2308didl2308didl2308d";
+            var des = new Security.TripleDesCryptographicProvider(pwd);
+            var aes = new Security.AesCryptographicProvider(pwd2);
+            var text = "liubqliubqliubqliubqliubqliubqliubq";
+            var cipherText = des.Encrypt(text);
+            var plainText = des.Decrypt(cipherText);
+            Assert.AreEqual(text, plainText);
+            var c2 = aes.Encrypt(text);
+            var p2 = aes.Decrypt(c2);
+            Assert.AreEqual(p2, text);
+        }
     }
 
     public class TestProxyInterceptor : IProxyExecutionInterceptor
