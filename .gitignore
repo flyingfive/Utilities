@@ -1,5 +1,6 @@
 .vs
 *.suo
 *.user
+*.log
 bin
 obj

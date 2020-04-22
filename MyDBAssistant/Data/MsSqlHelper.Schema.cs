@@ -196,7 +196,7 @@ namespace MyDBAssistant.Data
         /// </summary>
         public void LoadSchema()
         {
-            //lock (_locker)
+            //lock (_locker) 
             //{
             //    if (_tables == null || _tables.Count == 0)
             //    {
