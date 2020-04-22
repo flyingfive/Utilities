@@ -90,8 +90,9 @@ namespace FlyingFive.Comparing
 
         protected bool CompareNullableValue(object left, object right)
         {
-            var type = left.GetType().GetUnderlyingType();
-            var converter = new NullableConverter(type);
+            var nullableType = left.GetType();
+            var type = nullableType.GetUnderlyingType();            
+            var converter = new NullableConverter(nullableType);
             var typeCode = Type.GetTypeCode(type);
             switch (typeCode)
             {

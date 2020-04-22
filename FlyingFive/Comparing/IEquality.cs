@@ -29,25 +29,7 @@ namespace FlyingFive.Comparing
         /// <summary>
         /// 支持比较的原生数据类型名称
         /// </summary>
-        public static readonly string[] SupportedTypeName = new string[] {
-            TypeCode.Boolean.ToString(),
-            TypeCode.Byte.ToString(),
-            TypeCode.Char.ToString(),
-            TypeCode.DateTime.ToString(),
-            TypeCode.Decimal.ToString(),
-            TypeCode.Double.ToString(),
-            TypeCode.Int16.ToString(),
-            TypeCode.Int32.ToString(),
-            TypeCode.Int64.ToString(),
-            TypeCode.SByte.ToString(),
-            TypeCode.Single.ToString(),
-            TypeCode.String.ToString(),
-            TypeCode.UInt16.ToString(),
-            TypeCode.UInt32.ToString(),
-            TypeCode.UInt64.ToString(),
-            typeof(Guid).Name,
-            typeof(BigInteger).Name
-        };
+        public static readonly string[] SupportedTypeName = Enum.GetNames(typeof(TypeCode)).Where(c => "Empty,Object,DBNull".IndexOf(c) < 0).Concat(new string[] { typeof(Guid).Name, typeof(BigInteger).Name }).ToArray();
 
         /// <summary>
         /// 创建类型比较器
@@ -60,7 +42,8 @@ namespace FlyingFive.Comparing
             {
                 return new ArrayEquality();
             }
-            if (dataType.IsGenericType)
+            //泛型类型只支持泛型集合或可空类型
+            if (dataType.IsGenericType && dataType.GetGenericArguments().Count() == 1)
             {
                 if (dataType.IsListType())
                 {

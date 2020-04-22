@@ -15,9 +15,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq.Expressions;
 using FlyingFive.DynamicProxy;
+using System.Numerics;
+using System.ComponentModel;
+using FlyingFive.Comparing;
 
 namespace FlyingFive.Tests
 {
+    public class TM
+    {
+        public int? Id { get; set; }
+        public string Name { get; set; }
+    }
+
     public enum A
     {
         [System.ComponentModel.Description("这是测试枚举项1")]
@@ -146,6 +155,53 @@ namespace FlyingFive.Tests
             var c2 = aes.Encrypt(text);
             var p2 = aes.Decrypt(c2);
             Assert.AreEqual(p2, text);
+        }
+
+        [TestMethod]
+        public void TestCompare()
+        {
+            //Nullable<int> i = 5;
+            //var m = typeof(Nullable).GetMethod("Equals", System.Reflection.BindingFlags.Static);
+            //var type = typeof(Nullable<int>);
+            //var gm = m.MakeGenericMethod(type.GetGenericArguments());
+            //var parameters = new ParameterExpression[] { Expression.Parameter(type), Expression.Parameter(type) };
+            //var labelTarget = Expression.Label(typeof(Boolean));
+            //var localVar = Expression.Variable(typeof(Boolean));
+            //var assign = Expression.Assign(localVar, Expression.Call(gm, parameters));
+            //var gt = Expression.Return(labelTarget, localVar);
+            //var lbl = Expression.Label(labelTarget, Expression.Constant(false, typeof(bool)));
+            //var blocks = Expression.Block(new ParameterExpression[] { localVar }, assign, gt, lbl);
+            //var lambda = Expression.Lambda(blocks, parameters).Compile();//.Lambda<Func<object[], IProxyInvocationHandler>>(blocks, parameter);
+            //lambda.DynamicInvoke()
+
+
+            var prop1 = typeof(TM).GetProperty("Id");
+            var prop2 = typeof(TM).GetProperty("Name");
+            var compare1 = ComparerFactory.CreateObjectEquality(prop1.PropertyType);
+            var compare2 = ComparerFactory.CreateObjectEquality(prop2.PropertyType);
+            var getter1 = FlyingFive.Data.Emit.DelegateGenerator.CreateValueGetter(prop1);
+            var getter2 = FlyingFive.Data.Emit.DelegateGenerator.CreateValueGetter(prop2);
+            var m1 = new TM() { Id = 1, Name = "test" };
+            var m2 = new TM() { Id = 10, Name = "Test" };
+            var left = getter1(m1);
+            var right = getter1(m2);
+            var flag = compare1.AreEqual(left, right);
+            left = getter2(m1);
+            right = getter2(m2);
+            flag = compare2.AreEqual(left, right);
+            //Nullable<int> left = 5;
+            ////left = 5;
+            //int? right = 10;
+            //object aa = left;
+            //object bb = right;
+            //var flag = ComparerFactory.CreateObjectEquality(typeof(Int32?)).AreEqual(aa, bb);
+            //var type = left.GetType().GetUnderlyingType();
+            //var nullableType = left.GetType();
+            //var t2 = Nullable.GetUnderlyingType(nullableType);
+            //var typeCode = Type.GetTypeCode(type);
+            ////var val1 = (int?)converter.ConvertTo(left, type);
+            //var code = Type.GetTypeCode(typeof(Guid));
+            //var a = Enum.GetNames(typeof(TypeCode)).Where(c => "Empty,Object,DBNull".IndexOf(c) < 0).Concat(new string[] { typeof(Guid).Name, typeof(BigInteger).Name }).ToArray();
         }
     }
 
