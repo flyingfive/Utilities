@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Text;
 using Microsoft.CSharp;
 
-namespace FlyingFive.Data.CodeDom
+namespace FlyingFive.Data.Dynamic
 {
     /// <summary>
     /// C#模型源码（类型）生成器

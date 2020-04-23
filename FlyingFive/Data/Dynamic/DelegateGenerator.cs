@@ -1,5 +1,4 @@
-﻿using FlyingFive.Data.Infrastructure;
-using FlyingFive.Data.Mapper;
+﻿using FlyingFive.Data.Mapper;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -8,7 +7,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-namespace FlyingFive.Data.Emit
+namespace FlyingFive.Data.Dynamic
 {
     /// <summary>
     /// 委托生成工具

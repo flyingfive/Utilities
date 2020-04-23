@@ -61,7 +61,7 @@
     <Compile Include="Comparing\IEquality.cs" />
     <Compile Include="Comparing\ListEquality.cs" />
     <Compile Include="Comparing\ValueEquality.cs" />
-    <Compile Include="Data\CodeDom\CSharpSourceCodeCreater.cs" />
+    <Compile Include="Data\Dynamic\CSharpSourceCodeCreater.cs" />
     <Compile Include="Data\DataAccessException.cs" />
     <Compile Include="Data\Drivers\SqlServer\SqlServerConnectionFactory.cs" />
     <Compile Include="Data\Drivers\SqlServer\MsSqlHelper.cs" />
@@ -72,13 +72,13 @@
     <Compile Include="Data\Fakes\FakeDataReader.cs" />
     <Compile Include="Data\Fakes\FakeParameter.cs" />
     <Compile Include="Data\IDatabaseHelper.cs" />
-    <Compile Include="Data\Infrastructure\IDbConnectionFactory.cs" />
-    <Compile Include="Data\Infrastructure\SupportedMappingTypes.cs" />
+    <Compile Include="Data\IDbConnectionFactory.cs" />
+    <Compile Include="Data\SupportedMappingTypes.cs" />
     <Compile Include="Data\Interception\DbCommandInterceptionContext.cs" />
     <Compile Include="Data\Interception\GlobalDbInterception.cs" />
     <Compile Include="Data\Interception\IDbCommandInterceptor.cs" />
     <Compile Include="Data\Kernel\CommonAdoSession.cs" />
-    <Compile Include="Data\Emit\DelegateGenerator.cs" />
+    <Compile Include="Data\Dynamic\DelegateGenerator.cs" />
     <Compile Include="Data\Kernel\DatabaseHelper.cs" />
     <Compile Include="Data\Mapper\DataReaderOrdinalEnumerator.cs" />
     <Compile Include="Data\Mapper\IMemberMapper.cs" />
@@ -145,6 +145,7 @@
   <ItemGroup>
     <Compile Include="Data\Extensions.DataTable.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

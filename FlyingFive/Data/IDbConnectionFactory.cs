@@ -4,7 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 
-namespace FlyingFive.Data.Infrastructure
+namespace FlyingFive.Data
 {
     /// <summary>
     /// 表示数据库连接工厂

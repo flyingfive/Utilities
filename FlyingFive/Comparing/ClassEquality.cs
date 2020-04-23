@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using FlyingFive.Data.Emit;
+using FlyingFive.Data.Dynamic;
 
 namespace FlyingFive.Comparing
 {

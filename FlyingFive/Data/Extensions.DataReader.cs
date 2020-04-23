@@ -1,5 +1,4 @@
-﻿using FlyingFive.Data.CodeDom;
-using FlyingFive.Data.Emit;
+﻿using FlyingFive.Data.Dynamic;
 using FlyingFive.Data.Mapper;
 using System;
 using System.Collections.Generic;
@@ -184,9 +183,11 @@ namespace FlyingFive.Data
                     case TypeCode.DateTime:
                     case TypeCode.Byte:
                     case TypeCode.Char:
-                    case TypeCode.String:
                         name = string.Format("Get{0}{1}", isNullable ? "Nullable" : string.Empty, typeCode.ToString());
                         method = typeof(DataReaderMethods).GetMethod(name);
+                        break;
+                    case TypeCode.String:
+                        method = typeof(DataReaderMethods).GetMethod("GetString");
                         break;
                     default:
                         if (dataType == typeof(Guid))

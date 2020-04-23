@@ -61,7 +61,7 @@ namespace FlyingFive.Data.Mapper
     }
 
     /// <summary>
-    /// 复杂成员绑定
+    /// 复合成员（Class类型属性）绑定
     /// </summary>
     public class ComplexMemberBinder : IValueSetter
     {

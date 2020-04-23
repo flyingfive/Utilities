@@ -63,7 +63,7 @@ namespace FlyingFive.Data
             var properties = typeof(T).GetProperties().Where(p => p.CanWrite && p.CanRead && IsScalarType(p.PropertyType));
             foreach (var property in properties)
             {
-                _mappings.Add(new Extensions.MappingData() { Property = property, ValueAccessor = Emit.DelegateGenerator.CreateValueGetter(property), Ordinal = index });
+                _mappings.Add(new Extensions.MappingData() { Property = property, ValueAccessor = Dynamic.DelegateGenerator.CreateValueGetter(property), Ordinal = index });
                 index++;
             }
         }

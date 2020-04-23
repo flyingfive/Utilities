@@ -1,5 +1,4 @@
 ﻿using FlyingFive.Caching;
-using FlyingFive.Data.Infrastructure;
 using FlyingFive.Data.Kernel;
 using FlyingFive.Data.Schema;
 using System;
@@ -26,7 +25,7 @@ namespace FlyingFive.Data.Drivers.SqlServer
 
         public MsSqlHelper(IDbConnectionFactory dbConnectionFactory) : base(dbConnectionFactory)
         {
-            ReadServerVersion();
+            //ReadServerVersion();
             //默认创建sys_datadict视图，除非显示配置不用数据字典
             var config = ConfigurationManager.AppSettings["UnusedDataDict"];
             if (!string.IsNullOrEmpty(config))
@@ -39,7 +38,7 @@ namespace FlyingFive.Data.Drivers.SqlServer
         /// <summary>
         /// 读取服务器版本
         /// </summary>
-        private void ReadServerVersion()
+        public SqlServerVersion ReadServerVersion()
         {
             Func<string> readVersion = () =>
             {
@@ -62,6 +61,7 @@ namespace FlyingFive.Data.Drivers.SqlServer
             {
                 this.Version = ConvertToSqlVersion(readVersion());
             }
+            return this.Version;
         }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace FlyingFive.Data.Drivers.SqlServer
         private static readonly ConcurrentDictionary<string, TableInfo> _loadedTables = new ConcurrentDictionary<string, TableInfo>();
 
         /// <summary>
-        /// 获取表构架信息(不适用于同一实例下的跨库操作)
+        /// 获取表构架信息(不适用于跨库操作)
         /// </summary>
         /// <param name="tableName">表名称</param>
         /// <returns></returns>

@@ -4,7 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 
-namespace FlyingFive.Data.Infrastructure
+namespace FlyingFive.Data
 {
     /// <summary>
     /// 系统支持DB映射的数据类型

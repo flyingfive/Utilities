@@ -1,5 +1,4 @@
 ﻿using FlyingFive.Data.Fakes;
-using FlyingFive.Data.Infrastructure;
 using FlyingFive.Data.Interception;
 using System;
 using System.Collections.Generic;
@@ -15,7 +14,7 @@ namespace FlyingFive.Data.Kernel
     public abstract class DatabaseHelper : IDatabaseHelper, IDisposable
     {
         /// <summary>
-        /// 
+        /// 连接工厂
         /// </summary>
         public IDbConnectionFactory DbConnectionFactory { get; private set; }
 
