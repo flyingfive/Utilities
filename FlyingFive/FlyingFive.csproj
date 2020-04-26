@@ -115,6 +115,7 @@
     <Compile Include="ITypeFinder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Singleton.cs" />
+    <Compile Include="Utils\RandomHelper.cs" />
     <Compile Include="Win\RegistryUtility.cs" />
     <Compile Include="Utils\SerializationHelper.cs" />
     <Compile Include="Data\SnowflakeId.cs" />

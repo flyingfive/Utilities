@@ -18,6 +18,7 @@ using FlyingFive.DynamicProxy;
 using System.Numerics;
 using System.ComponentModel;
 using FlyingFive.Comparing;
+using FlyingFive.Data.Dynamic;
 
 namespace FlyingFive.Tests
 {
@@ -158,6 +159,33 @@ namespace FlyingFive.Tests
         }
 
         [TestMethod]
+        public void TestRandom()
+        {
+            var i = 0;
+            var flag = double.MaxValue > long.MaxValue;
+            while (i <= 128)
+            {
+                var x = RandomHelper.RandomNumber();
+                Debug.WriteLine("x=" + x);
+                if (x < 0)
+                {
+                }
+                var y = RandomHelper.RandomNumber(false);
+                Debug.WriteLine("y=" + y);
+                if (i >= 2)
+                {
+                    var z = RandomHelper.RandomString(i);
+                    Debug.WriteLine("z=" + z);
+                    if (z.Length != i)
+                    {
+
+                    }
+                }
+                i++;
+            }
+        }
+
+        [TestMethod]
         public void TestCompare()
         {
             //Nullable<int> i = 5;
@@ -179,8 +207,8 @@ namespace FlyingFive.Tests
             var prop2 = typeof(TM).GetProperty("Name");
             var compare1 = ComparerFactory.CreateObjectEquality(prop1.PropertyType);
             var compare2 = ComparerFactory.CreateObjectEquality(prop2.PropertyType);
-            var getter1 = FlyingFive.Data.Emit.DelegateGenerator.CreateValueGetter(prop1);
-            var getter2 = FlyingFive.Data.Emit.DelegateGenerator.CreateValueGetter(prop2);
+            var getter1 = DelegateGenerator.CreateValueGetter(prop1);
+            var getter2 = DelegateGenerator.CreateValueGetter(prop2);
             var m1 = new TM() { Id = 1, Name = "test" };
             var m2 = new TM() { Id = 10, Name = "Test" };
             var left = getter1(m1);
