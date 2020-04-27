@@ -266,6 +266,7 @@ namespace FlyingFive.Tests
 
     public interface ITestData { string test(); }
 
+    [Serializable]
     public class Model
     {
         public int FItemID { get; set; }
