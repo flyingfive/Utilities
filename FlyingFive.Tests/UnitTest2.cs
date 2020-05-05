@@ -258,7 +258,7 @@ namespace FlyingFive.Tests
         {
         }
 
-        public override void PerformProceed(ProxyExecutionContext context)
+        protected override void PerformProceed(ProxyExecutionContext context)
         {
             context.ReturnValue = "测试结果";
         }

@@ -19,9 +19,9 @@ namespace FlyingFive.Data
         /// <returns></returns>
         public static List<object> ToList(this DataTable data)
         {
-            var name = string.Join("&", data.Columns.OfType<DataColumn>().Select(c => string.Format("{0}@{1}{2}", c.ColumnName, c.DataType.ToString(), c.AllowDBNull ? "?" : "")));
-            var key = name.GetHashCode().ToString();
-            var modelType = _dynamicTypeCache.GetOrAdd(key, (str) =>
+            var name = string.Join("&", data.Columns.OfType<DataColumn>().ToList().OrderBy(c => c.Ordinal).Select(c => string.Format("{0}@{1}{2}", c.ColumnName, c.DataType.ToString(), c.AllowDBNull ? "?" : "")));
+            //var key = name.GetHashCode().ToString();
+            var modelType = _dynamicTypeCache.GetOrAdd(name, (str) =>
             {
                 var className = string.Format("DynamicDataModel_{0}", Guid.NewGuid().ToString("D").Split(new char[] { '-' }).Last());
                 var fields = new Dictionary<string, Type>();
@@ -63,73 +63,5 @@ namespace FlyingFive.Data
                 return list;
             }
         }
-
-        //private static Hashtable _allModelTableSchema = null;
-
-        ///// <summary>
-        ///// 获取指定类型的DataTable结构
-        ///// </summary>
-        ///// <param name="modelType">模型类型</param>
-        ///// <returns></returns>
-        //private static DataTable GetTableSchemaOfModel(this Type modelType)
-        //{
-        //    DataTable schema = null;
-        //    if (_allModelTableSchema == null) { _allModelTableSchema = new Hashtable(); }
-        //    var properties = modelType.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-        //    if (_allModelTableSchema.ContainsKey(modelType.FullName))
-        //    {
-        //        schema = _allModelTableSchema[modelType.FullName] as DataTable;
-        //    }
-        //    else
-        //    {
-        //        schema = new DataTable(modelType.Name);
-        //        foreach (var prop in properties)
-        //        {
-        //            if (prop.PropertyType.IsGenericType && prop.PropertyType.GetGenericTypeDefinition() != typeof(Nullable<>)) { continue; }
-        //            var column = new DataColumn(prop.Name);
-        //            column.DataType = prop.PropertyType.IsGenericType ? prop.PropertyType.GetGenericArguments().First() : prop.PropertyType;
-        //            if (prop.PropertyType.IsGenericType && prop.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-        //            {
-        //                column.AllowDBNull = true;
-        //            }
-        //            schema.Columns.Add(column);
-        //        }
-        //        _allModelTableSchema.Add(modelType.FullName, schema);
-        //    }
-        //    return schema.Clone();
-        //}
-
-        ///// <summary>
-        ///// 将泛型list集合转换为DataTable
-        ///// </summary>
-        ///// <typeparam name="T"></typeparam>
-        ///// <param name="list"></param>
-        ///// <returns></returns>
-        //public static DataTable ToDataTable<T>(this IList<T> list)
-        //{
-        //    if (list == null) { return null; }
-        //    var type = typeof(T);
-        //    if (type == typeof(Object) && list.Count() > 0 && list.FirstOrDefault() != null)
-        //    {
-        //        type = list.FirstOrDefault().GetType();
-        //    }
-        //    var table = GetTableSchemaOfModel(type);
-        //    var properties = type.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-        //    var items = table.Columns.OfType<DataColumn>()
-        //        .Where(dc => properties.Any(p => string.Equals(p.Name, dc.ColumnName, StringComparison.CurrentCultureIgnoreCase)))
-        //        .Select(dc => new { column = dc, prop = properties.SingleOrDefault(p => string.Equals(p.Name, dc.ColumnName, StringComparison.CurrentCultureIgnoreCase)) })
-        //        .ToList().ToDictionary(x => x.column, x => new { prop = x.prop, getter = DelegateGenerator.CreateValueGetter(x.prop) });
-        //    foreach (T item in list)
-        //    {
-        //        var row = table.NewRow();
-        //        foreach (DataColumn column in items.Keys)
-        //        {
-        //            var val = items[column].getter(item);
-        //            row[column.ColumnName] = val == null ? DBNull.Value : val;
-        //        }
-        //        table.Rows.Add(row);
-        //    }
-        //    return table;
-        //}
     }
 }

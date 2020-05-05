@@ -9,6 +9,7 @@ using System.Text;
 using System.Globalization;
 using System.Threading;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 
 namespace FlyingFive.DynamicProxy
 {
@@ -73,26 +74,35 @@ namespace FlyingFive.DynamicProxy
 
         private static readonly Dictionary<Assembly, ModuleBuilder> _moduleBuilders = new Dictionary<Assembly, ModuleBuilder>();
         private const string DYNAMIC_ASSEMBLY_NAME = "__FlyingFive.LocalDynamicProxies";
-
+        /// <summary>
+        /// 代理调用处理实现类
+        /// </summary>
         private Type _invocationHandlerType = null;
-
+        /// <summary>
+        /// 是否有初始化设置了代理调用处理实现类
+        /// </summary>
         public bool HasInitiated { get { return _invocationHandlerType != null; } }
 
         /// <summary>
         /// 配置IProxyInvocationHandler实现
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="type">IProxyInvocationHandler实现类型</param>
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void SetupProxyHandlerType(Type type)
         {
             if (type == null) { throw new ArgumentException("参数type不能为null。"); }
             if (HasInitiated) { throw new InvalidOperationException("已经完成初始化。"); }
-            if (!typeof(IProxyInvocationHandler).IsAssignableFrom(type))
-            {
-                throw new NotImplementedException(string.Format("类型没有实现：{0}接口", typeof(IProxyInvocationHandler).FullName));
-            }
+            //if (!typeof(IProxyInvocationHandler).IsAssignableFrom(type))
+            //{
+            //    throw new NotImplementedException(string.Format("类型没有实现：{0}接口", typeof(IProxyInvocationHandler).FullName));
+            //}
             if (type.BaseType != typeof(BaseInvocationHandler))
             {
                 throw new ArgumentNullException(string.Format("代理调用类型必需继承父类：{0}", typeof(BaseInvocationHandler).FullName));
+            }
+            if (type.GetConstructors().Length != 1)
+            {
+                throw new ArgumentException("参数type有且只能有一个构造函数。");
             }
             //if (!type.HasDefaultEmptyConstructor())
             //{
@@ -109,13 +119,14 @@ namespace FlyingFive.DynamicProxy
         /// 使用指定参数和拦截器创建接口的本地代理对象
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="arguments">IProxyInvocationHandler实现类上的构造参数</param>
+        /// <param name="arguments">IProxyInvocationHandler实现类上的构造参数<see cref="SetupProxyHandlerType"/></param>
         /// <param name="interceptorTypes">拦截器类型</param>
         /// <returns></returns>
         public T CreateInterfaceProxyWithoutTarget<T>(object[] arguments, params Type[] interceptorTypes) where T : class
         {
             var interfaceType = typeof(T);
             EnsureInitilized(interfaceType);
+            if (arguments == null) { arguments = new object[0]; }
             var constructor = _invocationHandlerType.GetConstructors().FirstOrDefault(c => c.GetParameters().Length == arguments.Length);
             if (constructor == null) { throw new InvalidOperationException("IProxyInvocationHandler代理调用类型上没有匹配的构造。"); }
             CheckArguments(constructor, arguments);
