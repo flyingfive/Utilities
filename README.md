@@ -5,7 +5,7 @@ FlyingFive为基库，不依赖任何其它第三方库。包括功能：<br />
 	1、.NET类型扩展。 <br />
 	2、ADO.NET一般封装。 <br />
 	3、Emit/Expression常用操作。 <br />
-	4、List&DataTable转换。
+	4、List&DataTable转换。<br />
 	5、对象判等。 <br />
 	6、CodeDom模型代码生成。 <br />
 	7、工具类：类型查找、DOS命令、Windows服务、文件拷贝、中文日历、注册表操作、常用序列化。等... <br />
