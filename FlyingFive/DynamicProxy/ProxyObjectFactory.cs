@@ -257,12 +257,12 @@ namespace FlyingFive.DynamicProxy
             constructorIL.Emit(OpCodes.Call, baseCtor);
             constructorIL.Emit(OpCodes.Ret);
 
-            GenerateMethod(interfaceType, handlerField, typeBuilder);
+            GenerateProxyMethod(interfaceType, handlerField, typeBuilder);
             var proxyType = typeBuilder.CreateType();
             return proxyType;
         }
 
-        private static void GenerateMethod(Type interfaceType, FieldBuilder handlerField, TypeBuilder typeBuilder)
+        private static void GenerateProxyMethod(Type interfaceType, FieldBuilder handlerField, TypeBuilder typeBuilder)
         {
             MetaDataFactory.Add(interfaceType);
             var interfaceMethods = interfaceType.GetMethods();
@@ -407,7 +407,7 @@ namespace FlyingFive.DynamicProxy
             //如果接口上还有接口，迭代创建其它接口方法的代理
             foreach (Type parentType in interfaceType.GetInterfaces())
             {
-                GenerateMethod(parentType, handlerField, typeBuilder);
+                GenerateProxyMethod(parentType, handlerField, typeBuilder);
             }
         }
 
