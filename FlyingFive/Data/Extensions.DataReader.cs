@@ -130,10 +130,12 @@ namespace FlyingFive.Data
         {
             var data = new DataTable();
             data.Locale = System.Globalization.CultureInfo.CurrentCulture;
-            data.TableName = typeof(T).Name;
-            var dr = new ListDataReader<T>(collection);
-            data.Load(dr);
-            return data;
+            data.TableName = typeof(T).FullName;
+            using (var dr = new ListDataReader<T>(collection))
+            {
+                data.Load(dr);
+                return data;
+            }
         }
 
         internal class MappingData

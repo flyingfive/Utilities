@@ -80,17 +80,17 @@ namespace FlyingFive.DynamicProxy
         /// 调用前
         /// </summary>
         /// <param name="context"></param>
-        public virtual void PreProceed(ProxyExecutionContext context) { }
+        protected virtual void PreProceed(ProxyExecutionContext context) { }
         /// <summary>
         /// 调用后
         /// </summary>
         /// <param name="context"></param>
-        public virtual void PostProceed(ProxyExecutionContext context) { }
+        protected virtual void PostProceed(ProxyExecutionContext context) { }
         /// <summary>
         /// 执行调用
         /// </summary>
         /// <param name="context"></param>
-        public abstract void PerformProceed(ProxyExecutionContext context);
+        protected abstract void PerformProceed(ProxyExecutionContext context);
     }
 
     /// <summary>
