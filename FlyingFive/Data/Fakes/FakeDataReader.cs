@@ -22,6 +22,7 @@ namespace FlyingFive.Data.Fakes
         public FakeDataReader(IDataReader reader)
         {
             if (reader == null) { throw new ArgumentNullException("参数: reader不能为null"); }
+            if (reader.IsClosed) { throw new InvalidOperationException("数据读取器reader已关闭"); }
             this._innerReader = reader;
             this._keyNames = new Dictionary<int, string>();
             for (int i = 0; i < this._innerReader.FieldCount; i++)

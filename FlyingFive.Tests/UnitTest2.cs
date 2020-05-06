@@ -80,7 +80,7 @@ namespace FlyingFive.Tests
             var s = System.Globalization.CultureInfo.GetCultureInfo("zh-CN");
             var a = "ABC".ToSBC();
             var b = a.ToDBC();
-            var flag = a.GetType().IsCustomType();
+            //var flag = a.GetType().IsCustomType();
             var text = A.Field1.GetEnumDescription();
             var t2 = A.Field2.GetEnumDescription();
         }
@@ -109,7 +109,7 @@ namespace FlyingFive.Tests
                         var dt = new DataTable();
                         da.Fill(dt);
                         var list1 = dt.ToList<Employee>();
-                        var list2 = dt.ToList();
+                        var list2 = dt.ToDynamicObjectList();
                     }
                 }));
                 Debug.WriteLine(result.ToString());

@@ -13,39 +13,22 @@ namespace FlyingFive.Data
         private static System.Collections.Concurrent.ConcurrentDictionary<string, Type> _dynamicTypeCache = new System.Collections.Concurrent.ConcurrentDictionary<string, Type>();
 
         /// <summary>
-        /// 将DataTable转成匿名对象集合（对象类型根据Table数据结构生成，名称随机）
+        /// 将DataTable转成动态对象集合（对象类型根据Table数据结构生成，名称随机）
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static List<object> ToList(this DataTable data)
+        public static List<object> ToDynamicObjectList(this DataTable data)
         {
-            var name = string.Join("&", data.Columns.OfType<DataColumn>().ToList().OrderBy(c => c.Ordinal).Select(c => string.Format("{0}@{1}{2}", c.ColumnName, c.DataType.ToString(), c.AllowDBNull ? "?" : "")));
-            //var key = name.GetHashCode().ToString();
-            var modelType = _dynamicTypeCache.GetOrAdd(name, (str) =>
+            if (data == null) { throw new ArgumentNullException("参数data不能为null"); }
+            if (data.Columns.Count == 0) { return new List<object>(); }
+            var duplicateColumns = data.Columns.OfType<DataColumn>().GroupBy(c => c.ColumnName).Where(g => g.Count() > 1).Select(g => g.Key);
+            if (duplicateColumns.Count() > 0)
             {
-                var className = string.Format("DynamicDataModel_{0}", Guid.NewGuid().ToString("D").Split(new char[] { '-' }).Last());
-                var fields = new Dictionary<string, Type>();
-                foreach (DataColumn dc in data.Columns)
-                {
-                    var dataType = dc.DataType;
-                    if (dc.AllowDBNull && dc.DataType.IsValueType)
-                    {
-                        dataType = typeof(Nullable<>).MakeGenericType(dc.DataType);
-                    }
-                    if (fields.ContainsKey(dc.ColumnName))
-                    {
-                        throw new InvalidOperationException(string.Format("无效的操作：动态类型转换不支持重复的成员名称：{0}", dc.ColumnName));
-                    }
-                    fields.Add(dc.ColumnName, dataType);
-                }
-                var sourceCodeCreater = new CSharpSourceCodeCreater(className, fields);
-                var type = sourceCodeCreater.BuildCSharpType();
-                return type;
-            });
+                throw new InvalidOperationException(string.Format("无效的操作：动态类型转换不支持重复的成员名称：{0}", string.Join(",", duplicateColumns)));
+            }
             using (var reader = data.CreateDataReader())
             {
-                var list = reader.AsEnumerable(modelType).ToList();
-                return list;
+                return reader.ToDynamicObjectList();
             }
         }
 

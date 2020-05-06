@@ -16,6 +16,7 @@ namespace FlyingFive
         /// </summary>
         /// <param name="type">要判断的类型</param>
         /// <returns></returns>
+        [Obsolete("慎用：可能存在错误，可改用IsSystemType")]
         public static bool IsCustomType(this Type type)
         {
             if (type.IsPrimitive) { return false; }
@@ -26,6 +27,20 @@ namespace FlyingFive
         }
 
         /// <summary>
+        /// 指示当前类型是否为系统原生数据类型
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsSystemType(this Type type)
+        {
+            if (type.IsPrimitive) { return true; }
+            var systemTypeNames = Enum.GetNames(typeof(TypeCode))
+                .Except(new string[] { "Empty", "Object" })                             //除掉这2个类型
+                .Concat(new string[] { "BigInteger", "Guid" }).ToArray();               //加上这2个类型
+            return type.Namespace.StartsWith("System.") && systemTypeNames.Contains(type.Name);
+        }
+
+        /// <summary>
         /// 转换为对应的数据库类型
         /// </summary>
         /// <param name="csharpType">C#内置类型</param>
@@ -33,10 +48,12 @@ namespace FlyingFive
         public static SqlDbType ToSqlDbType(this Type csharpType)
         {
             csharpType = csharpType.GetUnderlyingType();
+            if (!csharpType.IsSystemType()) { throw new NotSupportedException("仅支持C#原生数据类型转换"); }
             switch (csharpType.Name.ToLowerInvariant())
             {
                 case "int":
                 case "int32": return SqlDbType.Int;
+                case "biginteger":
                 case "int64": return SqlDbType.BigInt;
                 case "guid": return SqlDbType.UniqueIdentifier;
                 case "datetime": return SqlDbType.DateTime;
@@ -103,7 +120,7 @@ namespace FlyingFive
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static bool IsListType(this Type type)
+        public static bool IsGenericListType(this Type type)
         {
             var flag = type.IsGenericType &&
                 type.GetGenericTypeDefinition().GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>));
