@@ -23,14 +23,14 @@ namespace FlyingFive.Data
         /// <returns></returns>
         public static IEnumerable<T> AsEnumerable<T>(this IDataReader reader) where T : class, new()
         {
-            var fakeReader = reader as Fakes.FakeDataReader;
-            if (fakeReader == null)
-            {
-                fakeReader = new Fakes.FakeDataReader(reader);
-            }
-            var mappings = typeof(T).GetProperties().Where(p => p.CanWrite).Where(p => !p.PropertyType.IsListType())
+            //var fakeReader = reader as Fakes.FakeDataReader;
+            //if (fakeReader == null)
+            //{
+            //    fakeReader = new Fakes.FakeDataReader(reader);
+            //}
+            var mappings = typeof(T).GetProperties().Where(p => p.CanWrite && p.PropertyType.IsSystemType())
                 .Select(prop => new MappingData() { Ordinal = reader.GetOrdinal(prop.Name), Property = prop, Mapper = MemberMapperHelper.CreateMemberMapper(prop) });
-            while (fakeReader.Read())
+            while (reader.Read())
             {
                 var obj = Activator.CreateInstance<T>();
                 MapData(obj, reader, mappings);
@@ -46,14 +46,14 @@ namespace FlyingFive.Data
         /// <returns></returns>
         public static IEnumerable<object> AsEnumerable(this IDataReader reader, Type dataType)
         {
-            var fakeReader = reader as Fakes.FakeDataReader;
-            if (fakeReader == null)
-            {
-                fakeReader = new Fakes.FakeDataReader(reader);
-            }
-            var mappings = dataType.GetProperties().Where(p => p.CanWrite)
+            //var fakeReader = reader as Fakes.FakeDataReader;
+            //if (fakeReader == null)
+            //{
+            //    fakeReader = new Fakes.FakeDataReader(reader);
+            //}
+            var mappings = dataType.GetProperties().Where(p => p.CanWrite && p.PropertyType.IsSystemType())
                 .Select(prop => new MappingData() { Ordinal = reader.GetOrdinal(prop.Name), Property = prop, Mapper = MemberMapperHelper.CreateMemberMapper(prop) });
-            while (fakeReader.Read())
+            while (reader.Read())
             {
                 var obj = Activator.CreateInstance(dataType);
                 MapData(obj, reader, mappings);
@@ -70,11 +70,11 @@ namespace FlyingFive.Data
         }
 
         /// <summary>
-        /// 将DataReader转成匿名对象集合（对象类型根据DataReader数据结构生成，名称随机）
+        /// 将DataReader转成动态对象集合（对象类型根据DataReader数据结构生成，名称随机）
         /// </summary>
         /// <param name="reader"></param>
         /// <returns></returns>
-        public static List<object> ToList(this IDataReader reader)
+        public static List<object> ToDynamicObjectList(this IDataReader reader)
         {
             var schema = reader.GetSchemaTable();
             var name = new StringBuilder();
@@ -96,10 +96,11 @@ namespace FlyingFive.Data
                 }
                 fields.Add(fieldName, dataType);
             }
-            var key = name.ToString().GetHashCode().ToString();
+            var code = name.ToString().GetHashCode().ToString();
+            var key = string.Format("reader_dynamic_type_{0}", code);
             var modelType = _dynamicTypeCache.GetOrAdd(key, (str) =>
             {
-                var className = string.Format("DynamicDataModel_{0}", Guid.NewGuid().ToString("D").Split(new char[] { '-' }).Last());
+                var className = string.Format("DynamicDataReaderModel_{0}_{1}", code, Guid.NewGuid().ToString("D").Split(new char[] { '-' }).Last());
                 var sourceCodeCreater = new CSharpSourceCodeCreater(className, fields);
                 var type = sourceCodeCreater.BuildCSharpType();
                 return type;
@@ -107,7 +108,6 @@ namespace FlyingFive.Data
             var list = reader.AsEnumerable(modelType).ToList();
             return list;
         }
-
 
         /// <summary>
         /// 将泛型集合转换成IDataReader
@@ -138,11 +138,26 @@ namespace FlyingFive.Data
             }
         }
 
+        /// <summary>
+        /// 映射数据结构
+        /// </summary>
         internal class MappingData
         {
+            /// <summary>
+            /// 索引位置
+            /// </summary>
             public int Ordinal { get; set; }
+            /// <summary>
+            /// 映射属性
+            /// </summary>
             public PropertyInfo Property { get; set; }
+            /// <summary>
+            /// 映射器
+            /// </summary>
             public IMemberMapper Mapper { get; set; }
+            /// <summary>
+            /// 属性访问器（获取某实例对象上对应属性的值）
+            /// </summary>
             public Func<object, object> ValueAccessor { get; set; }
         }
     }

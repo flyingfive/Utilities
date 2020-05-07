@@ -18,7 +18,7 @@ namespace FlyingFive.Comparing
                 return false;                                           //二者其一为null，另一个非null
             }
             if (left.GetType() != right.GetType()) { return false; }
-            if (!left.GetType().IsListType() || !right.GetType().IsListType()) { return false; }
+            if (!left.GetType().IsGenericListType() || !right.GetType().IsGenericListType()) { return false; }
             var leftDataType = left.GetType().GetGenericArguments().First();
             var rightDataType = right.GetType().GetGenericArguments().First();
             if (leftDataType != rightDataType) { return false; }

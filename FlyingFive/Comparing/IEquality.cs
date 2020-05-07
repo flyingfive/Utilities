@@ -45,7 +45,7 @@ namespace FlyingFive.Comparing
             //泛型类型只支持泛型集合或可空类型
             if (dataType.IsGenericType && dataType.GetGenericArguments().Count() == 1)
             {
-                if (dataType.IsListType())
+                if (dataType.IsGenericListType())
                 {
                     return new ListEquality();
                 }
