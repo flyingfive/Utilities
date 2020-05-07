@@ -9,6 +9,9 @@ using System.Web.Hosting;
 
 namespace FlyingFive.Web.Utility
 {
+    /// <summary>
+    /// Web应用程序助手
+    /// </summary>
     public partial class WebHelper
     {
         private readonly string[] _staticFileExtensions = null;
