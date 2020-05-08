@@ -54,7 +54,8 @@ namespace FlyingFive.Tests
                 row.EndEdit();
                 dt.Rows.Add(row);
             }
-            var lst = dt.ToList<TestUser>();
+            var lst = dt.ToList<TestUser>(); 
+
         }
     }
 
