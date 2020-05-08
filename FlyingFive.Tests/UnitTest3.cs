@@ -33,5 +33,40 @@ namespace FlyingFive.Tests
             var base64 = SerializationHelper.SerializeObjectToBase64(x2);
             var x3 = SerializationHelper.DeserializeObjectFromBase64<Model>(base64);
         }
+
+        [TestMethod]
+        public void TestDataReader()
+        {
+            var code = Type.GetTypeCode(typeof(TestUser));
+            var ss = typeof(string).IsSystemType();
+            ss = typeof(TT).IsSystemType();
+            ss = typeof(TT).IsUserType();
+            var dt = new DataTable();
+            dt.Columns.AddRange(new DataColumn[] {
+                new DataColumn("Name",typeof(String)),
+                new DataColumn("Birth",typeof(DateTime))
+            });
+            for (int i = 0; i < 10; i++)
+            {
+                var row = dt.NewRow();
+                row["Name"] = Guid.NewGuid().ToString();
+                row["Birth"] = DateTime.Now;
+                row.EndEdit();
+                dt.Rows.Add(row);
+            }
+            var lst = dt.ToList<TestUser>();
+        }
+    }
+
+    public enum TT
+    {
+        a = 1,
+        b = 2
+    }
+
+    public class TestUser
+    {
+        public string Name { get; set; }
+        public DateTime? Birth { get; set; }
     }
 }

@@ -235,7 +235,7 @@ namespace FlyingFive.Data
             {
                 throw WrapValueTypeNullReferenceException(reader, ordinal);
             }
-            return reader.GetInt16(ordinal);
+            try { return reader.GetInt16(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static short? GetNullableInt16(IDataReader reader, int ordinal)
@@ -244,7 +244,7 @@ namespace FlyingFive.Data
             {
                 return null;
             }
-            return reader.GetInt16(ordinal);
+            try { return reader.GetInt16(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static int GetInt32(IDataReader reader, int ordinal)
@@ -253,7 +253,7 @@ namespace FlyingFive.Data
             {
                 throw WrapValueTypeNullReferenceException(reader, ordinal);
             }
-            return reader.GetInt32(ordinal);
+            try { return reader.GetInt32(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static int? GetNullableInt32(IDataReader reader, int ordinal)
@@ -262,7 +262,7 @@ namespace FlyingFive.Data
             {
                 return null;
             }
-            return reader.GetInt32(ordinal);
+            try { return reader.GetInt32(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static long GetInt64(IDataReader reader, int ordinal)
@@ -271,7 +271,7 @@ namespace FlyingFive.Data
             {
                 throw WrapValueTypeNullReferenceException(reader, ordinal);
             }
-            return reader.GetInt64(ordinal);
+            try { return reader.GetInt64(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static long? GetNullableInt64(IDataReader reader, int ordinal)
@@ -280,7 +280,7 @@ namespace FlyingFive.Data
             {
                 return null;
             }
-            return reader.GetInt64(ordinal);
+            try { return reader.GetInt64(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static decimal GetDecimal(IDataReader reader, int ordinal)
@@ -289,7 +289,7 @@ namespace FlyingFive.Data
             {
                 throw WrapValueTypeNullReferenceException(reader, ordinal);
             }
-            return reader.GetDecimal(ordinal);
+            try { return reader.GetDecimal(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static decimal? GetNullableDecimal(IDataReader reader, int ordinal)
@@ -298,7 +298,7 @@ namespace FlyingFive.Data
             {
                 return null;
             }
-            return reader.GetDecimal(ordinal);
+            try { return reader.GetDecimal(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static double GetDouble(IDataReader reader, int ordinal)
@@ -307,7 +307,7 @@ namespace FlyingFive.Data
             {
                 throw WrapValueTypeNullReferenceException(reader, ordinal);
             }
-            return reader.GetDouble(ordinal);
+            try { return reader.GetDouble(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static double? GetNullableDouble(IDataReader reader, int ordinal)
@@ -316,7 +316,7 @@ namespace FlyingFive.Data
             {
                 return null;
             }
-            return reader.GetDouble(ordinal);
+            try { return reader.GetDouble(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static float GetSingle(IDataReader reader, int ordinal)
@@ -325,7 +325,7 @@ namespace FlyingFive.Data
             {
                 throw WrapValueTypeNullReferenceException(reader, ordinal);
             }
-            return reader.GetFloat(ordinal);
+            try { return reader.GetFloat(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static float? GetNullableSingle(IDataReader reader, int ordinal)
@@ -334,7 +334,7 @@ namespace FlyingFive.Data
             {
                 return null;
             }
-            return reader.GetFloat(ordinal);
+            try { return reader.GetFloat(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static bool GetBoolean(IDataReader reader, int ordinal)
@@ -343,7 +343,7 @@ namespace FlyingFive.Data
             {
                 throw WrapValueTypeNullReferenceException(reader, ordinal);
             }
-            return reader.GetBoolean(ordinal);
+            try { return reader.GetBoolean(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static bool? GetNullableBoolean(IDataReader reader, int ordinal)
@@ -352,7 +352,7 @@ namespace FlyingFive.Data
             {
                 return null;
             }
-            return reader.GetBoolean(ordinal);
+            try { return reader.GetBoolean(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static DateTime GetDateTime(IDataReader reader, int ordinal)
@@ -361,7 +361,7 @@ namespace FlyingFive.Data
             {
                 throw WrapValueTypeNullReferenceException(reader, ordinal);
             }
-            return reader.GetDateTime(ordinal);
+            try { return reader.GetDateTime(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static DateTime? GetNullableDateTime(IDataReader reader, int ordinal)
@@ -370,7 +370,7 @@ namespace FlyingFive.Data
             {
                 return null;
             }
-            return reader.GetDateTime(ordinal);
+            try { return reader.GetDateTime(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static Guid GetGuid(IDataReader reader, int ordinal)
@@ -379,7 +379,7 @@ namespace FlyingFive.Data
             {
                 throw WrapValueTypeNullReferenceException(reader, ordinal);
             }
-            return reader.GetGuid(ordinal);
+            try { return reader.GetGuid(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static Guid? GetNullableGuid(IDataReader reader, int ordinal)
@@ -388,7 +388,7 @@ namespace FlyingFive.Data
             {
                 return null;
             }
-            return reader.GetGuid(ordinal);
+            try { return reader.GetGuid(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static byte GetByte(IDataReader reader, int ordinal)
@@ -397,7 +397,7 @@ namespace FlyingFive.Data
             {
                 throw WrapValueTypeNullReferenceException(reader, ordinal);
             }
-            return reader.GetByte(ordinal);
+            try { return reader.GetByte(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static byte? GetNullableByte(IDataReader reader, int ordinal)
@@ -406,7 +406,7 @@ namespace FlyingFive.Data
             {
                 return null;
             }
-            return reader.GetByte(ordinal);
+            try { return reader.GetByte(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static char GetChar(IDataReader reader, int ordinal)
@@ -415,7 +415,7 @@ namespace FlyingFive.Data
             {
                 throw WrapValueTypeNullReferenceException(reader, ordinal);
             }
-            return reader.GetChar(ordinal);
+            try { return reader.GetChar(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static char? GetNullableChar(IDataReader reader, int ordinal)
@@ -424,7 +424,7 @@ namespace FlyingFive.Data
             {
                 return null;
             }
-            return reader.GetChar(ordinal);
+            try { return reader.GetChar(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static string GetString(IDataReader reader, int ordinal)
@@ -433,7 +433,7 @@ namespace FlyingFive.Data
             {
                 return null;
             }
-            return reader.GetString(ordinal);
+            try { return reader.GetString(ordinal); } catch (InvalidCastException ex) { throw WrapInvalidValueException(ordinal, reader, ex); }
         }
 
         public static object GetValue(IDataReader reader, int ordinal)
@@ -460,13 +460,23 @@ namespace FlyingFive.Data
                 throw WrapValueTypeNullReferenceException(reader, ordinal);
             }
             Type fieldType = reader.GetFieldType(ordinal);
-
-            object value;
-            if (fieldType == typeof(short))
-                value = reader.GetInt16(ordinal);
-            else
-                value = reader.GetInt32(ordinal);
-            return (TEnum)Enum.ToObject(typeof(TEnum), value);
+            try
+            {
+                object value;
+                if (fieldType == typeof(short))
+                {
+                    value = reader.GetInt16(ordinal);
+                }
+                else
+                {
+                    value = reader.GetInt32(ordinal);
+                }
+                return (TEnum)Enum.ToObject(typeof(TEnum), value);
+            }
+            catch (InvalidCastException ex)
+            {
+                throw WrapInvalidValueException(ordinal, reader, ex);
+            }
         }
 
         public static TEnum? GetNullableEnum<TEnum>(IDataReader reader, int ordinal) where TEnum : struct
@@ -487,7 +497,7 @@ namespace FlyingFive.Data
             }
             catch (NullReferenceException ex)
             {
-                throw new InvalidCastException("The column value could not be null.");
+                throw new InvalidCastException(string.Format("获取类型{0}在索引{1}(字段:{2})处不能为NULL值", typeof(T).FullName, ordinal, reader.GetName(ordinal)));
             }
         }
 
@@ -511,9 +521,28 @@ namespace FlyingFive.Data
         /// <returns></returns>
         private static Exception WrapValueTypeNullReferenceException(IDataReader reader, int ordinal)
         {
+            var fieldName = reader.GetName(ordinal);
             var callMethod = new StackTrace().GetFrame(1).GetMethod();
             var returnType = callMethod.DeclaringType.GetMethod(callMethod.Name).ReturnType;
-            return new DataAccessException(string.Format("对于值类型{0}在索引位置: {1}(字段: {2})处返回了NULL值", returnType.FullName, ordinal, reader.GetName(ordinal)));
+            return new DataAccessException(string.Format("对于值类型{0}在索引位置{1}[{2}]处返回了NULL值", returnType.FullName, ordinal, fieldName));
+        }
+
+        /// <summary>
+        /// 包装类型转换错误
+        /// </summary>
+        /// <param name="ordinal"></param>
+        /// <param name="reader"></param>
+        /// <param name="exception"></param>
+        /// <returns></returns>
+        private static Exception WrapInvalidValueException(int ordinal, IDataReader reader, Exception exception)
+        {
+            var callMethod = new StackTrace().GetFrame(1).GetMethod();
+            var returnType = callMethod.DeclaringType.GetMethod(callMethod.Name).ReturnType;
+            var isNullableType = returnType.IsNullableType(out returnType);
+            var typeName = isNullableType ? string.Format("Nullable<{0}>", returnType.FullName) : returnType.FullName;
+            var dataType = reader.GetDataTypeName(ordinal);
+            var fieldName = reader.GetName(ordinal);
+            throw new DataAccessException(string.Format("转换无效:所需类型{0}在索引位置{1}[{2}]处的数据源类型为{3}", typeName, ordinal, fieldName, dataType), exception);
         }
     }
 }

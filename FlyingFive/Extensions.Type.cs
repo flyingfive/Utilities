@@ -16,7 +16,7 @@ namespace FlyingFive
         /// </summary>
         /// <param name="type">要判断的类型</param>
         /// <returns></returns>
-        [Obsolete("慎用：可能存在错误，可改用IsSystemType")]
+        [Obsolete("可能存在未知的不准确场景，可改用IsUserType", true)]
         public static bool IsCustomType(this Type type)
         {
             if (type.IsPrimitive) { return false; }
@@ -27,17 +27,34 @@ namespace FlyingFive
         }
 
         /// <summary>
+        /// 指示当前类型是否用户类型
+        /// </summary>
+        /// <param name="type">System.Type实例</param>
+        /// <returns></returns>
+        public static bool IsUserType(this Type type)
+        {
+            type = type.GetUnderlyingType();
+            if (type.IsPrimitive) { return false; }
+            if (type.IsEnum) { return false; }
+            if (type.IsArray && type.HasElementType && type.GetElementType().IsPrimitive) { return false; }
+            var code = Type.GetTypeCode(type);
+            var flag = code == TypeCode.Object && type != typeof(object) && !DataTypeExtension.SystemDataTypeName.Contains(code.ToString());
+            return flag;
+        }
+
+        /// <summary>
         /// 指示当前类型是否为系统原生数据类型
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
         public static bool IsSystemType(this Type type)
         {
+            type = type.GetUnderlyingType();
             if (type.IsPrimitive) { return true; }
-            var systemTypeNames = Enum.GetNames(typeof(TypeCode))
-                .Except(new string[] { "Empty", "Object" })                             //除掉这2个类型
-                .Concat(new string[] { "BigInteger", "Guid" }).ToArray();               //加上这2个类型
-            return type.Namespace.StartsWith("System.") && systemTypeNames.Contains(type.Name);
+            if (type.IsEnum) { return true; }
+            if (type.IsArray && type.HasElementType && type.GetElementType().IsPrimitive) { return true; }
+            var code = Type.GetTypeCode(type);
+            return type.Namespace.StartsWith("System") && DataTypeExtension.SystemDataTypeName.Contains(code.ToString());
         }
 
         /// <summary>
@@ -167,5 +184,18 @@ namespace FlyingFive
             var defaultConstructor = type.GetConstructor(Type.EmptyTypes);
             return defaultConstructor != null;
         }
+    }
+
+    /// <summary>
+    /// 数据类型扩展
+    /// </summary>
+    public class DataTypeExtension
+    {
+        /// <summary>
+        /// 系统的数据类型名称
+        /// </summary>
+        public static readonly string[] SystemDataTypeName = Enum.GetNames(typeof(TypeCode))
+                .Except(new string[] { "Empty", "Object" })                             //除掉这2个类型
+                .Concat(new string[] { "BigInteger", "Guid" }).ToArray();               //加上这2个类型
     }
 }
