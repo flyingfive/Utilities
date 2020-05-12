@@ -87,11 +87,12 @@ namespace FlyingFive
         /// <summary>
         /// 转换为对应的数据库类型
         /// </summary>
-        /// <param name="csharpType">C#内置类型</param>
+        /// <param name="csharpType">System.Type实例</param>
         /// <returns></returns>
         public static DbType ToDbType(this Type csharpType)
         {
             csharpType = csharpType.GetUnderlyingType();
+            if (!csharpType.IsSystemType()) { throw new NotSupportedException("仅支持C#原生数据类型转换"); }
             switch (csharpType.Name.ToLowerInvariant())
             {
                 case "int":
@@ -112,33 +113,57 @@ namespace FlyingFive
         /// <summary>
         /// 判断类型是否为可空类型
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="type">System.Type实例</param>
         /// <returns></returns>
         public static bool IsNullableType(this Type type)
         {
             Type underlyingType = null;
-            return IsNullableType(type, out underlyingType);
+            return IsNullableType(type, ref underlyingType);
         }
 
         /// <summary>
         /// 判断类型是否为可空类型,是则返回该类型的实际类型
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="type">System.Type实例</param>
         /// <param name="underlyingType">可空类型</param>
         /// <returns></returns>
-        public static bool IsNullableType(this Type type, out Type underlyingType)
+        public static bool IsNullableType(this Type type, ref Type underlyingType)
         {
-            underlyingType = Nullable.GetUnderlyingType(type);
-            return underlyingType != null;
+            if (type == null) { throw new ArgumentNullException("参数type不能为null."); }
+            if (!type.IsGenericType) { return false; }
+            var actType = Nullable.GetUnderlyingType(type);
+            if (actType != null)
+            {
+                underlyingType = actType;
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 获取可空类型的实际值类型,如:int? => int
+        /// </summary>
+        /// <param name="type">System.Type实例</param>
+        /// <returns></returns>
+        public static Type GetUnderlyingType(this Type type)
+        {
+            if (type == null) { throw new ArgumentNullException("参数type不能为null."); }
+            Type underlyingType = null;
+            if (!IsNullableType(type, ref underlyingType))
+            {
+                underlyingType = type;
+            }
+            return underlyingType;
         }
 
         /// <summary>
         /// 是否泛型集合类型
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="type">System.Type实例</param>
         /// <returns></returns>
         public static bool IsGenericListType(this Type type)
         {
+            if (type == null) { throw new ArgumentNullException("参数type不能为null."); }
             var flag = type.IsGenericType &&
                 type.GetGenericTypeDefinition().GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>));
             return flag;
@@ -148,10 +173,11 @@ namespace FlyingFive
         /// <summary>
         /// 判断指定该类型是否为匿名类型
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="type">System.Type实例</param>
         /// <returns></returns>
         public static bool IsAnonymousType(this Type type)
         {
+            if (type == null) { throw new ArgumentNullException("参数type不能为null."); }
             const string csharpAnonPrefix = "<>f__AnonymousType";
             const string vbAnonPrefix = "VB$Anonymous";
             var typeName = type.Name;
@@ -159,28 +185,13 @@ namespace FlyingFive
         }
 
         /// <summary>
-        /// 获取可空类型的实际值类型,如:int? => int
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public static Type GetUnderlyingType(this Type type)
-        {
-            Type underlyingType;
-            if (!IsNullableType(type, out underlyingType))
-            {
-                underlyingType = type;
-            }
-            return underlyingType;
-        }
-
-        /// <summary>
         /// 判断一个类型是否存在默认的空参构造
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="type">System.Type实例</param>
         /// <returns></returns>
         public static bool HasDefaultEmptyConstructor(this Type type)
         {
-            if (type == null) { throw new ArgumentNullException("参数：type不能为null"); }
+            if (type == null) { throw new ArgumentNullException("参数type不能为null."); }
             var defaultConstructor = type.GetConstructor(Type.EmptyTypes);
             return defaultConstructor != null;
         }

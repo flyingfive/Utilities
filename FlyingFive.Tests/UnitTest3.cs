@@ -27,6 +27,11 @@ namespace FlyingFive.Tests
         [TestMethod]
         public void TestSerializationHelper()
         {
+            var a = new Nullable<int>(5);
+            var flag = typeof(int?).IsNullableType();
+            Type t = typeof(String);
+            flag = typeof(Int32).IsNullableType(ref t);
+            var tt2 = typeof(int?).GetUnderlyingType();
             var x = new Model() { FFullName = "liubq", FItemClassID = 12, FItemID = 11243, FModifyTime = new byte[] { 0x3f, 0x58, 0xe2 }, FName = "siss", UUID = Guid.NewGuid(), FNumber = "2.3.6.2.5" };
             var data = SerializationHelper.SerializeObjectToBytes(x);
             var x2 = SerializationHelper.DeserializeObjectFromBytes<Model>(data);
@@ -54,7 +59,7 @@ namespace FlyingFive.Tests
                 row.EndEdit();
                 dt.Rows.Add(row);
             }
-            var lst = dt.ToList<TestUser>(); 
+            var lst = dt.ToList<TestUser>();
 
         }
     }

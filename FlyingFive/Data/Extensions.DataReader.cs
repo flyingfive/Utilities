@@ -177,7 +177,7 @@ namespace FlyingFive.Data
             MethodInfo method = null;
             var isNullable = false;
             Type underlyingType = null;
-            isNullable = dataType.IsNullableType(out underlyingType);
+            isNullable = dataType.IsNullableType(ref underlyingType);
             if (isNullable) { dataType = underlyingType; }
             var name = string.Empty;
             if (dataType.IsEnum)
@@ -538,7 +538,7 @@ namespace FlyingFive.Data
         {
             var callMethod = new StackTrace().GetFrame(1).GetMethod();
             var returnType = callMethod.DeclaringType.GetMethod(callMethod.Name).ReturnType;
-            var isNullableType = returnType.IsNullableType(out returnType);
+            var isNullableType = returnType.IsNullableType(ref returnType);
             var typeName = isNullableType ? string.Format("Nullable<{0}>", returnType.FullName) : returnType.FullName;
             var dataType = reader.GetDataTypeName(ordinal);
             var fieldName = reader.GetName(ordinal);
