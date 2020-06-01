@@ -42,6 +42,8 @@ namespace FlyingFive.Tests
         [TestMethod]
         public void TestDataReader()
         {
+            var a = TT.a | TT.b;
+            var x = a.ToString();
             var code = Type.GetTypeCode(typeof(TestUser));
             var ss = typeof(string).IsSystemType();
             ss = typeof(TT).IsSystemType();
@@ -64,10 +66,13 @@ namespace FlyingFive.Tests
         }
     }
 
+    [Flags]
     public enum TT
     {
-        a = 1,
-        b = 2
+        a = 1 << 0,
+        b = 1 << 1,
+        c = 1 << 2,
+        d = 1 << 3
     }
 
     public class TestUser

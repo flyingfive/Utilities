@@ -35,13 +35,13 @@ namespace FlyingFive
         /// 计算文件MD5值（大文件请合理调整bufferSize参数）
         /// </summary>  
         /// <param name="fileInfo">文件地址</param>  
-        /// <param name="bufferSize">自定义缓冲区大小,单位：K，默认1K</param>  
+        /// <param name="bufferSize">自定义缓冲区大小,单位：KB，默认4K</param>  
         /// <returns>MD5Hash</returns>  
-        public static string MD5File(this FileInfo fileInfo, int bufferSize = 1024)
+        public static string MD5File(this FileInfo fileInfo, int bufferSize = 1024 * 4)
         {
             if (!fileInfo.Exists) { throw new ArgumentException(string.Format("文件<{0}>, 不存在.", fileInfo.FullName)); }
-            if (bufferSize <= 0) { bufferSize = 1024; }
-            bufferSize = 1024 * bufferSize;             //自定义缓冲区大小
+            if (bufferSize <= 0) { bufferSize = 1024 * 4; }
+            //bufferSize = 1024 * bufferSize;             //自定义缓冲区大小
             byte[] buffer = new byte[bufferSize];
             using (Stream inputStream = File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var hashAlgorithm = new MD5CryptoServiceProvider())
