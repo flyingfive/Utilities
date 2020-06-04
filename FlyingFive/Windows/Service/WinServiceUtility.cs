@@ -5,7 +5,7 @@ using System.Linq;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading;
-using FlyingFive.Windows.Service.Installer;
+using FlyingFive.Windows.Service.Installation;
 
 namespace FlyingFive.Windows.Service
 {
@@ -21,9 +21,10 @@ namespace FlyingFive.Windows.Service
         /// <returns></returns>
         public static bool CheckServiceInstalled(string serviceName)
         {
-            var existsService = ServiceController.GetServices().Where(s => s.ServiceName.Equals(serviceName)).SingleOrDefault();
+            var existsService = ServiceController.GetServices().Where(s => s.ServiceName.Equals(serviceName, StringComparison.CurrentCultureIgnoreCase)).SingleOrDefault();
             return existsService != null;
         }
+
         /// <summary>
         /// 安装Windows服务
         /// </summary>
@@ -31,7 +32,7 @@ namespace FlyingFive.Windows.Service
         /// <param name="svcName">服务名</param>
         /// <param name="displayName">显示名</param>
         /// <param name="description">描述</param>
-        /// <param name="dependencies">服务依赖项名称，如果存在(多个用,符号分隔)</param>
+        /// <param name="dependencies">服务依赖项名称，如果存在(多个用,分隔)</param>
         /// <returns></returns>
         public static bool InstallService(string exeFile, string svcName, string displayName, string description, string dependencies)
         {
@@ -42,6 +43,30 @@ namespace FlyingFive.Windows.Service
             var serviceInstallInfo = new WindowsServiceInstallInfo(svcName, displayName, description, fileInfo.DirectoryName, fileInfo.Name, "Automatic");
             var installUtil = new WindowsServiceInstallUtil(serviceInstallInfo);
             var succeed = installUtil.Install(dependencies);
+            return succeed;
+        }
+
+        /// <summary>
+        /// 通过FlyingFive.dll代为安装Windows服务
+        /// </summary>
+        /// <param name="exeFile">实际的exe文件全路径</param>
+        /// <param name="svcName">服务名</param>
+        /// <param name="displayName">显示名</param>
+        /// <param name="description">描述</param>
+        /// <param name="dependencies">服务依赖项名称，如果存在(多个用,分隔)</param>
+        /// <param name="startArgs">服务启动参数，如果存在(多个用空格分隔)</param>
+        /// <returns></returns>
+        public static bool InstallFlyingWindowsService(string exeFile, string svcName, string displayName, string description, string dependencies, string startArgs)
+        {
+            if (string.IsNullOrWhiteSpace(exeFile) || string.IsNullOrWhiteSpace(svcName)) { return false; }
+            if (!File.Exists(exeFile)) { return false; }
+            var dllFile = Path.Combine(Path.GetDirectoryName(exeFile), "FlyingFive.dll");
+            if (!File.Exists(dllFile)) { return false; }
+            if (string.IsNullOrWhiteSpace(displayName)) { displayName = svcName; }
+            //var fileInfo = new FileInfo(exeFile);
+            var serviceInstallInfo = new WindowsServiceInstallInfo(svcName, displayName, description, Path.GetDirectoryName(dllFile), dllFile, "Automatic");
+            var installUtil = new WindowsServiceInstallUtil(serviceInstallInfo);
+            var succeed = installUtil.InstallFlyingWinService(exeFile, dependencies, startArgs);
             return succeed;
         }
 

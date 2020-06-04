@@ -45,7 +45,7 @@ namespace FlyingFive.Web.Utility
         }
 
         /// <summary>
-        /// 重启Web站点，不会重启w3wp进程。（重新进入Application_Start）
+        /// 重启Web站点，重新进入Application_Start而不重新创建w3wp进程
         /// </summary>
         /// <param name="makeRedirect"></param>
         /// <param name="redirectUrl"></param>
@@ -191,7 +191,7 @@ namespace FlyingFive.Web.Utility
         {
             if (!_trustLevel.HasValue)
             {
-                //set minimum
+                //初始化为没有权限
                 _trustLevel = AspNetHostingPermissionLevel.None;
                 var levels = new[] {
                     AspNetHostingPermissionLevel.Unrestricted,
@@ -200,14 +200,14 @@ namespace FlyingFive.Web.Utility
                     AspNetHostingPermissionLevel.Low,
                     AspNetHostingPermissionLevel.Minimal
                 };
-                //determine maximum
+                //从高到低，依次判断
                 foreach (AspNetHostingPermissionLevel trustLevel in levels)
                 {
                     try
                     {
                         new AspNetHostingPermission(trustLevel).Demand();
                         _trustLevel = trustLevel;
-                        break; //we've set the highest permission we can
+                        break;
                     }
                     catch (System.Security.SecurityException)
                     {

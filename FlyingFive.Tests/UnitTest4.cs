@@ -21,6 +21,7 @@ using FlyingFive.Comparing;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.IO;
+using System.ServiceProcess;
 
 namespace FlyingFive.Tests
 {

@@ -32,6 +32,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
+    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
@@ -123,9 +124,15 @@
     <Compile Include="Web\Utility\WebHelper.cs" />
     <Compile Include="Windows\Forms\Extensions.Control.cs" />
     <Compile Include="Windows\Forms\MsgBox.cs" />
-    <Compile Include="Windows\Service\Installer\WindowsServiceAccountType.cs" />
-    <Compile Include="Windows\Service\Installer\WindowsServiceInstallInfo.cs" />
-    <Compile Include="Windows\Service\Installer\WindowsServiceInstallUtil.cs" />
+    <Compile Include="Windows\Service\Installation\DynamicInstaller.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Windows\Service\Installation\DynamicInstaller.Designer.cs">
+      <DependentUpon>DynamicInstaller.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\Service\Installation\WindowsServiceAccountType.cs" />
+    <Compile Include="Windows\Service\Installation\WindowsServiceInstallInfo.cs" />
+    <Compile Include="Windows\Service\Installation\WindowsServiceInstallUtil.cs" />
     <Compile Include="Data\Drivers\SqlServer\SqlServerInstallationChecker.cs" />
     <Compile Include="Windows\Win32Api.cs" />
     <Compile Include="Windows\CommandUtility.cs" />

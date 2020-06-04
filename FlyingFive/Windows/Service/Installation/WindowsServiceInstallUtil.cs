@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace FlyingFive.Windows.Service.Installer
+namespace FlyingFive.Windows.Service.Installation
 {
     /// <summary>
     /// 
@@ -51,13 +51,31 @@ namespace FlyingFive.Windows.Service.Installer
         }
 
         /// <summary>
-        /// 安装服务
+        /// 安装具体服务
         /// </summary>
-        /// <param name="dependencies">服务依赖项名称，如果存在(,分隔)</param>
+        /// <param name="dependencies">服务依赖项名称，如果存在(多个用,分隔)</param>
         /// <returns></returns>
         public bool Install(string dependencies)
         {
             return Install(_wsInstallInfo.InstallLogFile, dependencies);
+        }
+
+        /// <summary>
+        /// 通过FlyingFive.dll代为安装Windows服务
+        /// </summary>
+        /// <param name="exeFile">实际的exe文件全路径</param>
+        /// <param name="dependencies">服务依赖项名称，如果存在(多个用,分隔)</param>
+        /// <param name="startArgs">服务启动参数，如果存在(多个用空格分隔)</param>
+        /// <returns></returns>
+        public bool InstallFlyingWinService(string exeFile, string dependencies = "", string startArgs = "")
+        {
+            var installUtilArguments = GenerateInstallutilInstallArgs(_wsInstallInfo.InstallLogFile, dependencies);
+            installUtilArguments += " /target=\"" + exeFile + "\"";
+            if (!string.IsNullOrWhiteSpace(startArgs))
+            {
+                installUtilArguments += " /args=\"" + startArgs + "\"";
+            }
+            return CallInstallUtil(installUtilArguments);
         }
 
         /// <summary>

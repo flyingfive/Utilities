@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace FlyingFive.Windows.Service.Installer
+namespace FlyingFive.Windows.Service.Installation
 {
 
     /// <summary>
