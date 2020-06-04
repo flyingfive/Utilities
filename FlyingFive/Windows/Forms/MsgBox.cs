@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace FlyingFive.Win
+namespace FlyingFive.Windows.Forms
 {
     /// <summary>
     /// Winform消息提示框封装
@@ -94,7 +94,6 @@ namespace FlyingFive.Win
             if (!System.Windows.Forms.SystemInformation.UserInteractive) { return DialogResult.None; }
             if (string.IsNullOrEmpty(title)) { title = "提示"; }
             return MessageBox.Show(msg, title, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
-
         }
     }
 }

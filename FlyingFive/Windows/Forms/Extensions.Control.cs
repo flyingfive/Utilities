@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
-namespace FlyingFive.Win
+namespace FlyingFive.Windows.Forms
 {
     /// <summary>
     /// 提供winform控件扩展行为
@@ -65,7 +66,7 @@ namespace FlyingFive.Win
         /// </summary>
         /// <param name="control"></param>
         /// <param name="text"></param>
-        public static void SetCueText(this Control control, string text)
+        public static void SetWatermark(this Control control, string text)
         {
             if (string.IsNullOrWhiteSpace(text)) { return; }
             if (control == null) { throw new ArgumentNullException("参数：control不能为null."); }
@@ -77,13 +78,46 @@ namespace FlyingFive.Win
             {
                 control.Invoke(new Action<Control, string>((ctl, txt) =>
                 {
-                    Win32Api.SetCueText(ctl, text);
+                    SetCueText(ctl, text);
                 }), new object[] { control, text });
             }
             else
             {
-                Win32Api.SetCueText(control, text);
+                SetCueText(control, text);
             }
+        }
+
+
+
+        private const int EM_SETCUEBANNER = 0x1501;
+        private const int EM_GETCUEBANNER = 0x1502;
+
+        /// <summary>
+        /// 设置控件的水印提示文字
+        /// </summary>
+        /// <param name="control"></param>
+        /// <param name="text"></param>
+        internal static void SetCueText(Control control, string text)
+        {
+            if (control is ComboBox)
+            {
+                COMBOBOXINFO info = GetComboBoxInfo(control);
+                Win32Api.SendMessage(info.hwndItem, EM_SETCUEBANNER, 0, text);
+            }
+            else
+            {
+                Win32Api.SendMessage(control.Handle, EM_SETCUEBANNER, 0, text);
+            }
+        }
+
+        internal static COMBOBOXINFO GetComboBoxInfo(Control control)
+        {
+            COMBOBOXINFO info = new COMBOBOXINFO();
+            //a combobox is made up of three controls, a button, a list and textbox;  
+            //we want the textbox  
+            info.cbSize = Marshal.SizeOf(info);
+            Win32Api.GetComboBoxInfo(control.Handle, ref info);
+            return info;
         }
 
         ///// <summary>

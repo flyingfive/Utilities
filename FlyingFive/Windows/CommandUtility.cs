@@ -6,12 +6,12 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
 
-namespace FlyingFive.Win
+namespace FlyingFive.Windows
 {
     /// <summary>
-    /// windows工具
+    /// windows command命令行工具
     /// </summary>
-    public class WindowsUtility
+    public class CommandUtility
     {
         /// <summary>
         /// 运行Dos命令

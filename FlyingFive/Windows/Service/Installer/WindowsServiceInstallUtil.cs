@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace FlyingFive.Win.ServiceInstaller
+namespace FlyingFive.Windows.Service.Installer
 {
     /// <summary>
     /// 

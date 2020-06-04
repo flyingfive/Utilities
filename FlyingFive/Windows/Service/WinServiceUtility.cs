@@ -5,9 +5,9 @@ using System.Linq;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading;
-using FlyingFive.Win.ServiceInstaller;
+using FlyingFive.Windows.Service.Installer;
 
-namespace FlyingFive.Win
+namespace FlyingFive.Windows.Service
 {
     /// <summary>
     /// Windows服务工具

@@ -116,20 +116,20 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Singleton.cs" />
     <Compile Include="Utils\RandomHelper.cs" />
-    <Compile Include="Win\RegistryUtility.cs" />
+    <Compile Include="Windows\RegistryUtility.cs" />
     <Compile Include="Utils\SerializationHelper.cs" />
     <Compile Include="Data\SnowflakeId.cs" />
     <Compile Include="Web\Utility\WebAppTypeFinder.cs" />
     <Compile Include="Web\Utility\WebHelper.cs" />
-    <Compile Include="Win\Extensions.Control.cs" />
-    <Compile Include="Win\MsgBox.cs" />
-    <Compile Include="Win\ServiceInstaller\WindowsServiceAccountType.cs" />
-    <Compile Include="Win\ServiceInstaller\WindowsServiceInstallInfo.cs" />
-    <Compile Include="Win\ServiceInstaller\WindowsServiceInstallUtil.cs" />
+    <Compile Include="Windows\Forms\Extensions.Control.cs" />
+    <Compile Include="Windows\Forms\MsgBox.cs" />
+    <Compile Include="Windows\Service\Installer\WindowsServiceAccountType.cs" />
+    <Compile Include="Windows\Service\Installer\WindowsServiceInstallInfo.cs" />
+    <Compile Include="Windows\Service\Installer\WindowsServiceInstallUtil.cs" />
     <Compile Include="Data\Drivers\SqlServer\SqlServerInstallationChecker.cs" />
-    <Compile Include="Win\Win32Api.cs" />
-    <Compile Include="Win\WindowsUtility.cs" />
-    <Compile Include="Win\WinServiceUtility.cs" />
+    <Compile Include="Windows\Win32Api.cs" />
+    <Compile Include="Windows\CommandUtility.cs" />
+    <Compile Include="Windows\Service\WinServiceUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\Extensions.DatabaseHelper.cs" />
