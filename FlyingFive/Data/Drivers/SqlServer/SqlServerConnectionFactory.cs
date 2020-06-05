@@ -13,6 +13,9 @@ namespace FlyingFive.Data.Drivers.SqlServer
     public class SqlServerConnectionFactory : IDbConnectionFactory
     {
         public string ConnectionString { get; private set; }
+
+        public DatabaseDriverType DriverType { get { return DatabaseDriverType.MsSql; } }
+
         public SqlServerConnectionFactory(string connectionString)
         {
             if (string.IsNullOrWhiteSpace(connectionString)) { throw new ArgumentException("参数: connectionString无效!"); }

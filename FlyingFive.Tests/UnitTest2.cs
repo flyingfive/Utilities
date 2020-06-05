@@ -92,6 +92,7 @@ namespace FlyingFive.Tests
             {
                 var connectionString = "Data Source=173.31.15.53,2012;Initial Catalog=Northwind;User Id=sa;Password=sa;";
                 var dbHelper = new MsSqlHelper(connectionString);
+                var listaa = dbHelper.FindSqlParameters("select * from a where name=@name and test= @test");//, new { name = "aaa", test = "fff" });
                 var result = CodePerformanceTester.Test((() =>
                 {
                     using (var connection = new SqlConnection(connectionString))

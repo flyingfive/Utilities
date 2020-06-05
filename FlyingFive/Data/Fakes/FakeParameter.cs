@@ -168,9 +168,9 @@ namespace FlyingFive.Data.Fakes
         /// </summary>
         /// <param name="sql">SQL文本</param>
         /// <returns></returns>
-        public static IList<string> FindQueryParmeters(string sql)
+        public static List<string> FindQueryParmeters(string sql)
         {
-            IList<string> lst = new List<string>();
+            var lst = new List<string>();
             //修正正则表达式匹配参数时，Sql中包括@@rowcount之类的变量的情况，不应该算作参数
             Regex paramReg = new Regex(@"[^@@](?<p>@\w+)");
             MatchCollection matches = paramReg.Matches(String.Concat(sql, " "));

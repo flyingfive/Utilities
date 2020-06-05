@@ -79,4 +79,29 @@ namespace FlyingFive.Data
             return msg;
         }
     }
+
+    /// <summary>
+    /// 数据库驱动类型
+    /// </summary>
+    [Flags]
+    public enum DatabaseDriverType
+    {
+        /// <summary>
+        /// MS SQLServer
+        /// </summary>
+        MsSql = 1 << 0,
+        /// <summary>
+        /// MySql
+        /// </summary>
+        MySql = 1 << 1,
+        /// <summary>
+        /// Oracle
+        /// </summary>
+        Oracle = 1 << 2,
+        /// <summary>
+        /// SQLite
+        /// </summary>
+        SQLite = 1 << 3,
+        //OleDB = 1 << 4
+    }
 }

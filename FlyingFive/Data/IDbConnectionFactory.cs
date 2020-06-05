@@ -12,6 +12,10 @@ namespace FlyingFive.Data
     public interface IDbConnectionFactory
     {
         /// <summary>
+        /// DB驱动类型
+        /// </summary>
+        DatabaseDriverType DriverType { get; }
+        /// <summary>
         /// 创建DB连接的字符串
         /// </summary>
         string ConnectionString { get; }

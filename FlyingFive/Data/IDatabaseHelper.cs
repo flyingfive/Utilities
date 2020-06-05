@@ -9,14 +9,18 @@ using System.Text;
 namespace FlyingFive.Data
 {
     /// <summary>
-    /// DB工具
+    /// DB辅助工具接口
     /// </summary>
     public interface IDatabaseHelper : IDisposable
     {
         /// <summary>
-        /// 会话是否在事务处理中
+        /// DB工具是否在事务处理过程中
         /// </summary>
         bool IsInTransaction { get; }
+        /// <summary>
+        /// DB辅助工具中当前正在执行的内部事务
+        /// </summary>
+        IDbTransaction UnderlyingTransaction { get; }
         /// <summary>
         /// 该会话下的数据库操作超时时间(单位：秒)
         /// </summary>
@@ -48,12 +52,12 @@ namespace FlyingFive.Data
         /// <summary>
         /// 开始事务
         /// </summary>
-        void BeginTransaction();
+        IDbTransaction BeginTransaction();
         /// <summary>
         /// 开始事务
         /// </summary>
         /// <param name="il"></param>
-        void BeginTransaction(IsolationLevel il);
+        IDbTransaction BeginTransaction(IsolationLevel il);
         /// <summary>
         /// 提交事务
         /// </summary>

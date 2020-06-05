@@ -22,6 +22,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.IO;
 using System.ServiceProcess;
+using System.Management;
 
 namespace FlyingFive.Tests
 {
@@ -74,6 +75,7 @@ namespace FlyingFive.Tests
         [TestMethod]
         public void TestDisk()
         {
+            var dx= DriveInfo.GetDrives();
             var root = Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory);
             var disk = AtapiDevice.GetHddInfo(0);
             var disk2 = AtapiDevice.GetHddInfo(1);

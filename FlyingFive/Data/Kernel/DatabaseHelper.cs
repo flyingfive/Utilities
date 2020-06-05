@@ -35,6 +35,8 @@ namespace FlyingFive.Data.Kernel
 
         public bool IsInTransaction { get { return this.CommonSession.IsInTransaction; } }
 
+        public IDbTransaction UnderlyingTransaction { get { return this.CommonSession.Transaction; } }
+
         public int CommandTimeout { get { return this.CommonSession.CommandTimeout; } set { this.CommonSession.CommandTimeout = value; } }
 
         public DatabaseHelper(IDbConnectionFactory connectionFactory)
@@ -58,14 +60,16 @@ namespace FlyingFive.Data.Kernel
             return this.CommonSession.ExecuteReader(cmdText, cmdType, parameters);
         }
 
-        public void BeginTransaction()
+        public IDbTransaction BeginTransaction()
         {
             this.CommonSession.BeginTransaction(null);
+            return this.CommonSession.Transaction;
         }
 
-        public void BeginTransaction(IsolationLevel il)
+        public IDbTransaction BeginTransaction(IsolationLevel il)
         {
             this.CommonSession.BeginTransaction(il);
+            return this.CommonSession.Transaction;
         }
 
         public void CommitTransaction()

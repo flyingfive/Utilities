@@ -18,6 +18,11 @@ namespace FlyingFive.Data.Drivers.SqlServer
     /// </summary>
     public class MsSqlHelper : DatabaseHelper, IDatabaseHelper
     {
+        /// <summary>
+        /// SQL服务器版本
+        /// </summary>
+        public SqlServerVersion Version { get; private set; }
+
         public MsSqlHelper(string connectionString)
             : this(new SqlServerConnectionFactory(connectionString))
         {
@@ -105,10 +110,6 @@ namespace FlyingFive.Data.Drivers.SqlServer
                 }
             }
         }
-        /// <summary>
-        /// SQL服务器版本
-        /// </summary>
-        public SqlServerVersion Version { get; private set; }
 
         private static bool? _hasSchemaViewCreated = false;
 

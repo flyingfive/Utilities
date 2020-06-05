@@ -16,7 +16,10 @@ namespace FlyingFive.Data.Kernel
         private bool _disposed = false;
 
         private IDbConnection _dbConnection = null;
-        private IDbTransaction _dbTransaction = null;
+        /// <summary>
+        /// 内部事务对象
+        /// </summary>
+        internal IDbTransaction Transaction { get; private set; }
         /// <summary>
         /// 会话是否在事务处理中
         /// </summary>
@@ -178,11 +181,11 @@ namespace FlyingFive.Data.Kernel
         public void Dispose()
         {
             if (this._disposed) { return; }
-            if (this._dbTransaction != null && this.IsInTransaction)
+            if (this.Transaction != null && this.IsInTransaction)
             {
                 try
                 {
-                    this._dbTransaction.Rollback();
+                    this.Transaction.Rollback();
                 }
                 catch
                 {
@@ -207,11 +210,11 @@ namespace FlyingFive.Data.Kernel
             this.Activate();
             if (il.HasValue)
             {
-                this._dbTransaction = this._dbConnection.BeginTransaction(il.Value);
+                this.Transaction = this._dbConnection.BeginTransaction(il.Value);
             }
             else
             {
-                this._dbTransaction = this._dbConnection.BeginTransaction();
+                this.Transaction = this._dbConnection.BeginTransaction();
             }
             this.IsInTransaction = true;
         }
@@ -221,11 +224,11 @@ namespace FlyingFive.Data.Kernel
         /// </summary>
         public void CommitTransaction()
         {
-            if (!this.IsInTransaction || this._dbTransaction == null)
+            if (!this.IsInTransaction || this.Transaction == null)
             {
                 throw new DataAccessException("当前会话没有开启事务.");
             }
-            this._dbTransaction.Commit();
+            this.Transaction.Commit();
             this.ReleaseTransaction();
             this.Complete();
         }
@@ -235,11 +238,11 @@ namespace FlyingFive.Data.Kernel
         /// </summary>
         public void RollbackTransaction()
         {
-            if (!this.IsInTransaction || this._dbTransaction == null)
+            if (!this.IsInTransaction || this.Transaction == null)
             {
                 throw new DataAccessException("当前会话没有开启事务.");
             }
-            this._dbTransaction.Rollback();
+            this.Transaction.Rollback();
             this.ReleaseTransaction();
             this.Complete();
         }
@@ -249,8 +252,8 @@ namespace FlyingFive.Data.Kernel
         /// </summary>
         private void ReleaseTransaction()
         {
-            this._dbTransaction.Dispose();
-            this._dbTransaction = null;
+            this.Transaction.Dispose();
+            this.Transaction = null;
             this.IsInTransaction = false;
         }
 
@@ -263,9 +266,9 @@ namespace FlyingFive.Data.Kernel
             command.CommandText = cmdText;
             command.CommandType = cmdType;
             command.CommandTimeout = this.CommandTimeout;
-            if (this.IsInTransaction && this._dbTransaction != null)
+            if (this.IsInTransaction && this.Transaction != null)
             {
-                command.Transaction = this._dbTransaction;
+                command.Transaction = this.Transaction;
             }
             if (parameters == null || parameters.Length <= 0) { return command; }
             foreach (var fakeParameter in parameters)
