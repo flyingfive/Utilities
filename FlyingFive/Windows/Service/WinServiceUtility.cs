@@ -54,16 +54,16 @@ namespace FlyingFive.Windows.Service
         /// <param name="displayName">显示名</param>
         /// <param name="description">描述</param>
         /// <param name="dependencies">服务依赖项名称，如果存在(多个用,分隔)</param>
-        /// <param name="startArgs">服务启动参数，如果存在(多个用空格分隔)</param>
+        /// <param name="startArgs">服务启动参数，如果存在(多个用,分隔。格式：key1=value1,key2=value2形式)</param>
         /// <returns></returns>
-        public static bool InstallFlyingWindowsService(string exeFile, string svcName, string displayName, string description, string dependencies, string startArgs)
+        public static bool InstallFlyingWindowsService(string exeFile, string svcName, string displayName, string description, string dependencies, string startArgs = "")
         {
-            if (string.IsNullOrWhiteSpace(exeFile) || string.IsNullOrWhiteSpace(svcName)) { return false; }
-            if (!File.Exists(exeFile)) { return false; }
+            if (string.IsNullOrWhiteSpace(exeFile) || string.IsNullOrWhiteSpace(svcName)) { throw new ArgumentException("未提供参数exeFile、svcName"); }
+            if (!File.Exists(exeFile)) { throw new FileNotFoundException(string.Format("文件{0}不存在。", exeFile)); }
             var dllFile = Path.Combine(Path.GetDirectoryName(exeFile), "FlyingFive.dll");
-            if (!File.Exists(dllFile)) { return false; }
+            if (!File.Exists(dllFile)) { throw new InvalidOperationException("服务程序未引用FlyingFive组件。"); }
             if (string.IsNullOrWhiteSpace(displayName)) { displayName = svcName; }
-            //var fileInfo = new FileInfo(exeFile);
+            //将FlyingFive.dll注册为windwos服务程序集，后面根据target参数在AfterInstall后修改正确的服务程序入口文件
             var serviceInstallInfo = new WindowsServiceInstallInfo(svcName, displayName, description, Path.GetDirectoryName(dllFile), dllFile, "Automatic");
             var installUtil = new WindowsServiceInstallUtil(serviceInstallInfo);
             var succeed = installUtil.InstallFlyingWinService(exeFile, dependencies, startArgs);

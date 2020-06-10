@@ -90,11 +90,11 @@ namespace FlyingFive.Windows.Service.Installation
             _commandLine = Environment.CommandLine;
             WriteLog("Environment.CommandLine=" + _commandLine);
             _commandArgs = _commandLine.Split(new string[] { "/" }, StringSplitOptions.RemoveEmptyEntries).ToArray().Skip(1).Select(x => x.Trim()).ToArray();
-            this.ServiceName = GetInstallArgument("name=");
-            this.DisplayName = GetInstallArgument("displayname=");
-            this.Description = GetInstallArgument("desc=");
+            this.ServiceName = GetInstallArgument("name");
+            this.DisplayName = GetInstallArgument("displayname");
+            this.Description = GetInstallArgument("desc");
 
-            var dependencies = GetInstallArgument("dependencies="); //服务依赖项
+            var dependencies = GetInstallArgument("dependencies"); //服务依赖项
             if (!string.IsNullOrWhiteSpace(dependencies))
             {
                 var dependencyServiceName = dependencies.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -110,10 +110,11 @@ namespace FlyingFive.Windows.Service.Installation
             this.AfterInstall += DynamicInstaller_AfterInstall;
         }
 
-        private string GetInstallArgument(string key)
+        private string GetInstallArgument(string argumentName)
         {
-            var value = _commandArgs.Where(x => x.StartsWith(key, StringComparison.CurrentCultureIgnoreCase)).SingleOrDefault();//.Substring(key.Length);
-            if (!string.IsNullOrEmpty(value)) { value = value.Substring(key.Length); }
+            if (!argumentName.EndsWith("=")) { argumentName = string.Concat(argumentName, "="); }
+            var value = _commandArgs.Where(x => x.StartsWith(argumentName, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault();
+            if (!string.IsNullOrEmpty(value)) { value = value.Substring(argumentName.Length); }
             if (value.StartsWith("\"")) { value = value.Substring(1); }
             if (value.EndsWith("\"")) { value = value.Substring(0, value.Length - 1); }
             return value;
@@ -123,20 +124,27 @@ namespace FlyingFive.Windows.Service.Installation
         {
             try
             {
+                var registryPath = string.Format(@"SYSTEM\CurrentControlSet\services\{0}", this._serviceInstaller.ServiceName);
+                var binFile = string.Empty;
+                binFile = RegistryUtility.ReadRegistryValue(RegistryHive.LocalMachine, registryPath, "ImagePath");
+                if (string.IsNullOrEmpty(binFile)) { return; }
+
                 //通过注册表修改服务实际的启动文件和参数
                 var target = GetInstallArgument("target=");
                 var args = GetInstallArgument("args=");
-                if (!string.IsNullOrWhiteSpace(target) || !string.IsNullOrWhiteSpace(args))
+                if (!string.IsNullOrWhiteSpace(target))// || !string.IsNullOrWhiteSpace(args))
                 {
-                    var registryPath = string.Format(@"SYSTEM\CurrentControlSet\services\{0}", this._serviceInstaller.ServiceName);
-                    var binFile = string.Empty;
-                    binFile = RegistryUtility.ReadRegistryValue(RegistryHive.LocalMachine, registryPath, "ImagePath");
-                    if (string.IsNullOrEmpty(binFile)) { return; }
                     if (binFile.StartsWith("\"")) { binFile = binFile.Substring(1); }
                     if (binFile.EndsWith("\"")) { binFile = binFile.Substring(0, binFile.Length - 1); }
-                    var command = string.Format("{0} -{1}", string.IsNullOrWhiteSpace(target) || !File.Exists(target) ? binFile : target, args);
-                    RegistryUtility.WriteRegistryValue(RegistryHive.LocalMachine, registryPath, "ImagePath", command);
+                    binFile = string.IsNullOrWhiteSpace(target) || !File.Exists(target) ? binFile : target;
                 }
+                if (!string.IsNullOrEmpty(args))
+                {
+                    args = string.Join(" ", args.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(c => string.Concat("/", c)));
+                    binFile = string.Format("{0} {1}", binFile, args);
+                }
+                //var command = string.Format("{0} -{1}", binFile, args);
+                RegistryUtility.WriteRegistryValue(RegistryHive.LocalMachine, registryPath, "ImagePath", binFile);
             }
             catch (Exception ex)
             {
