@@ -167,7 +167,7 @@ namespace FlyingFive.Windows.Service.Installation
             {
                 if (string.IsNullOrEmpty(WindowsServicePath) || string.IsNullOrEmpty(WindowsServiceAssemblyName))
                 {
-                    return @"C:\winService.install.log";
+                    return Path.Combine(Path.GetPathRoot(Environment.SystemDirectory), "winService.install.log");
                 }
                 var logFile = Path.Combine(WindowsServicePath, WindowsServiceAssemblyName + ".install.log");
                 return logFile;
