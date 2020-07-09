@@ -22,7 +22,15 @@ namespace FlyingFive.Windows
         [DllImport("user32.dll")]
         internal static extern bool GetComboBoxInfo(IntPtr hwnd, ref COMBOBOXINFO pcbi);
 
-
+        /// <summary>
+        /// 将进程中的内存数据转移到pagefile.sys（磁盘上的内存交互文件）
+        /// </summary>
+        /// <param name="process">进程句柄</param>
+        /// <param name="minSize"></param>
+        /// <param name="maxSize"></param>
+        /// <returns></returns>
+        [DllImport("kernel32.dll", EntryPoint = "SetProcessWorkingSetSize")]
+        public static extern int SetProcessWorkingSetSize(IntPtr process, int minSize, int maxSize);
     }
 
 

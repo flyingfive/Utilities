@@ -5,6 +5,7 @@ using System.Management;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Text;
+using FlyingFive.Windows;
 
 namespace FlyingFive.Utils
 {
@@ -295,22 +296,41 @@ namespace FlyingFive.Utils
         /// <summary>
         /// 检测电脑是否有ineternet连接
         /// </summary>
+        /// <param name="domain">检查域名或IP地址</param>
         /// <param name="timeout">检查超时毫秒</param>
         /// <returns></returns>
-        public static bool CheckInternetConnection(int timeout = 3000)
+        public static bool CheckInternetConnection(string domain = "wwww.baidu.com", int timeout = 3000)
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(domain)) { domain = "www.baidu.com"; }
                 if (timeout <= 0) { timeout = 3000; }
                 using (var ping = new Ping())
                 {
-                    var reply = ping.Send("www.baidu.com", timeout);
+                    var reply = ping.Send(domain, timeout);
                     return reply.Status == IPStatus.Success;
                 }
             }
             catch
             {
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// 释放内存压力
+        /// </summary>
+        /// <param name="usePagefile">是否转换内存数据到物理磁盘上的交换文件</param>
+        public static void FreeMemory(bool usePagefile = false)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                if (usePagefile)
+                {
+                    Win32Api.SetProcessWorkingSetSize(System.Diagnostics.Process.GetCurrentProcess().Handle, -1, -1);
+                }
             }
         }
     }
