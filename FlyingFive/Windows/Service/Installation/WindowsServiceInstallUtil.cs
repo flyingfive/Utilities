@@ -65,12 +65,14 @@ namespace FlyingFive.Windows.Service.Installation
         /// </summary>
         /// <param name="exeFile">实际的exe文件全路径</param>
         /// <param name="dependencies">服务依赖项名称，如果存在(多个用,分隔)</param>
-        /// <param name="startArgs">服务启动参数，如果存在(多个用空格分隔)</param>
+        /// <param name="startArgs">服务启动参数，如果存在(多个用,分隔。key1=value1,key2=value2形式)</param>
         /// <returns></returns>
-        public bool InstallFlyingWinService(string exeFile, string dependencies = "", string startArgs = "")
+        internal bool InstallFlyingWinService(string exeFile, string dependencies = "", string startArgs = null)
         {
             var installUtilArguments = GenerateInstallutilInstallArgs(_wsInstallInfo.InstallLogFile, dependencies);
+            //指定target参数
             installUtilArguments += " /target=\"" + exeFile + "\"";
+            //指定服务启动参数
             if (!string.IsNullOrWhiteSpace(startArgs))
             {
                 installUtilArguments += " /args=\"" + startArgs + "\"";
