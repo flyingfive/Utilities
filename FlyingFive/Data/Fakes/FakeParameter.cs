@@ -50,9 +50,9 @@ namespace FlyingFive.Data.Fakes
         /// </summary>
         public IDbDataParameter ExplicitParameter { get; set; }
 
-        public FakeParameter() { }
+        public FakeParameter() { ParameterDirection = ParameterDirection.Input; }
 
-        public FakeParameter(string name, object value)
+        public FakeParameter(string name, object value) : this()
         {
             this.Name = name;
             this.Value = value;
@@ -64,10 +64,8 @@ namespace FlyingFive.Data.Fakes
         /// <param name="name">参数名称</param>
         /// <param name="value">参数值</param>
         /// <param name="type">参数类型</param>
-        public FakeParameter(string name, object value, Type type)
+        public FakeParameter(string name, object value, Type type) : this(name, value)
         {
-            this.Name = name;
-            this.Value = value;
             this.DataType = type;
         }
 

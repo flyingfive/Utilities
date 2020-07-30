@@ -28,7 +28,15 @@ namespace FlyingFive.Data
         {
             if (dbHelper == null) { throw new ArgumentNullException("dbHelper"); }
             if (string.IsNullOrWhiteSpace(plainSql)) { throw new ArgumentException("plainSql"); }
-            var parameters = dbHelper.CreateParameters(plainSql, instance);
+            List<FakeParameter> parameters = null;
+            if (cmdType == CommandType.Text)
+            {
+                parameters = dbHelper.CreateParameters(plainSql, instance);
+            }
+            if(cmdType == CommandType.StoredProcedure)
+            {
+                parameters = dbHelper.CreateParameters(instance);
+            }
             using (var reader = dbHelper.ExecuteReader(plainSql, cmdType, parameters.ToArray()))
             {
                 var list = reader.AsEnumerable<T>().ToList();
@@ -47,7 +55,15 @@ namespace FlyingFive.Data
         {
             if (dbHelper == null) { throw new ArgumentNullException("dbHelper"); }
             if (string.IsNullOrWhiteSpace(plainSql)) { throw new ArgumentException("plainSql"); }
-            var parameters = dbHelper.CreateParameters(plainSql, instance);
+            List<FakeParameter> parameters = null;
+            if (cmdType == CommandType.Text)
+            {
+                parameters = dbHelper.CreateParameters(plainSql, instance);
+            }
+            if (cmdType == CommandType.StoredProcedure)
+            {
+                parameters = dbHelper.CreateParameters(instance);
+            }
             var cnt = dbHelper.ExecuteNonQuery(plainSql, cmdType, parameters.ToArray());
             return cnt;
         }
@@ -65,6 +81,7 @@ namespace FlyingFive.Data
             var driverType = (dbHelper as DatabaseHelper).DbConnectionFactory.DriverType;
             switch (driverType)
             {
+                case DatabaseDriverType.SQLite:
                 case DatabaseDriverType.MsSql: return FakeMsSqlParameter.FindQueryParmeters(plainSql);
                 //todo:其它驱动待完善补充...
                 default: throw new NotImplementedException();
@@ -74,8 +91,8 @@ namespace FlyingFive.Data
         /// <summary>
         /// 根据参数列表从数据对象中创建查询参数
         /// </summary>
-        /// <param name="paramNames"></param>
-        /// <param name="instance"></param>
+        /// <param name="plainSql">原生SQL脚本</param>
+        /// <param name="instance">包含参数的数据对象</param>
         /// <returns></returns>
         public static List<FakeParameter> CreateParameters(this IDatabaseHelper dbHelper, string plainSql, object instance)
         {
@@ -97,6 +114,33 @@ namespace FlyingFive.Data
                     if (prop == null) { throw new FormatException(string.Format("参数生成失败:数据对象没有指定的成员[{0}]", pName)); }
                     var pValue = prop.getter(instance);
                     var param = new FakeParameter(pName, pValue);
+                    parameters.Add(param);
+                }
+            }
+            return parameters;
+        }
+
+
+        /// <summary>
+        /// 从数据对象中创建DB伪装参数
+        /// </summary>
+        /// <param name="instance">数据对象</param>
+        /// <returns></returns>
+        public static List<FakeParameter> CreateParameters(this IDatabaseHelper dbHelper, object instance)
+        {
+            if (dbHelper == null) { throw new ArgumentNullException("dbHelper"); }
+            if (instance == null)
+            {
+                throw new FormatException("参数生成失败：没有提供必要的数据对象。");
+            }
+            var parameters = new List<FakeParameter>();
+            if (instance != null)
+            {
+                var properties = instance.GetType().GetProperties().Where(p => p.CanRead).Select(p => new { Name = string.Format("@{0}", p.Name), getter = DelegateGenerator.CreateValueGetter(p) });
+                foreach (var prop in properties)
+                {
+                    var pValue = prop.getter(instance);
+                    var param = new FakeParameter(prop.Name, pValue);
                     parameters.Add(param);
                 }
             }
