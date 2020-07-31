@@ -96,6 +96,16 @@ namespace FlyingFive
                 }
                 else
                 {
+                    if (destinationType.IsNullableType())
+                    {
+                        destinationType = destinationType.GetUnderlyingType();
+                        if (sourceType == destinationType) { return srcValue; }
+                        destinationConverter = TypeDescriptor.GetConverter(destinationType);
+                        if (destinationConverter.IsValid(srcValue))
+                        {
+                            return destinationConverter.ConvertFrom(srcValue);
+                        }
+                    }
                     if (sourceType == typeof(String) && destinationType == typeof(Boolean))
                     {
                         return srcValue.ToString().IsTrue();
