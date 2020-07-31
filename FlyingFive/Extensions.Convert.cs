@@ -88,6 +88,20 @@ namespace FlyingFive
             if (sourceType == destinationType) { return srcValue; }
             var destinationConverter = TypeDescriptor.GetConverter(destinationType);
             var sourceConverter = TypeDescriptor.GetConverter(sourceType);
+            if (destinationType.IsNullableType())
+            {
+                var underlyingType = destinationType.GetUnderlyingType();
+                if (sourceType == underlyingType) { return srcValue; }
+                var underlyingTypeConverter = TypeDescriptor.GetConverter(underlyingType);
+                if (underlyingTypeConverter != null && underlyingTypeConverter.IsValid(srcValue))
+                {
+                    return underlyingTypeConverter.ConvertFrom(srcValue);
+                }
+                if (sourceType == typeof(String) && underlyingType == typeof(Boolean))
+                {
+                    return srcValue.ToString().IsTrue();
+                }
+            }
             if (destinationConverter != null && destinationConverter.CanConvertFrom(sourceType))
             {
                 if (destinationConverter.IsValid(srcValue))
@@ -96,16 +110,6 @@ namespace FlyingFive
                 }
                 else
                 {
-                    if (destinationType.IsNullableType())
-                    {
-                        destinationType = destinationType.GetUnderlyingType();
-                        if (sourceType == destinationType) { return srcValue; }
-                        destinationConverter = TypeDescriptor.GetConverter(destinationType);
-                        if (destinationConverter.IsValid(srcValue))
-                        {
-                            return destinationConverter.ConvertFrom(srcValue);
-                        }
-                    }
                     if (sourceType == typeof(String) && destinationType == typeof(Boolean))
                     {
                         return srcValue.ToString().IsTrue();
