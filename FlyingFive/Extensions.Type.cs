@@ -33,13 +33,21 @@ namespace FlyingFive
         /// <returns></returns>
         public static bool IsUserType(this Type type)
         {
-            type = type.GetUnderlyingType();
-            if (type.IsPrimitive) { return false; }
-            if (type.IsEnum) { return false; }
-            if (type.IsArray && type.HasElementType && type.GetElementType().IsPrimitive) { return false; }
-            var code = Type.GetTypeCode(type);
-            var flag = code == TypeCode.Object && type != typeof(object) && !DataTypeExtension.SystemDataTypeName.Contains(code.ToString());
-            return flag;
+            //type = type.GetUnderlyingType();
+            //if (type.IsPrimitive) { return false; }
+            //if (type.IsEnum) { return false; }
+            //if (type.IsArray && type.HasElementType && type.GetElementType().IsPrimitive) { return false; }
+            //var code = Type.GetTypeCode(type);
+            //if (code != TypeCode.Object)
+            //{
+            //    return !DataTypeExtension.SystemDataTypeName.Contains(code.ToString());
+            //}
+            //if (type == typeof(Guid) || type == typeof(System.Numerics.BigInteger))
+            //{
+            //    return false;
+            //}
+            //return true;
+            return !IsSystemType(type);
         }
 
         /// <summary>
@@ -54,7 +62,11 @@ namespace FlyingFive
             if (type.IsEnum) { return true; }
             if (type.IsArray && type.HasElementType && type.GetElementType().IsPrimitive) { return true; }
             var code = Type.GetTypeCode(type);
-            return type.Namespace.StartsWith("System") && DataTypeExtension.SystemDataTypeName.Contains(code.ToString());
+            if (code == TypeCode.Object)
+            {
+                return type == typeof(Guid) || type == typeof(System.Numerics.BigInteger);
+            }
+            return DataTypeExtension.SystemDataTypeName.Contains(code.ToString());
         }
 
         /// <summary>
@@ -206,7 +218,7 @@ namespace FlyingFive
         /// 系统的数据类型名称
         /// </summary>
         public static readonly string[] SystemDataTypeName = Enum.GetNames(typeof(TypeCode))
-                .Except(new string[] { "Empty", "Object" })                             //除掉这2个类型
-                .Concat(new string[] { "BigInteger", "Guid" }).ToArray();               //加上这2个类型
+                .Except(new string[] { "Empty", "Object" }).ToArray();                             //除掉这2个类型
+                //.Concat(new string[] { "BigInteger", "System.Guid" }).ToArray();               //加上这2个类型
     }
 }
