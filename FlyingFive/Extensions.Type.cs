@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -67,6 +68,18 @@ namespace FlyingFive
                 return type == typeof(Guid) || type == typeof(System.Numerics.BigInteger);
             }
             return DataTypeExtension.SystemDataTypeName.Contains(code.ToString());
+        }
+        /// <summary>
+        /// 类型是否为数字类型
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsNumericType(this Type type)
+        {
+            var code = Type.GetTypeCode(type);
+            return code == TypeCode.Int16 || code == TypeCode.Int32 || code == TypeCode.Int64 ||
+                code == TypeCode.Single || code == TypeCode.Double || code == TypeCode.Decimal ||
+                code == TypeCode.UInt16 || code == TypeCode.UInt32 || code == TypeCode.UInt64;
         }
 
         /// <summary>
@@ -219,6 +232,6 @@ namespace FlyingFive
         /// </summary>
         public static readonly string[] SystemDataTypeName = Enum.GetNames(typeof(TypeCode))
                 .Except(new string[] { "Empty", "Object" }).ToArray();                             //除掉这2个类型
-                //.Concat(new string[] { "BigInteger", "System.Guid" }).ToArray();               //加上这2个类型
+                                                                                                   //.Concat(new string[] { "BigInteger", "System.Guid" }).ToArray();               //加上这2个类型
     }
 }

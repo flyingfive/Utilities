@@ -110,9 +110,16 @@ namespace FlyingFive
                 }
                 else
                 {
-                    if (sourceType == typeof(String) && destinationType == typeof(Boolean))
+                    if (sourceType == typeof(String))
                     {
-                        return srcValue.ToString().IsTrue();
+                        if (destinationType == typeof(Boolean))
+                        {
+                            return srcValue.ToString().IsTrue();
+                        }
+                        if (destinationType.IsNumericType())
+                        {
+                            return srcValue.ToString().ToNumeric();
+                        }
                     }
                     throw new InvalidCastException(string.Format("值:{0}不能从类型{1}转换为:{2}", srcValue.ToString(), sourceType.FullName, destinationType.FullName));
                 }

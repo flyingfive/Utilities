@@ -169,6 +169,26 @@ namespace FlyingFive
             return flag;
         }
 
+        public static object ToNumeric(this string val)
+        {
+            if (string.IsNullOrEmpty(val)) { throw new InvalidCastException("空内容不能转换为数值"); }
+            var text = val.Replace(",", "").Replace("#", "");
+            if (text.IsInt(true))
+            {
+                return Convert.ToInt32(text);
+            }
+            if (text.IsDecimal(true))
+            {
+                var dec = Convert.ToDecimal(text);
+                if (Convert.ToInt32(text.Substring(text.IndexOf(".") + 1)) == 0)
+                {
+                    return decimal.ToInt32(dec);
+                }
+                return dec;
+            }
+            throw new ArgumentException("内容:{0}不是正确的数值", val);
+        }
+
         /// <summary>
         /// 指示字符串是否html内容
         /// </summary>
