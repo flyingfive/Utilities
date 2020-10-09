@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -69,7 +70,29 @@ namespace FlyingFive
             {
                 return Math.Truncate(d) + Math.Floor((d - Math.Truncate(d)) * sp) / sp;
             }
-        }        
+        }
+
+        /// <summary>
+        /// 传统四舍五入
+        /// </summary>
+        /// <param name="val"></param>
+        /// <param name="decimals">保留小数位数</param>
+        /// <returns></returns>
+        public static decimal Round(this decimal val, int decimals)
+        {
+            return Math.Round(val, decimals, MidpointRounding.AwayFromZero);
+        }
+
+        /// <summary>
+        /// 传统四舍五入
+        /// </summary>
+        /// <param name="val"></param>
+        /// <param name="decimals">保留小数位数</param>
+        /// <returns></returns>
+        public static double Round(this double val, int decimals)
+        {
+            return Math.Round(val, decimals, MidpointRounding.AwayFromZero);
+        }
 
         ///// <summary>
         ///// 字符串转换为decimal 
@@ -102,5 +125,29 @@ namespace FlyingFive
         //    if (trimEmpty) { str = str.Trim(); }
         //    return str;
         //}
+
+        /// <summary>
+        /// 获取枚举字段的Description描述标记说明
+        /// </summary>
+        /// <param name="enumValue"></param>
+        /// <returns></returns>
+        public static string GetDescription(this Enum enumValue)
+        {
+            var attr = enumValue.GetCustomAttribute<DescriptionAttribute>();
+            return attr == null ? string.Empty : attr.Description;
+        }
+
+        /// <summary>
+        /// 获取枚举字段的特性标记
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="enum"></param>
+        /// <returns></returns>
+        public static T GetEnumAttribute<T>(this Enum @enum) where T : System.Attribute
+        {
+            var field = @enum.GetType().GetField(@enum.ToString());
+            T attr = field.GetCustomAttribute<T>(false);
+            return attr;
+        }
     }
 }

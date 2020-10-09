@@ -40,6 +40,7 @@ namespace FlyingFive.Tests
                 var b = x.ToDBCChar();
             }
             Assert.AreEqual(flag, true);
+
             flag = 'C'.IsDoubleByte();
 
         }
