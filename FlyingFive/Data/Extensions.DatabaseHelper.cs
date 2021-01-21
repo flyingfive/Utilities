@@ -20,6 +20,7 @@ namespace FlyingFive.Data
         /// 执行原生SQL查询语句
         /// </summary>
         /// <typeparam name="T">返回数据类型</typeparam>
+        /// <param name="dbHelper">DB查询对象</param>
         /// <param name="plainSql">原生SQL查询脚本</param>
         /// <param name="instance">包含执行SQL脚本中的参数值对象</param>
         /// <param name="cmdType">命令类型</param>
@@ -47,6 +48,7 @@ namespace FlyingFive.Data
         /// <summary>
         /// 执行原生SQL命令语句
         /// </summary>
+        /// <param name="dbHelper">DB查询对象</param>
         /// <param name="plainSql">原生SQL命令脚本</param>
         /// <param name="instance">包含执行SQL脚本中的参数值对象</param>
         /// <param name="cmdType">命令类型</param>
@@ -91,6 +93,7 @@ namespace FlyingFive.Data
         /// <summary>
         /// 根据参数列表从数据对象中创建查询参数
         /// </summary>
+        /// <param name="dbHelper">DB查询对象</param>
         /// <param name="plainSql">原生SQL脚本</param>
         /// <param name="instance">包含参数的数据对象</param>
         /// <returns></returns>
@@ -124,6 +127,7 @@ namespace FlyingFive.Data
         /// <summary>
         /// 从数据对象中创建DB伪装参数
         /// </summary>
+        /// <param name="dbHelper">DB查询对象</param>
         /// <param name="instance">数据对象</param>
         /// <returns></returns>
         public static List<FakeParameter> CreateParameters(this IDatabaseHelper dbHelper, object instance)

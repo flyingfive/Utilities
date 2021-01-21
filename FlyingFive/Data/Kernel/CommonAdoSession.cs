@@ -361,13 +361,13 @@ namespace FlyingFive.Data.Kernel
         /// </summary>
         public void Complete()
         {
-            if (!this.IsInTransaction)
-            {
-                if (this._dbConnection.State == ConnectionState.Open)
-                {
-                    this._dbConnection.Close();
-                }
-            }
+            //if (!this.IsInTransaction)
+            //{
+            //    if (this._dbConnection.State == ConnectionState.Open)
+            //    {
+            //        this._dbConnection.Close();
+            //    }
+            //}
         }
 
         #region DbInterception

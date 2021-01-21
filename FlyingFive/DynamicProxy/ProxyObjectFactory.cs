@@ -246,7 +246,7 @@ namespace FlyingFive.DynamicProxy
                         assemblyName.Version = new Version(1, 0, 0, 0);
 
                         var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
-                        dynamicModuleBuilder = assemblyBuilder.DefineDynamicModule("DynamicProxyModule");
+                        dynamicModuleBuilder = assemblyBuilder.DefineDynamicModule("FlyingFive.DynamicProxyModule");
                         _moduleBuilders.Add(assembly, dynamicModuleBuilder);
                     }
                 }
